@@ -1,0 +1,27 @@
+# Archivos de variables de entorno (Contienen llaves, tokens y contraseñas)
+.env
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
+
+# Archivos de configuración personal o del sistema
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs y bases de datos locales
+*.log
+*.sqlite
+/db.sqlite3
+
+# Carpetas de dependencias (para que no pesen en el repo)
+node_modules/
+vendor/
+
+# Ignorar un archivo de Excel específico
+Datos/Practica_Provisionales.xlsx
+
+# Ignorar un archivo CSV específico
+Datos/Practica_Provisionales.csv
