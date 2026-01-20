@@ -12,3 +12,4 @@ Tras instalarme java y un .exe que era necesario ya que pyspark esta diseñado p
 En Big Data utilizabamos los google notebook para no tener que realizar la instalacion en windows, esto permitia poder hacer "burradas" y cosas muy ineficientes que mi ordenador a punto de la jubilacion no me permite.
 Otra idea que me surgio es hacerlo en google notebook y depues pasarlo a local pero viendo que mi idea final es hacer una web o un .exe que sea facil de enterder y utilizar por la gente del hospital he abandonado la idea de pyspark pasando a hacerlo en un .py y un notebook para pruebas con pandas a ver que tal sale el proyecto.
 De momento he hecho el calculo de la mortalidad estandarizada ya que depende del parametro de gravedad de cada paciente llamado apache.
+He visto reflex y streamlit como posibles paginas web.
