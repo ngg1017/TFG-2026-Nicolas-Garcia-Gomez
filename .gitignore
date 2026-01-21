@@ -1,3 +1,9 @@
+*.py[cod]
+.states
+__pycache__/
+*.db
+.web
+assets/external/
 # Archivos de variables de entorno (Contienen llaves, tokens y contraseñas)
 .env
 *.env.local
