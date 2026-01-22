@@ -13,3 +13,8 @@ En Big Data utilizabamos los google notebook para no tener que realizar la insta
 Otra idea que me surgio es hacerlo en google notebook y depues pasarlo a local pero viendo que mi idea final es hacer una web o un .exe que sea facil de enterder y utilizar por la gente del hospital he abandonado la idea de pyspark pasando a hacerlo en un .py y un notebook para pruebas con pandas a ver que tal sale el proyecto.
 De momento he hecho el calculo de la mortalidad estandarizada ya que depende del parametro de gravedad de cada paciente llamado apache.
 He visto reflex y streamlit como posibles paginas web.
+
+Dia 3 - 21 de enero de 2026:
+Hoy no hemos conseguido datos nuevos, seguimos estancados por lo que he empezado a desarrollar la web. He tomado la decision de hacerlo a traves de Reflex que no necesita ningun otro lenguaje como java, css o html.
+He estado pensando si hacerlo con reflex o con streamlit que tras informarme he encontrado que se puede crear un link a traves de github. Pero bueno ya he empezado con reflex y veremos si tenemos que cambiar el proyecto.
+Reflex ofrecen un servicio llamada Reflex Cloud que me podria permitir ejecutar mi web de manera remota y online en sus servidores por lo que de momento seguire con reflex. Ya he creado un pequeño titulo y un link a la web de la REA en los proximos dias tratare de crear un boton que nos permita subir los datos para hacer el analisis
