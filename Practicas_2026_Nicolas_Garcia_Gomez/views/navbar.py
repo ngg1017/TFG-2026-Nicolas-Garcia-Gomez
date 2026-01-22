@@ -5,9 +5,9 @@ import Practicas_2026_Nicolas_Garcia_Gomez.constantes as constantes
 
 #Creamos la barra lateral
 def navbar() -> rx.Component:
-    return rx.vstack(  #linea debajo de la barra vertical
-        rx.hstack(     #Crea la barra en horizontal
-            rx.image(  #Para poner imagen a la barra
+    return rx.vstack(                                     #Linea debajo de la barra vertical
+        rx.hstack(                                        #Crea la barra en horizontal
+            rx.image(                                     #Para poner imagen a la barra
                 src = "sacyl.png",
                 alt = "Icono del sacyl",
                 width = Size.MUYGRANDE.value,
@@ -19,7 +19,7 @@ def navbar() -> rx.Component:
                 "REA", 
                 constantes.REA_URL
             ),
-            width = "100%",                                #Tamaño de la barra(ocupa la totalidad)
+            width = "100%",                               #Tamaño de la barra(ocupa la totalidad)
             align="center"
         ),
         position = "sticky",                                           #Hace que la linea debajo siempre este fija

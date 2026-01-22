@@ -1,7 +1,6 @@
 import reflex as rx
 import Practicas_2026_Nicolas_Garcia_Gomez.estilos.estilos as estilos
 from Practicas_2026_Nicolas_Garcia_Gomez.views.navbar import navbar
-from programa_prueba import main
 
 
 # class State(rx.State):
