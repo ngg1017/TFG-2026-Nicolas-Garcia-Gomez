@@ -17,4 +17,9 @@ He visto reflex y streamlit como posibles paginas web.
 Dia 3 - 21 de enero de 2026:
 Hoy no hemos conseguido datos nuevos, seguimos estancados por lo que he empezado a desarrollar la web. He tomado la decision de hacerlo a traves de Reflex que no necesita ningun otro lenguaje como java, css o html.
 He estado pensando si hacerlo con reflex o con streamlit que tras informarme he encontrado que se puede crear un link a traves de github. Pero bueno ya he empezado con reflex y veremos si tenemos que cambiar el proyecto.
-Reflex ofrecen un servicio llamada Reflex Cloud que me podria permitir ejecutar mi web de manera remota y online en sus servidores por lo que de momento seguire con reflex. Ya he creado un pequeño titulo y un link a la web de la REA en los proximos dias tratare de crear un boton que nos permita subir los datos para hacer el analisis
+Reflex ofrecen un servicio llamada Reflex Cloud que me podria permitir ejecutar mi web de manera remota y online en sus servidores por lo que de momento seguire con reflex. Ya he creado un pequeño titulo y un link a la web de la REA en los proximos dias tratare de crear un boton que nos permita subir los datos para hacer el analisis.
+
+Dia 4 - 22 de enero de 2026:
+Hoy Cristina ha conseguido que nos den los datos necesarios anonimizados pero nos serviran. Tengo que hacer un listado con todos los datos que necesitamos ya que la gerencia del hospital se encargara de recogerlos y de entregarlos de forma anonima.
+Por lo que he realizado un excel con todos los inicadores a programar con todos los datos que tenemos que pedir especificados y he aprovechado a dejar apuntada la formula y pequeñas ideas de como lo programare.
+He organizado un poco el proyecto ya que las carpetas estaban mal.
