@@ -1,0 +1,132 @@
+Buenos días les escribo para pedirles los datos anodizados para ellos necesito los datos en formato de tablas o Excel que:
+1- Una o varias columnas con las fechas de ingresos, reingresos de todos los pacientes así como todos los pacientes dados de alta
+2- Una columna con los enfermos que desarrollen barotrauma
+3- Una columna con los pacientes con VMI y los días que la han empleado
+4- Una columna con los pacientes cuya posición sea inclinada y su inclinación
+5- Una columna con los pacientes que desarrollan UPP
+6- Una columna con los pacientes con **ventana de sedación**
+7- Una columna con los pacientes con profilaxis
+8- Una columna con los pacientes con TVP
+9- Una columna con los pacientes con glucemia
+10- Una columna con los pacientes con tratamiento con insulina
+11- Una columnas donde indique aquellos pacientes con altas precoces o no planificada
+12- Una columna donde se indique aquellos pacientes con sepsis 
+13- **Una columna donde indique si el paciente ha tenido SS**
+14- Todos aquellos pacientes que tengan un traslado realizado
+15- Todos aquellos pacientes que tengan traslado intrahospitalario
+16- Una columna donde se indique la antibioterapia del paciente y si ha había desescalada de ese paciente
+17- Un indicador de fallecimiento del paciente
+18- El APACHE de todos los pacientes
+19- Una columna donde se indique si hay tratamiento de corticoides del paciente
+20- Una columna donde se indique si hay antecedentes de hemorragia gastrointestinal 
+21- Una columna donde se indique si hay coagulopatía 
+22- Una columna donde se indique si hay insuficiencia renal
+23- Una columna donde se indique si hay insuficiencia hepática
+24- Un indicador de si el paciente tiene NE
+25- Un indicador de si recibe profilaxis farmacológica
+26- Pacientes con episodios NAV
+27- Pacientes con RASS
+28- Pacientes con BIS
+29- Una columna donde aparezcas todas las intubaciones del paciente
+30- Un indicador que digas las extubaciones programadas del paciente
+31- La especialidad de cada paciente por la que ha sido ingresado
+32- Un indicador de si el paciente ha sido ingresado por urgencia
+33- Un indicador de los eventos adversos durante el traslado del paciente
+34- Fecha en la que comenzó la NE
+35- Indicador de si el paciente tiene sutura intestinal
+36- Un indicador de si el paciente ha necesitado actos transfusionales 
+37- Una columna que refleje si el paciente tiene sangrado activo
+38- Si el paciente ha recibido alguna extubación debida a maniobras
+
+Te hago un pequeño resumen de las columnas necesarias y adjunto un Excel donde pongo las cabeceras a modo de ejemplo:
+
+1	Fecha Ingreso - Fecha (DD/MM/AAAA)
+
+2	Fecha Reingreso - Fecha (DD/MM/AAAA)
+
+3	Fecha Alta - Fecha (DD/MM/AAAA)
+
+4	Barotrauma - Booleano (Sí/No)
+
+5	VMI - Booleano (Sí/No)
+
+6	Días VMI - Numérico (Entero)
+
+7	Posición Inclinada - Booleano (Sí/No)
+
+8	Grados Inclinación - Numérico (Ej. 30, 45)
+
+9	UPP (Úlceras por Presión) - Booleano (Sí/No)
+
+10	Ventana de Sedación - Booleano (Sí/No)
+
+11	Profilaxis - Booleano (Sí/No)
+
+12	TVP (Trombosis Venosa Profunda) - Booleano (Sí/No)
+
+13	Glucemia - Numérico (Decimal/mg/dL)
+
+14	Tratamiento Insulina - Booleano (Sí/No)
+
+15	Alta Precoz / No Planificada - Booleano (Sí/No)
+
+16	Sepsis - Booleano (Sí/No)
+
+17	SS (Shock Séptico) - Booleano (Sí/No)
+
+18	Traslado Externo - Booleano (Sí/No)
+
+19	Traslado Intrahospitalario - Booleano (Sí/No)
+
+20	Antibioterapia - Texto (Fármaco/Familia)
+
+21	Desescalada Antibiótica - Booleano (Sí/No)
+
+22	Fallecimiento - Booleano (Sí/No)
+
+23	APACHE (Puntuación) - Numérico (0-71)
+
+24	Tratamiento Corticoides - Booleano (Sí/No)
+
+25	Antecedentes Hemorragia GI - Booleano (Sí/No)
+
+26	Coagulopatía - Booleano (Sí/No)
+
+27	Insuficiencia Renal - Booleano (Sí/No)
+
+28	Insuficiencia Hepática - Booleano (Sí/No)
+
+29	NE (Nutrición Enteral) - Booleano (Sí/No)
+
+30	Profilaxis Farmacológica - Booleano (Sí/No)
+
+31	Episodios NAV - Numérico (Contador/Entero)
+
+32	RASS (Escala Sedación) - Numérico (-5 a +4)
+
+33	BIS (Índice Bispectral) - Numérico (0-100)
+
+34	Registro Intubaciones - Texto o Fecha (Ej: "2; 01/01/24")
+
+35	Extubación Programada - Booleano (Sí/No)
+
+36	Especialidad de Ingreso - Texto (Categoría)
+
+37	Ingreso por Urgencia - Booleano (Sí/No)
+
+38	Eventos Adversos Traslado - Texto (Descripción)
+
+39	Fecha Inicio NE - Fecha (DD/MM/AAAA)
+
+40	Sutura Intestinal - Booleano (Sí/No)
+
+41	Actos Transfusionales - Booleano (Sí/No)
+
+42	Sangrado Activo - Booleano (Sí/No)
+
+43	Extubación por Maniobras - Booleano (Sí/No)
+
+Todas estas columnas así como si tipo de dato es orientativo ustedes decidirán cual es la mejor forma de hacerme llegar los daotos.
+Muchas gracias por su atención.
+
+Un saludo.

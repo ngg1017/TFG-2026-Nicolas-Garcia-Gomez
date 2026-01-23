@@ -23,3 +23,7 @@ Dia 4 - 22 de enero de 2026:
 Hoy Cristina ha conseguido que nos den los datos necesarios anonimizados pero nos serviran. Tengo que hacer un listado con todos los datos que necesitamos ya que la gerencia del hospital se encargara de recogerlos y de entregarlos de forma anonima.
 Por lo que he realizado un excel con todos los inicadores a programar con todos los datos que tenemos que pedir especificados y he aprovechado a dejar apuntada la formula y pequeñas ideas de como lo programare.
 He organizado un poco el proyecto ya que las carpetas estaban mal.
+
+Dia 5 - 23 de enero de 2026:
+Hoy ya hemos revisado todos los datos y hemos mandado el correo solicitando los datos.
+Estoy documentandome sobre como crear un boton de seleccion multiple para la web la semana que viene lo integrare.
