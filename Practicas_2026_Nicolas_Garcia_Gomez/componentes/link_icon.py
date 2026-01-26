@@ -6,5 +6,7 @@ def link_icon(icon: str, url: str) -> rx.Component:
         f"{icon}",
         class_name = "btn btn-primary btn-lg",        #Importamos de Boostrap el boton
         href = url,                                   #El link que abrimos
-        is_external = True                            #Hacemos que se abrea en una ventana nueva
+        is_external = True,                           #Hacemos que se abrea en una ventana nueva
+        weight = "bold",                              #Tipo y debajo tamaño
+        size = "8"
     )

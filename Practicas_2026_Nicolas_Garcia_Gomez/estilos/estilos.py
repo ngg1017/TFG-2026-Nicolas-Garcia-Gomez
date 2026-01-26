@@ -6,6 +6,7 @@ from enum import Enum
 #Definimos los tamaños que vamos a usar em va en consonancia con la fuente
 class Size(Enum):
     PEQUEÑO = "0.5em"
+    MEDIANO = "0.8em"
     DEFECTO = "1em"
     GRANDE = "2em"
     MUYGRANDE = "6em"

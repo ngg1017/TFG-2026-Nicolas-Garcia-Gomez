@@ -16,7 +16,7 @@ def navbar() -> rx.Component:
             rx.text(f"Indicadores Calidad", size = "5"),  #Texto de la barra
             rx.spacer(),                                  #Empuja la barra a la izquierda
             link_icon(                                    #Creamos el boton en la navbar
-                "REA", 
+                "Pagina web REA", 
                 constantes.REA_URL
             ),
             width = "100%",                               #Tamaño de la barra(ocupa la totalidad)

@@ -27,3 +27,7 @@ He organizado un poco el proyecto ya que las carpetas estaban mal.
 Dia 5 - 23 de enero de 2026:
 Hoy ya hemos revisado todos los datos y hemos mandado el correo solicitando los datos.
 Estoy documentandome sobre como crear un boton de seleccion multiple para la web la semana que viene lo integrare.
+
+Dia 6 - 26 de enero de 2026:
+Una vez hemos mandado el email solicitando los datos solo falta esperar a que nos contesten, Cristina me ha dicho que esta tarde espera tener respuesta.
+Mientras tanto sigo desarrollando la web hoy he creado la cabecera principal mañana seguiremos.
