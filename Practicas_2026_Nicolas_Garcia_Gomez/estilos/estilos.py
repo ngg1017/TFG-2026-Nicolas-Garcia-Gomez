@@ -3,6 +3,8 @@ from .fuentes import Fuente as Fuente
 from .colores import TextoColor, Color
 from enum import Enum
 
+MAX_WIDTH = "1000px"
+
 #Definimos los tamaños que vamos a usar em va en consonancia con la fuente
 class Size(Enum):
     PEQUEÑO = "0.5em"
@@ -22,5 +24,28 @@ HOJAESTILO = [
 ESTILO_BASE = {
     "font_family": Fuente.defecto.value,
     "color" : TextoColor.PRIMARIO.value,
-    "background": Color.PRIMARIO.value
+    "background": Color.PRIMARIO.value,
+    
+    rx.heading: {
+        "color": TextoColor.ACENTO.value,
+        "font_family": Fuente.defecto.value,
+    },
+    
+    rx.link: {
+        "text_decoration": "none",
+        "_hover": {
+            "text_decoration": "none",
+            "color": TextoColor.ACENTO.value
+        }
+    }
 }
+
+max_width_estilo = dict(
+    align = "center",
+    justify = "center",
+    padding_x = Size.GRANDE.value,
+    width = "100%",
+    max_width = MAX_WIDTH,
+    #el contenido de la página es más ancho, el vstack se pegará a la izquierda por lo que ponemos el margin
+    margin_x = "auto" 
+)

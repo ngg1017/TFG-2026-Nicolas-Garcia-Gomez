@@ -31,7 +31,3 @@ app.add_page(
     title = "Indicadores de calidad REA",
     description = "Explciar como subir todos los componentes"
 )
-
-
-
-

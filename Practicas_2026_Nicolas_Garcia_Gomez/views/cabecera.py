@@ -1,5 +1,7 @@
 import reflex as rx
+import Practicas_2026_Nicolas_Garcia_Gomez.estilos.estilos as estilos
 from Practicas_2026_Nicolas_Garcia_Gomez.estilos.estilos import Size, Color, TextoColor
+import Practicas_2026_Nicolas_Garcia_Gomez.constantes as constantes
 
 def cabecera() -> rx.Component:
     return rx.vstack(
@@ -10,8 +12,10 @@ def cabecera() -> rx.Component:
             size = "9",
 
             #Para dejar espacios con los bordes
-            padding_buttom = Size.DEFECTO.value
+            padding_buttom = Size.DEFECTO.value,
+            margin_x = "auto"
         ),
+
         #Para estructurar el contenido
         rx.flex(          
             rx.image(
@@ -27,8 +31,13 @@ def cabecera() -> rx.Component:
                 rx.box(
 
                     #Las lineas superiores
-                    rx.text("Instrucciones de Carga"),
-                    rx.text("Por favor seguir los pasos descritos a continuación")
+                    rx.text("Instrucciones de Carga",
+                            size = "6"
+                    ),
+                    rx.text("Por favor seguir los pasos descritos a continuación:",
+                            size = "6"
+                    ),
+                    class_name = "container-fluid border border-red rounded"
                 ),
 
                 #Hay que ponerles as_ para que no fuerzen un salto de línea
@@ -37,11 +46,10 @@ def cabecera() -> rx.Component:
 
                     #Subtexto en color rojo
                     rx.text(
-                        "'Subir archivo' de color rojo",
+                        "'Subir archivo' de color rojo!",
                         color = Color.ACENTO.value,
                         as_="span"
                     ),
-                    "!.",
                     as_="span"
                 ),
                 rx.text(
@@ -60,12 +68,15 @@ def cabecera() -> rx.Component:
                 ),
                 rx.link(
                     "UbU",
-                    href = "https://www.ubu.es/",
+                    href = constantes.UBU,
                     is_external = True,
                     color = TextoColor.TERCIARIO.value,
                     padding_top = Size.GRANDE.value,
-                    font_size = Size.MEDIANO.value
+                    font_size = Size.DEFECTO.value
                 )
-            )
-        )
+            ),
+            direction = {"sm": "column","md": "column","lg": "row",}
+        ),
+        style = estilos.max_width_estilo,
+        padding_top = Size.GRANDE.value
     )
