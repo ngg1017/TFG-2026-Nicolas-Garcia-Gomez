@@ -7,6 +7,7 @@ MAX_WIDTH = "1000px"
 
 #Definimos los tamaños que vamos a usar em va en consonancia con la fuente
 class Size(Enum):
+    ZERO = "0px"
     PEQUEÑO = "0.5em"
     MEDIANO = "0.8em"
     DEFECTO = "1em"

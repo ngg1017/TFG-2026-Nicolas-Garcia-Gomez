@@ -31,10 +31,10 @@ def cabecera() -> rx.Component:
                 rx.box(
 
                     #Las lineas superiores
-                    rx.text("Instrucciones de Carga",
+                    rx.text("¡Bienvenido a esta herramienta!",
                             size = "6"
                     ),
-                    rx.text("Por favor seguir los pasos descritos a continuación:",
+                    rx.text("Vamos a desgranar como funciona y que ventajas vamos a tener con ella",
                             size = "6"
                     ),
                     class_name = "container-fluid border border-red rounded"
@@ -42,28 +42,29 @@ def cabecera() -> rx.Component:
 
                 #Hay que ponerles as_ para que no fuerzen un salto de línea
                 rx.text(
-                    "Para poder ver los indicadores de calidad debe clicar en el boton de ",
+                    "Esta herramienta va a utilizarse para la creacion de ",
 
                     #Subtexto en color rojo
                     rx.text(
-                        "'Subir archivo' de color rojo!",
+                        "Indicadores de calidad",
                         color = Color.ACENTO.value,
                         as_="span"
                     ),
+                    ". Gracias a unos datos que vamos a obtener desde la dirección y vamos a procesar pero de momento no te procupes en como subirlos.",
                     as_="span"
                 ),
                 rx.text(
-                    "Una vez clique en el boton debe seleccionar el archivo de texto en ",
+                    "Esta aplicación es muy sencilla por lo que no te sientas ",
                     rx.text(
-                        "formato CSV(muy importante) ",
+                        "abrumad@",
                         color = Color.ACENTO.value,
                         as_="span"
                     ),
-                    "y con los nombres de las columnas especificados.",
+                    ".",
                     as_="span"
                 ),
                 rx.text(
-                    "Cuando este todo cargado solo tienes que seleccionar en el desplegable el indicador deseado.",
+                    "Solo tienes que seguir las indicaciones del apartado de debajo y todo será muy fácil por lo que ¡Manos a la obra!.",
                     as_="span"
                 ),
                 rx.link(

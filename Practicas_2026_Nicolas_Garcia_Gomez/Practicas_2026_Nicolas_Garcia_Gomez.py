@@ -1,8 +1,9 @@
 import reflex as rx
 import Practicas_2026_Nicolas_Garcia_Gomez.estilos.estilos as estilos
-from Practicas_2026_Nicolas_Garcia_Gomez.estilos.estilos import Size
 from Practicas_2026_Nicolas_Garcia_Gomez.views.navbar import navbar
 from Practicas_2026_Nicolas_Garcia_Gomez.views.cabecera import cabecera
+from Practicas_2026_Nicolas_Garcia_Gomez.views.pie import pie
+from Practicas_2026_Nicolas_Garcia_Gomez.views.instrucciones import instrucciones
 
 #Colocamos los elementos de la web
 def index() -> rx.Component:
@@ -11,8 +12,8 @@ def index() -> rx.Component:
         rx.center(
             rx.vstack(
                 cabecera(),
-                cabecera(),
-                cabecera(),
+                instrucciones(),
+                pie(),
                 width = "100%",
                 spacing = "9"
             )
