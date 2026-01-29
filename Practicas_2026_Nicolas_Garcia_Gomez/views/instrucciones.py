@@ -34,18 +34,19 @@ def instrucciones() -> rx.Component:
                 as_="samp"
             ),
             rx.text(
-                State.documentos.length(),
+                f"{State.documentos.length()} ",
                 State.nombres_archivos,
                 as_="samp"
             ),
-            rx.center(
-                boton_subida(
-                    "Carga de archivos",
-                ),
+
+            #Centra el boton de subida
+            rx.center(                      
+                boton_subida("Carga de archivos"),
                 width="100%", 
                 margin_bottom=Size.MEDIANO.value
             ),
 
+            #Le ponemos un recuadro de bootstrap
             width = "100%",
             class_name = "container-fluid border border-red rounded"
         ),

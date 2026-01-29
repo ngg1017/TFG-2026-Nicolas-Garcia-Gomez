@@ -22,6 +22,8 @@ def pie() -> rx.Component:
             align = "start",
             spacing = "0"
         ),
+
+        #Ocupa todo el espacio mandando la imagen a la derecha
         rx.spacer(),
         rx.image(
             src = "ubu.png",

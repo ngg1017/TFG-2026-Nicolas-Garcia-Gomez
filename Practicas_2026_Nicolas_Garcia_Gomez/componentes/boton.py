@@ -1,65 +1,83 @@
 import reflex as rx
 from Logica.State import State
+from Practicas_2026_Nicolas_Garcia_Gomez.estilos.colores import TextoColor, Color
 
 #Para crear botones
 def boton_subida(icon: str) -> rx.Component: 
+
+    #Nos permite crear el area de subida
     return rx.upload.root(
         rx.box(
+
+            #La nube
             rx.icon(
                 tag="cloud_upload",
                 style={
                     "width": "3rem",
                     "height": "3rem",
-                    "color": "#2563eb",
+                    "color": TextoColor.ACENTO.value,
                     "marginBottom": "0.75rem",
                 },
             ),
             rx.hstack(
                 rx.text(
                     f"{icon}",
-                    style={"fontWeight": "bold", "color": "#1d4ed8"},
+                    style={"fontWeight": "bold", "color": TextoColor.ACENTO.value},
                 ),
-                " o arrastra el archivo",
-                style={"fontSize": "0.875rem", "color": "#4b5563"},
+                "o arrastra el archivo",
+                style={"fontSize": "0.875rem", "color": TextoColor.TERCIARIO.value},
             ),
             rx.text(
                 "CSV",
-                style={"fontSize": "0.75rem", "color": "#6b7280", "marginTop": "0.25rem"},
+                style={"fontSize": "0.875rem", "color": TextoColor.ACENTO.value, "marginTop": "0.25rem"},
             ),
+
+            #Estilo de la caja dentro de la subida
             style={
+                #Esto permite que alignItems y justifyContent funcione
                 "display": "flex",
                 "flexDirection": "column",
                 "alignItems": "center",
                 "justifyContent": "center",
                 "padding": "1.5rem",
-                "textAlign": "center",
+                "textAlign": "center"
             },
         ),
+
+        #Propiedades del boton
         id="my_upload",
         multiple=True,
-        accept={"documentos/pdf": [".csv"]},
+        accept={"documentos/csv": [".csv"]},
         max_files=3,
         disabled=False,
         no_keyboard=True,
+        #Las acciones que se dan al ejecutarse la subida MODIFICARRRRRRRRRRRRRRRR
         on_drop=[
             State.limpiar(),
             State.handle_upload(rx.upload_files(upload_id="my_upload"))
         ],
 
+        #Estilo de la subida
         style={
-            "maxWidth": "24rem",
+            #Tamaño
+            "maxWidth": "20rem",
             "height": "16rem",
-            "borderWidth": "2px",
+            #Tamaño del borde
+            "borderWidth": "3px",
             "borderStyle": "dashed",
-            "borderColor": "#60a5fa",
+            "borderColor": Color.OSCURO.value,
             "borderRadius": "0.75rem",
+            #Cursor
             "cursor": "pointer",
+            #Propiedades al subir o pasar el raton
             "transitionProperty": "background-color",
             "transitionDuration": "0.2s",
             "transitionTimingFunction": "ease-in-out",
+            #Centrar y justificar todos los componentes
             "display": "flex",
             "alignItems": "center",
             "justifyContent": "center",
-            "boxShadow": "0 1px 2px rgba(0, 0, 0, 0.05)",
+            #Sombra
+            "boxShadow": "0 2px 2px rgba(0, 0, 0, 0.05)",
         },
     )

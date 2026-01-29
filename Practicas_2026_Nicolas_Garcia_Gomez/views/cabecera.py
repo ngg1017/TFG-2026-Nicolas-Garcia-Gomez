@@ -6,7 +6,7 @@ import Practicas_2026_Nicolas_Garcia_Gomez.constantes as constantes
 def cabecera() -> rx.Component:
     return rx.vstack(
 
-        #Cabecera
+        #Titulo
         rx.heading(      
             "Indicadores de calidad REA",
             size = "9",
@@ -19,9 +19,9 @@ def cabecera() -> rx.Component:
         #Para estructurar el contenido
         rx.flex(          
             rx.image(
-                src = "sacyl.png",
+                src = "rea.png",
                 alt = "Icono de Sacyl",
-                width = "16em",
+                width = "25em",
                 height = "16em",
                 margin_right = Size.GRANDE.value 
             ),
@@ -76,6 +76,7 @@ def cabecera() -> rx.Component:
                     font_size = Size.DEFECTO.value
                 )
             ),
+            #Establece direcciones en diferentes tamaños de pantalla
             direction = {"sm": "column","md": "column","lg": "row",}
         ),
         style = estilos.max_width_estilo,
