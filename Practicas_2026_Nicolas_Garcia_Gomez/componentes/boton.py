@@ -3,8 +3,7 @@ from Logica.State import State
 from Practicas_2026_Nicolas_Garcia_Gomez.estilos.colores import TextoColor, Color
 
 #Para crear botones
-def boton_subida(icon: str) -> rx.Component: 
-
+def boton_subida(icon: str) -> rx.Component:
     #Nos permite crear el area de subida
     return rx.upload.root(
         rx.box(
@@ -49,13 +48,10 @@ def boton_subida(icon: str) -> rx.Component:
         multiple=True,
         accept={"documentos/csv": [".csv"]},
         max_files=3,
-        disabled=False,
+        disabled=State.barra,
         no_keyboard=True,
-        #Las acciones que se dan al ejecutarse la subida MODIFICARRRRRRRRRRRRRRRR
-        on_drop=[
-            State.limpiar(),
-            State.handle_upload(rx.upload_files(upload_id="my_upload"))
-        ],
+        #Las acciones que se dan al ejecutarse la subida
+        on_drop=[State.handle_upload(rx.upload_files(upload_id="my_upload"))],
 
         #Estilo de la subida
         style={

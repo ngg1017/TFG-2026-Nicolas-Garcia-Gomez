@@ -14,7 +14,6 @@ def link_icon(icon: str, url: str) -> rx.Component:
         bg = Color.OSCURO.value,
         _hover = {
             "bg": Color.ACENTO.value,
-            "background_color": Color.ACENTO.value,
             "color": TextoColor.SECUNDARIO.value
         }
     )
