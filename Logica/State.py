@@ -25,7 +25,7 @@ class State(rx.State):
         self.barra = True
         yield
 
-        for file in files:
+        for file in files:  
             try: 
                 upload_data = await file.read()
 
@@ -72,4 +72,24 @@ class State(rx.State):
         self.documentos = []
         self.nombres_archivos = []
         yield rx.toast(f"Todos los archivos borrados: {[e for e in self.nombres_archivos_eliminados]}")
-        
+
+    #Metodo para gestionar las excepciones del boton "Maximo de 3 y tipo csv"
+    def excepcion_boton(self, files: list):
+        self.barra = False
+        maximo = False
+        csv = False
+        for elem in files:
+            if elem["errors"][0]["message"] == "Too many files":
+                 maximo = True
+            if elem["errors"][0]["message"] == "File type must be one of documentos/csv, .csv":
+                csv = True
+        if csv and maximo:
+            return rx.window_alert("Se han intentado subir archivos que no son CSV y ademas son mas de 3 csv")
+        elif maximo:
+            return rx.window_alert("El maximo de archivos para subir a la vez son 3 csv")   
+        else:
+            return rx.window_alert("El tipo de archivo a subir es CSV") 
+
+    #Metodo para el caso en el que se suban archivos csv junto con alguno que no lo sea funcione la barra
+    def set_barra(self, variable: bool):
+        self.barra = variable     
