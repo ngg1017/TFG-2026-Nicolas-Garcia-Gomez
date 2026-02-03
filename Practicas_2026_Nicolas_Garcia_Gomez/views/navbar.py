@@ -27,6 +27,6 @@ def navbar() -> rx.Component:
         border_bottom = f"0.25em solid {Color.SECUNDARIO.value}",      #Aparezca la linea de debajo
         padding_x = Size.GRANDE.value,                                 #Separa icono de las letras
         padding_y = Size.DEFECTO.value,
-        z_index = "999",                                               #Siempre esta la primera
+        z_index = "10",                                                #Siempre esta por encima
         top = "0",                                                     #Se pegue a la parte superior
     )

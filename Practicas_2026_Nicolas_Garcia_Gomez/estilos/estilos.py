@@ -34,7 +34,23 @@ ESTILO_BASE = {
     },
     
     rx.link: {
-        "text_decoration": "none"
+        "text_decoration": "none",
+        "justify": "center",
+        "align": "center"
+    },
+
+    rx.button: {
+        "class_name":"btn btn",
+        "color": TextoColor.PRIMARIO.value,
+        "bg": Color.OSCURO.value,
+        "borderRadius": "0.75rem",
+        "weight": "bold",
+        "justify": "center",
+        "align": "center",
+        "_hover": {
+                "bg": Color.ACENTO.value,
+                "color": TextoColor.SECUNDARIO.value
+        }
     }
 }
 

@@ -1,8 +1,9 @@
 import reflex as rx
 import Practicas_2026_Nicolas_Garcia_Gomez.estilos.estilos as estilos
 from Practicas_2026_Nicolas_Garcia_Gomez.estilos.estilos import Size, Color, TextoColor
-from Practicas_2026_Nicolas_Garcia_Gomez.componentes.boton import boton_subida
+from Practicas_2026_Nicolas_Garcia_Gomez.componentes.boton_subida import boton_subida
 from Logica.State import State
+from Practicas_2026_Nicolas_Garcia_Gomez.componentes.seleccion import seleccion
 
 def instrucciones() -> rx.Component:
     return rx.box(
@@ -49,17 +50,10 @@ def instrucciones() -> rx.Component:
                         State.documentos.length() > 0,
                         rx.button(
                             "Borrar",
-                            class_name="btn btn",
-                            color = TextoColor.PRIMARIO.value,
-                            bg = Color.OSCURO.value,
                             size = "2",
                             font_size = "13px",
                             on_click= State.borrar_datos,
                             style={"margin_bottom": "14.5px"},
-                            _hover = {
-                                "bg": Color.ACENTO.value,
-                                "color": TextoColor.SECUNDARIO.value
-                            },
                         ),
                         rx.spacer()
                     ),
@@ -87,9 +81,21 @@ def instrucciones() -> rx.Component:
             rx.center(                      
                 boton_subida("Carga de archivos"),
                 width="100%", 
-                margin_bottom=Size.MEDIANO.value
+                margin_bottom=Size.PEQUEÑO.value
             ),
             
+            #Centra el boton para seleccionar los condicionantes
+            rx.cond(
+                State.documentos.length() > 0,
+                rx.center(
+                seleccion("Seleccion de indicadores"),
+                width="100%",
+                margin_top=Size.PEQUEÑO.value,
+                margin_bottom=Size.GRANDE.value
+                ),
+                rx.spacer()
+            ),
+
             #Le ponemos un recuadro de bootstrap
             width = "100%",
             class_name = "container-fluid border border-red rounded"

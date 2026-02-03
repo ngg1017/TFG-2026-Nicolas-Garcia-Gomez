@@ -46,16 +46,10 @@ def boton_subida(icon: str) -> rx.Component:
         #Propiedades del boton
         id="my_upload",
         multiple=True,
-        accept={"documentos/csv": [".csv"]},
-        max_files=3,
         disabled=State.barra,
         no_keyboard=True,
         #Las acciones que se dan al ejecutarse la subida
-        on_drop_rejected=State.excepcion_boton,
-        on_drop=[
-            State.set_barra(True),
-            State.handle_upload(rx.upload_files(upload_id="my_upload"))
-        ],
+        on_drop=State.handle_upload(rx.upload_files(upload_id="my_upload")),
         
         #Estilo de la subida
         style={
