@@ -4,6 +4,8 @@ from Practicas_2026_Nicolas_Garcia_Gomez.views.navbar import navbar
 from Practicas_2026_Nicolas_Garcia_Gomez.views.cabecera import cabecera
 from Practicas_2026_Nicolas_Garcia_Gomez.views.pie import pie
 from Practicas_2026_Nicolas_Garcia_Gomez.views.instrucciones import instrucciones
+from Practicas_2026_Nicolas_Garcia_Gomez.views.vent_flotante import vent_flotante
+from Logica.Programa import Programa
 
 #Colocamos los elementos de la web
 def index() -> rx.Component:
@@ -13,10 +15,11 @@ def index() -> rx.Component:
             rx.vstack(
                 cabecera(),
                 instrucciones(),
+                vent_flotante(Programa.texto, Programa.datos_final),
                 pie(),
                 width = "100%",
                 spacing = "9"
-            )
+            ),
         )
     )
 

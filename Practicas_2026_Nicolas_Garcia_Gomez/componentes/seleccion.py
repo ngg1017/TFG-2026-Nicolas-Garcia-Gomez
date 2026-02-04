@@ -39,7 +39,7 @@ def seleccion(icon: str) -> rx.Component:
                         rx.menu.content(
 
                             #Opciones del menu
-                            rx.menu.item("Apple", on_click=Programa.mortalidad_estandarizada),
+                            rx.menu.item("Mortalidad Estandarizada", on_click=Programa.mortalidad_estandarizada),
                             rx.menu.item("Grape"),
                             rx.menu.item("Pear"),
 
