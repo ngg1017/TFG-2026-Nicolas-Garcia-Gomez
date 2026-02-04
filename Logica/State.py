@@ -2,13 +2,13 @@
 # if "APACHE" not in df.columns:
     #raise ValueError(f"Falta la columna 'APACHE (0-71)' en {file.name}")
         
-
 import reflex as rx
-import pandas as pd
-import io
+import os
+import tempfile
+import time
 
 class State(rx.State):
-    documentos: list[list[dict]]
+    rutas_archivos: list[str]
     nombres_archivos: list[str]
     nombres_archivos_eliminados: list[str]
     cargados: int
@@ -38,48 +38,52 @@ class State(rx.State):
 
         for file in files:  
             try: 
-                upload_data = await file.read()
 
-                #Convertimos a un "archivo virtual" en memoria y luego a Pandas
-                #Usamos io.BytesIO para que Pandas pueda leerlo como si fuera un archivo físico
-                df = pd.read_csv(io.BytesIO(upload_data))
+                #Creamos un archivo temporal fisico en el disco
+                #delete=False es vital para que el archivo no se borre al cerrar el 'with'
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp:
+                    contenido = await file.read()
+                    tmp.write(contenido)
 
-                #Convertir a lista de diccionarios (Serializable)
-                #Esto evita el error "dispatch is not a function"
-                datos_serializables = df.to_dict(orient="records")
+                    #Impide que se guarden mas de 3
+                    while len(self.rutas_archivos) + 1 > 3:
+                        self.rutas_archivos.pop(0)
+                        self.nombres_archivos_eliminados.append(self.nombres_archivos[0])
+                        self.nombres_archivos.pop(0)
 
-                #Impide que se guarden mas de 3
-                while len(self.documentos) + 1 > 3:
-                    self.documentos.pop(0)
-                    self.nombres_archivos_eliminados.append(self.nombres_archivos[0])
-                    self.nombres_archivos.pop(0)
-
-                self.documentos.append(datos_serializables)
-                self.nombres_archivos.append(file.name)
-                self.cargados += 1
-
-            except pd.errors.EmptyDataError:
-                yield rx.window_alert(f"El archivo {file.name} está vacío.")
+                    #Guardamos la ruta unica
+                    self.rutas_archivos.append(tmp.name)
+                    #Guardamos el nombre original solo para mostrarlo
+                    self.nombres_archivos.append(file.name)
+                    self.cargados += 1
             
             # Captura cualquier otro error inesperado
             except Exception as e:
                 #Imprime en la consola
                 print(f"Error crítico: {e}") 
-                yield rx.window_alert("Ocurrió un error inesperado al procesar el archivo.")
-
-            finally:
-                #Que siempre termine la barra y con el yield avisamos
-                self.barra = False
-                yield
+                yield rx.window_alert("Ocurrió un error inesperado al procesar el archivo.")  
 
         if len(self.nombres_archivos_eliminados) > 0:
             yield rx.toast(f"El maximo son 3 por lo que se han borrado los siguientes archivos: {[e for e in self.nombres_archivos_eliminados]}")
         
+        #Como ya no guardamos los archivos hacemos que tarde para que se vea la barra
+        time.sleep(1.5)
+        #Que siempre termine la barra y con el yield avisamos
+        self.barra = False
         yield rx.toast(f"Se cargaron: {self.cargados} archivos con éxito")
     
     def borrar_datos(self):
+        #Borramos los archivos fisicos uno por uno
+        for ruta in self.rutas_archivos:
+            if os.path.exists(ruta):
+                os.remove(ruta)
+
+        #Limpiamos las listas del estado
+        self.rutas_archivos = []
         self.nombres_archivos_eliminados = []
         self.nombres_archivos_eliminados = self.nombres_archivos
-        self.documentos = []
         self.nombres_archivos = []
-        yield rx.toast(f"Todos los archivos borrados: {[e for e in self.nombres_archivos_eliminados]}")
+        return rx.toast(f"Todos los archivos borrados: {[e for e in self.nombres_archivos_eliminados]}")
+
+        
+        

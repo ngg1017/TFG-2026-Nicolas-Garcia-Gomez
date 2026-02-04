@@ -1,9 +1,9 @@
 import pandas as pd
 import reflex as rx
-from Logica.State import State
+from .State import State
 
 class Programa(State):
-    resultado_mortalidad: list = []
+    resultado_mortalidad: list[float]
 
     def codigo_apache(self, apache):
         if pd.isna(apache): return 0
@@ -21,10 +21,19 @@ class Programa(State):
 
     def mortalidad_estandarizada(self):
         self.resultado_mortalidad = []
-        for file in self.documentos:
-            df = pd.DataFrame(file)
-            numero_fallecidos = (len(df[df["Fallecido"] == True]))
+
+        #Iteramos sobre las RUTAS temporales
+        for ruta in self.rutas_archivos:
+            
+            # Pandas lee el archivo temporal unico
+            df = pd.read_csv(ruta)
+            
+            #Logica de calculo
+            numero_fallecidos = len(df[df["Fallecido"] == True])
             df["probabilidad_mortalidad"] = df["Apache"].apply(self.codigo_apache)
-            suma_mortalidad = sum(df["probabilidad_mortalidad"][df["Fallecido"] == True])
-            self.resultado_mortalidad.append(numero_fallecidos / suma_mortalidad)
+            suma_mortalidad = df.loc[df["Fallecido"] == True, "probabilidad_mortalidad"].sum()
+            
+            valor_final = (numero_fallecidos / suma_mortalidad) if suma_mortalidad != 0 else 0.0
+            self.resultado_mortalidad.append(float(valor_final))
+
         return rx.toast(f"Cálculo finalizado {self.resultado_mortalidad}")

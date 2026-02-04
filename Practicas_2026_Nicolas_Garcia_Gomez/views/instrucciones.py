@@ -47,7 +47,7 @@ def instrucciones() -> rx.Component:
 
                     #Condicional para cuando existan documentos aparezca el boton de borrar
                     rx.cond(
-                        State.documentos.length() > 0,
+                        State.rutas_archivos.length() > 0,
                         rx.button(
                             "Borrar",
                             size = "2",
@@ -86,7 +86,7 @@ def instrucciones() -> rx.Component:
             
             #Centra el boton para seleccionar los condicionantes
             rx.cond(
-                State.documentos.length() > 0,
+                State.rutas_archivos.length() > 0,
                 rx.center(
                 seleccion("Seleccion de indicadores"),
                 width="100%",
