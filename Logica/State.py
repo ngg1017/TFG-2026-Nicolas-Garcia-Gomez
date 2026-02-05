@@ -1,7 +1,3 @@
-#Posible implementacion de todas las columnas a utilizar vere si lo implemento aqui o en los propios métodos
-# if "APACHE" not in df.columns:
-    #raise ValueError(f"Falta la columna 'APACHE (0-71)' en {file.name}")
-        
 import reflex as rx
 import os
 import tempfile
@@ -38,18 +34,27 @@ class State(rx.State):
 
         for file in files:  
             try: 
-
                 #Creamos un archivo temporal fisico en el disco
                 #delete=False es vital para que el archivo no se borre al cerrar el 'with'
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp:
                     contenido = await file.read()
                     tmp.write(contenido)
 
-                    #Impide que se guarden mas de 3
-                    while len(self.rutas_archivos) + 1 > 3:
+                    #Impide que se guarden mas de 3 y los borra fisicamente
+                    while len(self.rutas_archivos) >= 3:
+                        #Extraemos las referencias del archivo mas antiguo
+                        ruta_a_borrar = self.rutas_archivos[0]
+                        nombre_a_borrar = self.nombres_archivos[0]
+
+                        #Borrado fisico del disco
+                        if os.path.exists(ruta_a_borrar):
+                            os.remove(ruta_a_borrar)
+
+                        #Registro y limpieza de las listas
+                        self.nombres_archivos_eliminados.append(nombre_a_borrar)
                         self.rutas_archivos.pop(0)
-                        self.nombres_archivos_eliminados.append(self.nombres_archivos[0])
                         self.nombres_archivos.pop(0)
+
 
                     #Guardamos la ruta unica
                     self.rutas_archivos.append(tmp.name)
@@ -57,10 +62,8 @@ class State(rx.State):
                     self.nombres_archivos.append(file.name)
                     self.cargados += 1
             
-            # Captura cualquier otro error inesperado
+            # Captura errores inesperado
             except Exception as e:
-                #Imprime en la consola
-                print(f"Error crítico: {e}") 
                 yield rx.window_alert("Ocurrió un error inesperado al procesar el archivo.")  
 
         if len(self.nombres_archivos_eliminados) > 0:

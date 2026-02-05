@@ -22,19 +22,24 @@ def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
                 rx.hstack(
                     #Creamos una card por cada archivo guardado
                     rx.foreach(
-                    datos,
-                    lambda item: rx.card(
-                        rx.text(
-                            f"El año: {item["name"]}",
-                            align="center"
+                        datos,
+                        lambda item: rx.card(
+                            rx.vstack(
+                                rx.text(
+                                    f"El año: {item["name"]}",
+                                    align="center"
+                                ),
+                                rx.text(
+                                    f"Tuvimos: {item["valor"]}",
+                                    align="center"
+                                ),
+                                align="center",
+                                spacing="2",
+                                width="100%",
                             ),
-                        rx.text(
-                            f"Tuvimos: {item["valor"]}",
-                            align="center"
-                            ),
-                        #CAMBIARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
-                        border=f"5px: {Color.ACENTO.value}",
-                        padding="0.5em",
+                            style={
+                                "border": f"2px solid {Color.ACENTO.value}"
+                            }
                         )  
                     ),
                     margin_x = "auto" 
@@ -47,7 +52,7 @@ def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
                     rx.recharts.bar(
                         data_key="valor",
                         stroke=Color.SECUNDARIO.value,
-                        fill=rx.color("accent", 8),
+                        fill=Color.ACENTO.value
                     ),
                     #Eje x
                     rx.recharts.x_axis(data_key="name"),

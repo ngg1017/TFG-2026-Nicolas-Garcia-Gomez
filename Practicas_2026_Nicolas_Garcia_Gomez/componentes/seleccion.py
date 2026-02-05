@@ -40,7 +40,7 @@ def seleccion(icon: str) -> rx.Component:
 
                             #Opciones del menu
                             rx.menu.item("Mortalidad Estandarizada", on_click=Programa.mortalidad_estandarizada),
-                            rx.menu.item("Grape"),
+                            rx.menu.item("Reingresos no programados", on_click=Programa.reingresos_no_programados),
                             rx.menu.item("Pear"),
 
                             #Aseguramos que el menú flote por encima de todo
