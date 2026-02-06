@@ -12,13 +12,19 @@ def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
         rx.dialog.content(
 
             #Titulo
-            rx.dialog.title(
-                "Resultados del Indicador", 
-                color = TextoColor.ACENTO.value
+            rx.hstack(
+                rx.dialog.title(
+                texto.split(":")[0],
+                weight="bold",
+                color = TextoColor.ACENTO.value,
+                white_space="nowrap"
+                ),
+                justify = "center"
             ),
+
             rx.vstack(
                 #El texto de cada indicador
-                rx.text(texto),
+                rx.text(texto.split(":")[1]),
                 rx.hstack(
                     #Creamos una card por cada archivo guardado
                     rx.foreach(
@@ -59,17 +65,39 @@ def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
                     #Eje y
                     rx.recharts.y_axis(),
                     data=datos,
-                    width="100%",
+                    width=550,
                     height=250,
-                )
+                ),
+                width="100%",
+                align="center",
             ),
+
+            #Descargar los datos filtrados
+            rx.hstack(
+                #Creamos un boton por cada archivo para descargar
+                rx.foreach(
+                    datos,
+                    lambda item, i: rx.button(
+                        f"Descargar {item["name"]}",
+                        on_click=Programa.descargar_archivo(i)
+                    )
+                    
+                ),
+                margin_x = "auto",
+                justify = "center"
+            ),
+        
             #Para cerrar la ventana
             rx.dialog.close(
                 rx.button(
                 "Cerrar",
-                on_click=Programa.cerrar_ventana
+                on_click=Programa.cerrar_ventana,
+                margin_top = "10px"
                 )
-            )
+            ),
+            #Permite que el ancho crezca segun el contenido
+            width="fit-content", 
+            max_width="50vw",      
         ),
         #Mostar solo cuando se haya hecho un calculo(se selecciona una opcion)
         open=Programa.mostrar_resultado,

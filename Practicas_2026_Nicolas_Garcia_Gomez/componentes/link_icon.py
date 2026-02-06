@@ -4,12 +4,16 @@ from Practicas_2026_Nicolas_Garcia_Gomez.estilos.estilos import ESTILO_BASE
 
 #Para crear botones
 def link_icon(icon: str, url: str) -> rx.Component:
-    return rx.link(                                   #Creamos el link
+    #Creamos el link
+    return rx.link(                                   
         rx.button(
             icon,
-            class_name="btn btn-lg",                  #Importamos de Boostrap el boton
+            #Importamos de Boostrap el boton
+            class_name="btn btn-lg",                  
             size = "4"
         ),
-        href = url,                                   #El link que abrimos
-        is_external = True                            #Hacemos que se abrea en una ventana nueva
+        #El link que abrimos
+        href = url,
+        #Hacemos que se abrea en una ventana nueva                                
+        is_external = True                            
     )

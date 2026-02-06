@@ -41,9 +41,11 @@ def seleccion(icon: str) -> rx.Component:
                             #Opciones del menu
                             rx.menu.item("Mortalidad Estandarizada", on_click=Programa.mortalidad_estandarizada),
                             rx.menu.item("Reingresos no programados", on_click=Programa.reingresos_no_programados),
-                            rx.menu.item("Pear"),
+                            rx.menu.item("Incidencia de barotrauma", on_click=Programa.incidencia_de_barotrauma),
+                            rx.menu.item("Posicion semiincorporada con VMI", on_click=Programa.posicion_semiincorporada_VMI),
+                            
 
-                            #Aseguramos que el menú flote por encima de todo
+                            #Aseguramos que el menu flote por encima de todo
                             z_index="2000", 
                             background_color=Color.ACENTO.value,
                             color=TextoColor.SECUNDARIO.value,

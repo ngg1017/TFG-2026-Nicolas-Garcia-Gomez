@@ -5,28 +5,41 @@ import Practicas_2026_Nicolas_Garcia_Gomez.constantes as constantes
 
 #Creamos la barra lateral
 def navbar() -> rx.Component:
-    return rx.vstack(                                     #Linea debajo de la barra vertical
-        rx.hstack(                                        #Crea la barra en horizontal
-            rx.image(                                     #Para poner imagen a la barra
+    #Linea debajo de la barra vertical
+    return rx.vstack(   
+        #Crea la barra en horizontal                                  
+        rx.hstack( 
+            #Para poner imagen a la barra                                       
+            rx.image(                                     
                 src = "sacyl.png",
                 alt = "Icono del sacyl",
                 width = Size.MUYGRANDE.value,
                 height = Size.MUYGRANDE.value
             ),
-            rx.text(f"Indicadores Calidad", size = "5"),  #Texto de la barra
-            rx.spacer(),                                  #Empuja la barra a la izquierda
-            link_icon(                                    #Creamos el boton en la navbar
+            #Texto de la barra
+            rx.text(f"Indicadores Calidad", size = "5"), 
+            #Empuja la barra a la izquierda 
+            rx.spacer(),   
+            #Creamos el boton en la navbar                               
+            link_icon(                                    
                 "Pagina web REA", 
                 constantes.REA_URL
             ),
-            width = "100%",                               #Tamaño de la barra(ocupa la totalidad)
+            #Tamaño de la barra(ocupa la totalidad)
+            width = "100%",                               
             align="center"
         ),
-        position = "sticky",                                           #Hace que la linea debajo siempre este fija
-        bg = Color.PRIMARIO.value,                                     #Color de fondo
-        border_bottom = f"0.25em solid {Color.SECUNDARIO.value}",      #Aparezca la linea de debajo
-        padding_x = Size.GRANDE.value,                                 #Separa icono de las letras
+        #Hace que la linea debajo siempre este fija
+        position = "sticky",
+        #Color de fondo                                           
+        bg = Color.PRIMARIO.value,     
+        #Aparezca la linea de debajo                                
+        border_bottom = f"0.25em solid {Color.SECUNDARIO.value}", 
+        #Separa icono de las letras     
+        padding_x = Size.GRANDE.value,                                 
         padding_y = Size.DEFECTO.value,
-        z_index = "10",                                                #Siempre esta por encima
-        top = "0",                                                     #Se pegue a la parte superior
+        #Siempre esta por encima
+        z_index = "10", 
+         #Se pegue a la parte superior                                               
+        top = "0",                                                    
     )
