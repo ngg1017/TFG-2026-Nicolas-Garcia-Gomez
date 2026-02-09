@@ -43,8 +43,17 @@ def seleccion(icon: str) -> rx.Component:
                             rx.menu.item("Reingresos no programados", on_click=Programa.reingresos_no_programados),
                             rx.menu.item("Incidencia de barotrauma", on_click=Programa.incidencia_de_barotrauma),
                             rx.menu.item("Posicion semiincorporada con VMI", on_click=Programa.posicion_semiincorporada_VMI),
-                            
+                            rx.menu.item("Incidencias úlcera por presión", on_click=Programa.incidencia_ulceras_presion),
+                            rx.menu.item("Valoración diaria de la interrupción de la sedación", on_click=Programa.valoracion_interrupcion_sedacion),
+                            rx.menu.item("Prevención de la enfermedad tromboembólica", on_click=Programa.prevencion_enfermedad_tromboembolica),
+                            rx.menu.item("Mantenimiento de niveles de glucemia", on_click=Programa.mantenimiento_niveles_glucemia),
+                            rx.menu.item("Alta precoz de medicina intensiva", on_click=Programa.alta_precoz_medicina_intensiva),
+                            rx.menu.item("Resucitación precoz de la sepsis", on_click=Programa.resucitacion_precoz_sepsis),
+                            rx.menu.item("Traslado intrahospitalario", on_click=Programa.traslado_intrahospitalario),
+                            rx.menu.item("Tratamiento empírico adecuado en infección", on_click=Programa.tratamiento_empirico_infeccion),
+                            rx.menu.item("", on_click=Programa.tratamiento_empirico_infeccion),
 
+                    
                             #Aseguramos que el menu flote por encima de todo
                             z_index="2000", 
                             background_color=Color.ACENTO.value,

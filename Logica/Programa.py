@@ -3,10 +3,6 @@ import reflex as rx
 from .State import State
 import unicodedata
 
-"""
-Metodo para automatizar el final de cada metodo
-"""
-
 #Hereda de mi clase State
 class Programa(State):
     datos_final: list[dict]
@@ -20,7 +16,7 @@ class Programa(State):
         columna_unicode = unicodedata.normalize("NFD", columna).encode("ascii", "ignore").decode("utf-8")
         
         #Pasa a mayusculas todo y reemplaza espacios o cualquier otro cararcter de saparacion por "_"
-        columnas_final = columna_unicode.upper().replace(" ","_").replace(".","_").replace("?","_").replace("/","_").replace(",","_").replace(";","_").replace("DE","_")
+        columnas_final = columna_unicode.upper().replace(" ","_").replace(".","_").replace("?","_").replace("/","_").replace(",","_").replace(";","_").replace("__","_").replace("___","_")
         return columnas_final
     
     #Metodo para parsear los datos aptos para la ventana flotante y los graficos(ordenandolos)
@@ -45,6 +41,13 @@ class Programa(State):
         self.csv_final = []
         resultado = []
         return resultado
+    
+    #Metodo que hace el proceso final de todos los metodos.
+    def final(self, datos: list[float], texto: str):
+        self.parsear_datos(datos)
+        self.texto = texto
+        self.mostrar_resultado = True
+        return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
     
     #Metodo que crea el csv que se va a descargar con las columnas y sus transformaciones correspondientes de cada indicador
     def csv_metodo(self,resumen: dict, nombres: list[str], datos: list[pd.DataFrame], nombre_archivo):
@@ -131,13 +134,13 @@ class Programa(State):
                 )
                 
         except ValueError as e:
-            return rx.window_alert(f"Error crítico: {e}")  
-
-        self.parsear_datos(resultado)
-        self.texto = "Mortalidad estandarizada: Es un indicador de resultado que mide la calidad y efectividad de un Servicio de Medicina Intensiva (SMI). Su propósito es corregir las limitaciones de la 'mortalidad cruda'."
-        self.mostrar_resultado = True
-        return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
-    
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        #Metodo que hace todas las operaciones finales para ahorrarnos algo de codigo.
+        self.final(resultado, "Mortalidad estandarizada: Es un indicador de resultado que mide la calidad y efectividad " \
+        "de un Servicio de Medicina Intensiva (SMI). " \
+        "Su propósito es corregir las limitaciones de la 'mortalidad cruda'.")
+        
     def reingresos_no_programados(self):
         resultado = self.limpieza()
 
@@ -170,15 +173,23 @@ class Programa(State):
                 valor_final = (numero_reingresos/numero_alta)*100 if numero_alta != 0 else 0.0
                 resultado.append(float(valor_final))
 
-                #Csv que necesita la doctora con los datos filtrados
-  
+                data_resumen = {
+                    "FECHA_ALTA": ["RESUMEN GLOBAL reingresos no programados"],
+                    "FECHA_REINGRESO": [f"Total: {numero_reingresos}"],
+                    "NUMERO_ALTAS": [f"Total: {numero_alta}"],
+                    "REINGRESOS_NO_PROGRAMADOS": [f"SMI: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["FECHA_ALTA","FECHA_REINGRESO"], [df["FECHA_ALTA"], df["FECHA_REINGRESO"]], 
+                    f"indicador_reingresos_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
         except ValueError as e:
-            return rx.window_alert(f"Error crítico: {e}")  
-
-        self.parsear_datos(resultado)
-        self.texto = "Reingresos no programados: Es un indicador de resultado que mide la proporción de pacientes que, tras haber sido dados de alta de la UCI a una planta de hospitalización, deben ser reingresados de forma imprevista en la UCI en un periodo de 48 horas."
-        self.mostrar_resultado = True
-        return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Reingresos no programados: Es un indicador de resultado que mide la proporción de pacientes que, " \
+        "tras haber sido dados de alta de la UCI a una planta de hospitalización, " \
+        "deben ser reingresados de forma imprevista en la UCI en un periodo de 48 horas.")
 
 
     def incidencia_de_barotrauma(self):
@@ -199,22 +210,30 @@ class Programa(State):
                 #Conversion a horas
                 horas_vmi = df["DIAS_VMI"].fillna(0)*24
 
-                numero_barotrauma = df["BAROTRAUMA"].notna().sum()
+                numero_barotrauma = (df["BAROTRAUMA"].fillna(False) == True).sum()
 
+                #Suma en dias de aquellos que tengan mas de 12 horas
                 dias_barotrauma = (horas_vmi[horas_vmi > 12] / 24).sum()
 
                 valor_final = (numero_barotrauma/dias_barotrauma)*1000 if dias_barotrauma != 0 else 0.0
                 resultado.append(float(valor_final))
 
-                #Csv que necesita la doctora con los datos filtrados
-  
+                data_resumen = {
+                    "BAROTRAUMA": ["RESUMEN GLOBAL incidencia de barotrauma"],
+                    "DIAS_VMI": [f"Total: {dias_barotrauma}"],
+                    "NUMERO_BAROTRAUMA": [f"Total: {numero_barotrauma}"],
+                    "INDICE_BAROTRAUMA": [f"Baro: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["BAROTRAUMA","DIAS_VMI"], [df["BAROTRAUMA"], df["DIAS_VMI"]], 
+                    f"indicador_barotrauma_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
         except ValueError as e:
-            return rx.window_alert(f"Error crítico: {e}")  
-
-        self.parsear_datos(resultado)
-        self.texto = "Indice de barotrauma: Es un indicador de seguridad y proceso que mide la aparición de complicaciones pulmonares relacionadas con el daño físico provocado por la ventilación mecánica."
-        self.mostrar_resultado = True
-        return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")    
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Indice de barotrauma: Es un indicador de seguridad y proceso que mide la aparición de complicaciones " \
+        "pulmonares relacionadas con el daño físico provocado por la ventilación mecánica.")
 
 
     def posicion_semiincorporada_VMI(self):
@@ -232,23 +251,380 @@ class Programa(State):
                     raise ValueError(f"Falta la columna 'Dias VMI' en {nombre}")
                 
                 #Logica de calculo
-                #MODIFICARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR
-                #Conversion a horas
                 dias_vmi = df["DIAS_VMI"].fillna(0)
                 inclinacion = df["GRADOS_INCLINACION"].fillna(0)
 
                 dias_vmi_totales = dias_vmi[dias_vmi > 0].sum()
-                total_inclinacion = dias_vmi[(inclinacion > 20) & (dias_vmi > 0)].sum()
+                #Inclinacion mayor a 20 y que tengan dias de vmi
+                total_inclinacion = dias_vmi[(inclinacion >= 20) & (dias_vmi > 0)].sum()
 
                 valor_final = (total_inclinacion/dias_vmi_totales)*100 if dias_vmi_totales != 0 else 0.0
                 resultado.append(float(valor_final))
 
-                #Csv que necesita la doctora con los datos filtrados
-  
+                data_resumen = {
+                    "GRADOS_INCLINACION": ["RESUMEN GLOBAL posicion semiincorporada"],
+                    "DIAS_VMI": [f"Total: {dias_vmi_totales}"],
+                    "NUMERO_INCLINACION": [f"Total: {total_inclinacion}"],
+                    "INDICE_POSICION": [f"VMI: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["GRADOS_INCLINACION","DIAS_VMI"], [inclinacion, dias_vmi], 
+                    f"indicador_posicion_semiincorporada_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
         except ValueError as e:
-            return rx.window_alert(f"Error crítico: {e}")  
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Posicion semiincorporada con VMI: Es un indicador de proceso que mide el porcentaje de pacientes " \
+        "con ventilación mecánica invasiva que se mantienen con el cabecero de la cama elevado 20º, con el fin de prevenir " \
+        "la neumonía asociada a la ventilación")
+    
+    def incidencia_ulceras_presion(self):
+        resultado = self.limpieza()
 
-        self.parsear_datos(resultado)
-        self.texto = "Posicion semiincorporada con VMI: Es un indicador de proceso que mide el porcentaje de pacientes con ventilación mecánica invasiva que se mantienen con el cabecero de la cama elevado 20º, con el fin de prevenir la neumonía asociada a la ventilación"
-        self.mostrar_resultado = True
-        return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado") 
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+
+                if "UPP" not in df.columns:
+                    raise ValueError(f"Falta la columna 'UPP' en {nombre}")
+            
+                #Logica de calculo
+                upp = df["UPP"].fillna(0)
+
+                #Pacientes que tengan ulceras por presion
+                total_upp = upp[upp == True].sum()
+                total_ingresados = len(df)
+
+                valor_final = (total_upp/total_ingresados)*100 if total_ingresados != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "UPP": ["RESUMEN GLOBAL indice UPP"],
+                    "TOTAL_UPP": [f"Total: {total_upp}"],
+                    "TOTAL_INGRESADOS": [f"Total: {total_ingresados}"],
+                    "INDICE_UPP": [f"UPP: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["UPP"], [upp], 
+                    f"indicador_upp_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Incidencias úlcera por presión UPP: Es un indicador de seguridad que mide el porcentaje " \
+        "de pacientes que desarrollan lesiones en la piel o tejidos subyacentes por presión prolongada durante su estancia en " \
+        "la UCI, con el objetivo de evaluar la efectividad de las medidas de prevención y cuidados de enfermería")
+
+    #PREGUNTAR DOCTORAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    def valoracion_interrupcion_sedacion(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+
+                if "VENTANA_DE_SEDACION" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Ventana de sedacion' en {nombre}")
+                
+                if "DIAS_VMI" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Dias VMI' en {nombre}")
+            
+                #Logica de calculo
+                sedacion = df["VENTANA_DE_SEDACION"].fillna(False)
+                dias_vmi = df["DIAS_VMI"].fillna(0)
+
+                #Simplemente que tengan sedacion y dias de vmi necesito otro tipo de datos para hacerlo correctamente
+                total_sedacion = dias_vmi[(sedacion == True) & (dias_vmi > 0)].sum()
+
+                valor_final = (total_sedacion/dias_vmi.sum())*100 if dias_vmi.sum() != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                #Csv que necesita la doctora con los datos filtrados
+                data_resumen = {
+                    "VENTANA_DE_SEDACION": ["RESUMEN GLOBAL interrupcion sedacion"],
+                    "DIAS_VMI": [f"Total: {dias_vmi.sum()}"],
+                    "TOTAL_SEDACION": [f"Total: {total_sedacion}"],
+                    "INDICE_SEDACION": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["VENTANA_DE_SEDACION", "DIAS_VMI"], [sedacion, dias_vmi], 
+                    f"indicador_sedacion_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        #Metodo que hace todas las operaciones finales para ahorrarnos algo de codigo.
+        self.final(resultado, "Interrupción de la sedación: Es un indicador de proceso que mide el porcentaje " \
+        "de días en los que se evalúa y ejecuta la suspensión diaria de la sedación continua en pacientes con ventilación mecánica, " \
+        "con el fin de reducir la duración del soporte ventilatorio y la estancia en la UCI.")
+    
+    def prevencion_enfermedad_tromboembolica(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+
+                if "PROFILAXIS_TVP" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Profilaxis TVP' en {nombre}")
+                
+                if "TVP" not in df.columns:
+                    raise ValueError(f"Falta la columna 'TVP' en {nombre}")
+            
+                #Logica de calculo
+                profilaxis = df["PROFILAXIS_TVP"].fillna(False)
+                tvp = df["TVP"].fillna(False)
+
+                #Aquellos que tengas profilaxis y tvp a la vez
+                total_tvp = profilaxis[(profilaxis == True) & (tvp == True)].sum()
+                total_ingresados = len(df)
+
+                valor_final = (total_tvp/total_ingresados)*100 if total_ingresados != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "PROFILAXIS_TVP": ["RESUMEN GLOBAL enfermedad tromboembolica"],
+                    "TVP": [f"Total: {tvp.sum()}"],
+                    "TOTAL_PROFILAXIS": [f"Total: {profilaxis.sum()}"],
+                    "TOTAL_PROFILAXIS_TVP": [f"Total: {total_tvp}"],
+                    "INDICE_TROMBOEMBOLICO": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["PROFILAXIS_TVP", "TVP"], [profilaxis, tvp], 
+                    f"indicador_tvp_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Prevención enfermedad tromboembólica: Es un indicador de proceso que mide el porcentaje de pacientes " \
+        "que reciben profilaxis antitrombótica adecuada (farmacológica o mecánica), " \
+        "con el fin de evitar complicaciones graves como la trombosis venosa profunda o el tromboembolismo pulmonar.")
+
+    def mantenimiento_niveles_glucemia(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+
+                if "GLUCEMIA" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Glucemia' en {nombre}")
+                
+                if "TRATAMIENTO_INSULINA" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Tratamiento insulina' en {nombre}")
+            
+                #Logica de calculo
+                glucemia = df["GLUCEMIA"].fillna(0)
+                insulina = df["TRATAMIENTO_INSULINA"].fillna(False)
+
+                #Aquellos que tengas insulina y glucemia > 150 a la vez
+                total = insulina[(glucemia >= 150) & (insulina == True)].sum()
+                total_glucemia = (glucemia >= 150).sum()
+
+                valor_final = (total/total_glucemia)*100 if total_glucemia != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "GLUCEMIA": ["RESUMEN GLOBAL niveles glucemia"],
+                    "TRATAMIENTO_INSULINA": [f"Total: {insulina.sum()}"],
+                    "TOTAL_GLUCEMIA": [f"Total: {total_glucemia}"],
+                    "TOTAL_GLUCEMIA_INSULINA": [f"Total: {total}"],
+                    "INDICE_MANTENIMIENTO": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["GLUCEMIA", "TRATAMIENTO_INSULINA"], [glucemia, insulina], 
+                    f"indicador_glucemia_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Mantenimiento de niveles de glucemia: Es un indicador de proceso que mide el porcentaje de pacientes en " \
+        "los que se mantiene una glucemia capilar de 150, con el fin de evitar tanto la hiperglucemia como la hipoglucemia " \
+        "grave y reducir así la morbi-mortalidad asociada.")
+    
+    def alta_precoz_medicina_intensiva(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+
+                if "ALTA_PRECOZ" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Alta Precoz' en {nombre}")
+                
+                if "FECHA_ALTA" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Fecha Alta' en {nombre}")
+            
+                #Logica de calculo
+                alta_precoz = df["ALTA_PRECOZ"].fillna(False)
+                alta = df["FECHA_ALTA"].notna()
+                numero_alta_total = alta.sum()
+
+                #Aquellos que tengan alta precoz y fecha de alta
+                num_alta_precoz = (alta & (alta_precoz == True)).sum()
+
+                valor_final = (num_alta_precoz/numero_alta_total)*100 if numero_alta_total != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "ALTA_PRECOZ": ["RESUMEN GLOBAL alta precoz"],
+                    "TOTAL_ALTA": [f"Total: {numero_alta_total}"],
+                    "TOTAL_ALTA_PRECOZ": [f"Total: {num_alta_precoz}"],
+                    "INDICE_ALTA_PRECOZ": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["ALTA_PRECOZ"], [alta_precoz], 
+                    f"indicador_alta_precoz_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Alta precoz de medicina intensiva: Es un indicador de resultado que mide el porcentaje de " \
+        "pacientes que son dados de alta de la UCI a una planta de hospitalización antes de lo recomendado por los criterios clínicos, " \
+        "generalmente por necesidad de camas, lo que aumenta el riesgo de reingreso y complicaciones.")
+
+    #MAL PREGUNTAAR DOCTORAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    def resucitacion_precoz_sepsis(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+
+                if "Sepsis" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Alta Precoz' en {nombre}")
+                
+                if "RASS" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Fecha Alta' en {nombre}")
+            
+                #Logica de calculo
+                alta_precoz = df["ALTA_PRECOZ"].fillna(False)
+                alta = df["FECHA_ALTA"].notna()
+                numero_alta_total = alta.sum()
+
+                #Aquellos que tengan alta precoz y fecha de alta
+                num_alta_precoz = (alta & (alta_precoz == True)).sum()
+
+                valor_final = (num_alta_precoz/numero_alta_total)*100 if numero_alta_total != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "ALTA_PRECOZ": ["RESUMEN GLOBAL alta precoz"],
+                    "TOTAL_ALTA": [f"Total: {numero_alta_total}"],
+                    "TOTAL_ALTA_PRECOZ": [f"Total: {num_alta_precoz}"],
+                    "INDICE_ALTA_PRECOZ": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["ALTA_PRECOZ"], [alta_precoz], 
+                    f"indicador_alta_precoz_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Resucitación precoz de la sepsis:")
+
+    def traslado_intrahospitalario(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+
+                if "LISTADO_DE_VERIFICACION" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Listado de verificacion' en {nombre}")
+                
+                if "TRASLADO_INTRAHOSPITALARIO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Traslado intrahospitalario' en {nombre}")
+            
+                #Logica de calculo
+                traslado = df["TRASLADO_INTRAHOSPITALARIO"].fillna(False)
+                listado = df["LISTADO_DE_VERIFICACION"].fillna(False)
+                num_traslado = traslado.sum()
+
+                #Aquellos que tengan traslado y listado
+                num_listado = ((listado == True) & (traslado == True)).sum()
+
+                valor_final = (num_listado/num_traslado)*100 if num_traslado != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "LISTADO_DE_VERIFICACION": ["RESUMEN GLOBAL listado trsalado"],
+                    "TRASLADO_INTRAHOSPITALARIO": [f"Total: {num_traslado}"],
+                    "TOTAL_LISTADO_TRASLADO": [f"Total: {num_listado}"],
+                    "INDICE_LISTADO": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["LISTADO_DE_VERIFICACION", "TRASLADO_INTRAHOSPITALARIO"], [listado, traslado], 
+                    f"indicador_listado_traslado_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Traslado intrahospitalario: Es un indicador de proceso que mide el porcentaje de traslados de pacientes " \
+        "críticos fuera de la UCI (a pruebas de imagen o quirófano) realizados utilizando un listado de verificación (check-list) " \
+        "estandarizado, con el fin de minimizar los eventos adversos y garantizar la seguridad durante el transporte.")
+
+    def tratamiento_empirico_infeccion(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+
+                if "ANTIBIOTERAPIA" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Antibioterapia' en {nombre}")
+                
+                if "DESESCALADA_ANTIBIOTICA" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Desescalada Antibiotica' en {nombre}")
+            
+                #Logica de calculo
+                terapia = df["ANTIBIOTERAPIA"].fillna("Ninguno")
+                desescalada = df["DESESCALADA_ANTIBIOTICA"].fillna(False)
+
+                num_infeccion = (terapia != "Ninguno").sum()
+
+                #Aquellos que hagan desescalada y solo tengan un farmaco
+                trat_adecuado = ((desescalada == True) & (terapia != "Ninguno") & (~terapia.str.contains(",", na=False))).sum()
+
+                valor_final = (trat_adecuado/num_infeccion)*100 if num_infeccion != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "ANTIBIOTERAPIA": ["RESUMEN GLOBAL tratamiento empirico"],
+                    "DESESCALADA_ANTIBIOTICA": [f"Total: {desescalada.sum()}"],
+                    "TOTAL_INFECCIONES": [f"Total: {num_infeccion}"],
+                    "TOTAL_TRAT_ADECUADO": [f"Total: {trat_adecuado}"],
+                    "INDICE_TRAT_ADECUADO": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["ANTIBIOTERAPIA", "DESESCALADA_ANTIBIOTICA"], [terapia, desescalada], 
+                    f"indicador_trat_adecuado_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Tratamiento empírico adecuado: Es un indicador de proceso que mide el porcentaje de " \
+        "pacientes con sospecha de infección grave que reciben una terapia antibiótica inicial ajustada a las guías clínicas y a los " \
+        "mapas de resistencias locales en menos de una hora, con el fin de reducir drásticamente la mortalidad y la disfunción orgánica")
+    
+    
+   
+
+        
