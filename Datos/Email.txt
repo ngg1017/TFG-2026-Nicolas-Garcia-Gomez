@@ -126,6 +126,23 @@ Te hago un pequeño resumen de las columnas necesarias y adjunto un Excel donde 
 
 43	Extubación por Maniobras - Booleano (Sí/No)
 
+44      PAM al ingreso, a las 6 horas y a las 24 horas - Numérico
+
+45      Diuresis al ingreso, a las 6 horas y a las 24 horas -  Numérico
+
+46      Niveles de lactato al ingreso, a las 6 horas y a las 24 horas - Numérico
+
+47      Listado de verificación - Booleano (Si/No)
+
+48      Antibioterapia ingreso - Texto (Fármaco/Familia)
+
+49      Antibioterapia posterior a los cultivos(24h) - Texto (Fármaco/Familia)
+
+50      Coagulopatía  - Booleano (Si/No)
+
+51      Cantidad de trasfusión por día - Numérico 
+
+
 Todas estas columnas así como si tipo de dato es orientativo ustedes decidirán cual es la mejor forma de hacerme llegar los daotos.
 Muchas gracias por su atención.
 

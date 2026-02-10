@@ -318,7 +318,6 @@ class Programa(State):
         "de pacientes que desarrollan lesiones en la piel o tejidos subyacentes por presión prolongada durante su estancia en " \
         "la UCI, con el objetivo de evaluar la efectividad de las medidas de prevención y cuidados de enfermería")
 
-    #PREGUNTAR DOCTORAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
     def valoracion_interrupcion_sedacion(self):
         resultado = self.limpieza()
 
@@ -361,7 +360,11 @@ class Programa(State):
         #Metodo que hace todas las operaciones finales para ahorrarnos algo de codigo.
         self.final(resultado, "Interrupción de la sedación: Es un indicador de proceso que mide el porcentaje " \
         "de días en los que se evalúa y ejecuta la suspensión diaria de la sedación continua en pacientes con ventilación mecánica, " \
-        "con el fin de reducir la duración del soporte ventilatorio y la estancia en la UCI.")
+        "con el fin de reducir la duración del soporte ventilatorio y la estancia en la UCI. " \
+        "Debido a la estructura de la base de datos, " \
+        "donde la interrupción de la sedación se registra como una variable dicotómica (Sí/No) por paciente y no de forma diaria, el indicador " \
+        "se ha calculado asumiendo que el cumplimiento del protocolo se extiende a la totalidad de los días de ventilación " \
+        "mecánica del paciente registrado.")
     
     def prevencion_enfermedad_tromboembolica(self):
         resultado = self.limpieza()
@@ -450,49 +453,6 @@ class Programa(State):
         self.final(resultado, "Mantenimiento de niveles de glucemia: Es un indicador de proceso que mide el porcentaje de pacientes en " \
         "los que se mantiene una glucemia capilar de 150, con el fin de evitar tanto la hiperglucemia como la hipoglucemia " \
         "grave y reducir así la morbi-mortalidad asociada.")
-    
-    def alta_precoz_medicina_intensiva(self):
-        resultado = self.limpieza()
-
-        try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
-                df.columns = [self.normalizar_frame(col) for col in df.columns]
-
-                if "ALTA_PRECOZ" not in df.columns:
-                    raise ValueError(f"Falta la columna 'Alta Precoz' en {nombre}")
-                
-                if "FECHA_ALTA" not in df.columns:
-                    raise ValueError(f"Falta la columna 'Fecha Alta' en {nombre}")
-            
-                #Logica de calculo
-                alta_precoz = df["ALTA_PRECOZ"].fillna(False)
-                alta = df["FECHA_ALTA"].notna()
-                numero_alta_total = alta.sum()
-
-                #Aquellos que tengan alta precoz y fecha de alta
-                num_alta_precoz = (alta & (alta_precoz == True)).sum()
-
-                valor_final = (num_alta_precoz/numero_alta_total)*100 if numero_alta_total != 0 else 0.0
-                resultado.append(float(valor_final))
-
-                data_resumen = {
-                    "ALTA_PRECOZ": ["RESUMEN GLOBAL alta precoz"],
-                    "TOTAL_ALTA": [f"Total: {numero_alta_total}"],
-                    "TOTAL_ALTA_PRECOZ": [f"Total: {num_alta_precoz}"],
-                    "INDICE_ALTA_PRECOZ": [f"Total: {float(valor_final)}"]
-                }
-                self.csv_metodo(
-                    data_resumen, ["ALTA_PRECOZ"], [alta_precoz], 
-                    f"indicador_alta_precoz_{nombre.split(".")[0][len(nombre)-8:]}.csv"
-                )
-                
-        except ValueError as e:
-            return rx.window_alert(f"Error crítico: {e}") 
-        
-        self.final(resultado, "Alta precoz de medicina intensiva: Es un indicador de resultado que mide el porcentaje de " \
-        "pacientes que son dados de alta de la UCI a una planta de hospitalización antes de lo recomendado por los criterios clínicos, " \
-        "generalmente por necesidad de camas, lo que aumenta el riesgo de reingreso y complicaciones.")
 
     #MAL PREGUNTAAR DOCTORAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
     def resucitacion_precoz_sepsis(self):
@@ -623,6 +583,136 @@ class Programa(State):
         self.final(resultado, "Tratamiento empírico adecuado: Es un indicador de proceso que mide el porcentaje de " \
         "pacientes con sospecha de infección grave que reciben una terapia antibiótica inicial ajustada a las guías clínicas y a los " \
         "mapas de resistencias locales en menos de una hora, con el fin de reducir drásticamente la mortalidad y la disfunción orgánica")
+
+    def neumonia_asociada_vmi(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+
+                if "EPISODIOS_NAV" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Episodios NAV' en {nombre}")
+                
+                if "DIAS_VMI" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Dias VMI' en {nombre}")
+            
+                #Logica de calculo
+                nav = df["EPISODIOS_NAV"].fillna(0)
+                vmi = df["DIAS_VMI"].fillna(0)
+
+                #Simplemente hay que hacer el calculo
+                valor_final = (nav.sum()/vmi.sum())*1000 if vmi.sum() != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "EPISODIOS_NAV": ["RESUMEN GLOBAL nuemonia asociada a VMI"],
+                    "DIAS_VMI": [f"Total: {vmi.sum()}"],
+                    "TOTAL_NAV": [f"Total: {nav.sum()}"],
+                    "INDICE_NAV": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["EPISODIOS_NAV", "DIAS_VMI"], [nav, vmi], 
+                    f"indicador_nav_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Neumonia asociada a VMI: Es un indicador de seguridad que mide el número de episodios " \
+        "de neumonía desarrollados por cada 1.000 días de ventilación mecánica, con el " \
+        "fin de evaluar la eficacia de las medidas preventivas y reducir las complicaciones infecciosas del paciente crítico")
+
+    def reintubacion(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+
+                if "REGISTRO_INTUBACIONES" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Registro Intubaciones' en {nombre}")
+                
+                if "EXTUBACION_PROGRAMADA" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Extubacion Programada' en {nombre}")
+            
+                #Logica de calculo
+                intuba = df["REGISTRO_INTUBACIONES"].fillna("")
+                extuba = df["EXTUBACION_PROGRAMADA"].fillna(False)
+
+                #Aquellos que contengan mas de un registro en intubaciones
+                reintubaciones = (intuba.str.contains(",", na=False)).sum()
+                num_extuba = ((intuba != "")&(extuba == True)).sum()
+
+                valor_final = (reintubaciones/num_extuba)*100 if num_extuba != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "REGISTRO_INTUBACIONES": ["RESUMEN GLOBAL nuemonia asociada a VMI"],
+                    "EXTUBACION_PROGRAMADA": [f"Total: {num_extuba}"],
+                    "TOTAL_INTUBACIONES": [f"Total: {(intuba != "").sum()}"],
+                    "TOTAL_REINTUBACIONES": [f"Total: {reintubaciones}"],
+                    "INDICE_REINTUBACIONES": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["REGISTRO_INTUBACIONES", "EXTUBACION_PROGRAMADA"], [intuba, extuba], 
+                    f"indicador_reintubaciones_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Reintubación: Es un indicador de resultado que mide el porcentaje de pacientes que requieren " \
+        "la inserción de un tubo endotraqueal posterior a una extubación planificada, con el objetivo de evaluar " \
+        "el éxito del destete y evitar el aumento de la morbimortalidad asociada al fracaso de la extubación.")
+    
+    def especialidad_ingreso(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+
+                if "ESPECIALIDAD_DE_INGRESO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Especialidad de ingreso' en {nombre}")
+            
+                #Logica de calculo
+                especialidad = df["ESPECIALIDAD_DE_INGRESO"].fillna("No especificada")
+                valores = especialidad.value_counts(normalize=True)
+
+                #Me salto el metodo de parsear los datos pero se muestran en el grafico mal
+                for (nomb,valor) in zip (valores.index, valores.values):
+                    self.datos_final.append({"name": nomb, "valor": valor * 100})
+                
+                df_temp = valores.reset_index()
+                df_temp.columns = ["nombre", "conteo"] 
+
+                data_resumen = {
+                    "ESPECIALIDAD_DE_INGRESO": ["RESUMEN GLOBAL ingresos por especialidad"],
+                    "ESPECIALIDAD": [f"Total: {len(df_temp["nombre"])}"],
+                    "TOTAL_POR_ESPECIALIDAD": [f"Total: {len(df)}"],
+                    "INDICE_ESPECIALIDAD": [f"Total: {(df_temp["conteo"] * 100).sum()}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["ESPECIALIDAD_DE_INGRESO", "ESPECIALIDAD", "TOTAL_POR_ESPECIALIDAD", "INDICE_ESPECIALIDAD"], 
+                    [especialidad, df_temp["nombre"], df_temp["conteo"] * len(df), df_temp["conteo"] * 100], 
+                    f"indicador_especialidad_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        #Me salto el metodo final ya que hay variaciones en los datos
+        #Tengo que modificarlo de tal forma que me muestre las especialidades por año descaargandome solo por años
+        self.datos_final.sort(key= lambda x: x["name"])
+        self.csv_final.sort(key= lambda x: x["name"])
+        self.texto = "Especialidad con mayor ingreso:"
+        self.mostrar_resultado = True
+        return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
+
     
     
    
