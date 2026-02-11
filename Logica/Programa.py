@@ -3,6 +3,15 @@ import reflex as rx
 from .State import State
 import unicodedata
 
+
+"""
+cambiar metodos numericos por: 
+Asegura que son numeros (los errores se vuelven NaN)
+rass = pd.to_numeric(df["RASS"], errors="coerce")
+
+Meter strip() en normalizar_frame
+"""
+
 #Hereda de mi clase State
 class Programa(State):
     datos_final: list[dict]
@@ -107,6 +116,9 @@ class Programa(State):
                 df = pd.read_csv(ruta)
                 #Normalizamos sus columnas
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    #Esto elimina las columnas repetidas quedandose solo con la primera que encuentre
+                    df = df.loc[:, ~df.columns.duplicated()]
 
                 if "APACHE" not in df.columns:
                     raise ValueError(f"Falta la columna 'Apache' en {nombre}")
@@ -115,21 +127,23 @@ class Programa(State):
                     raise ValueError(f"Falta la columna 'Fallecimiento' en {nombre}")
                 
                 #Logica de calculo
-                numero_fallecidos = len(df[df["FALLECIMIENTO"] == True])
+                fallecimiento = df["FALLECIMIENTO"].fillna(False)
+                numero_fallecidos = len(df[fallecimiento == True])
                 df["PROBABILIDAD_MORTALIDAD"] = df["APACHE"].apply(self.codigo_apache)
-                suma_mortalidad = df.loc[df["FALLECIMIENTO"] == True, "PROBABILIDAD_MORTALIDAD"].sum()
+                suma_mortalidad = df.loc[fallecimiento == True, "PROBABILIDAD_MORTALIDAD"].sum()
                 
-                valor_final = (numero_fallecidos / suma_mortalidad) if suma_mortalidad != 0 else 0.0
+                valor_final = (numero_fallecidos / suma_mortalidad)*100 if suma_mortalidad != 0 else 0.0
                 resultado.append(float(valor_final))
 
                 #Csv que necesita la doctora con los datos filtrados
                 data_resumen = {
                     "APACHE": ["RESUMEN GLOBAL mortalidad estandarizada"],
+                    "APACHE_TOTAL": [f"Total: {suma_mortalidad}"],
                     "FALLECIMIENTO": [f"Total: {numero_fallecidos}"],
                     "PROBABILIDAD_MORTALIDAD": [f"SMR: {float(valor_final)}"]
                 }
                 self.csv_metodo(
-                    data_resumen, ["APACHE","FALLECIMIENTO"], [df["PROBABILIDAD_MORTALIDAD"], df["FALLECIMIENTO"]], 
+                    data_resumen, ["APACHE","FALLECIMIENTO"], [df["PROBABILIDAD_MORTALIDAD"], fallecimiento], 
                     f"indicador_mortalidad_{nombre.split(".")[0][len(nombre)-8:]}.csv"
                 )
                 
@@ -148,6 +162,8 @@ class Programa(State):
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
                 df = pd.read_csv(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
 
                 if "FECHA_ALTA" not in df.columns:
                     raise ValueError(f"Falta la columna 'Fecha alta' en {nombre}")
@@ -157,8 +173,8 @@ class Programa(State):
                 
                 #Logica de calculo
                 #Conversion a fechas
-                df["FECHA_ALTA"] = pd.to_datetime(df["FECHA_ALTA"], format='%d/%m/%Y')
-                df["FECHA_REINGRESO"] = pd.to_datetime(df["FECHA_REINGRESO"], format="%d/%m/%Y")
+                df["FECHA_ALTA"] = pd.to_datetime(df["FECHA_ALTA"].fillna(""), format='%d/%m/%Y')
+                df["FECHA_REINGRESO"] = pd.to_datetime(df["FECHA_REINGRESO"].fillna(""), format="%d/%m/%Y")
 
                 #Usamos total_seconds() / 3600 para que si pasan 3 dias, nos de 72 horas.
                 df["HORAS_DIFERENCIA"] = (df["FECHA_REINGRESO"] - df["FECHA_ALTA"]).dt.total_seconds() / 3600
@@ -168,7 +184,7 @@ class Programa(State):
                 numero_reingresos = (df["HORAS_DIFERENCIA"] > 48).sum()
 
                 #Contar altas
-                numero_alta = df["FECHA_ALTA"].notna().sum()
+                numero_alta = (df["FECHA_ALTA"] != "").sum()
 
                 valor_final = (numero_reingresos/numero_alta)*100 if numero_alta != 0 else 0.0
                 resultado.append(float(valor_final))
@@ -199,6 +215,8 @@ class Programa(State):
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
                 df = pd.read_csv(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
 
                 if "BAROTRAUMA" not in df.columns:
                     raise ValueError(f"Falta la columna 'Barotrauma' en {nombre}")
@@ -225,7 +243,7 @@ class Programa(State):
                     "INDICE_BAROTRAUMA": [f"Baro: {float(valor_final)}"]
                 }
                 self.csv_metodo(
-                    data_resumen, ["BAROTRAUMA","DIAS_VMI"], [df["BAROTRAUMA"], df["DIAS_VMI"]], 
+                    data_resumen, ["BAROTRAUMA","DIAS_VMI"], [df["BAROTRAUMA"].fillna(False), df["DIAS_VMI"].fillna("0")], 
                     f"indicador_barotrauma_{nombre.split(".")[0][len(nombre)-8:]}.csv"
                 )
                 
@@ -243,6 +261,8 @@ class Programa(State):
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
                 df = pd.read_csv(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
 
                 if "GRADOS_INCLINACION" not in df.columns:
                     raise ValueError(f"Falta la columna 'Grados Inclinacion' en {nombre}")
@@ -286,6 +306,8 @@ class Programa(State):
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
                 df = pd.read_csv(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
 
                 if "UPP" not in df.columns:
                     raise ValueError(f"Falta la columna 'UPP' en {nombre}")
@@ -325,6 +347,8 @@ class Programa(State):
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
                 df = pd.read_csv(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
 
                 if "VENTANA_DE_SEDACION" not in df.columns:
                     raise ValueError(f"Falta la columna 'Ventana de sedacion' en {nombre}")
@@ -357,7 +381,6 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        #Metodo que hace todas las operaciones finales para ahorrarnos algo de codigo.
         self.final(resultado, "Interrupción de la sedación: Es un indicador de proceso que mide el porcentaje " \
         "de días en los que se evalúa y ejecuta la suspensión diaria de la sedación continua en pacientes con ventilación mecánica, " \
         "con el fin de reducir la duración del soporte ventilatorio y la estancia en la UCI. " \
@@ -373,6 +396,8 @@ class Programa(State):
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
                 df = pd.read_csv(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
 
                 if "PROFILAXIS_TVP" not in df.columns:
                     raise ValueError(f"Falta la columna 'Profilaxis TVP' en {nombre}")
@@ -417,6 +442,8 @@ class Programa(State):
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
                 df = pd.read_csv(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
 
                 if "GLUCEMIA" not in df.columns:
                     raise ValueError(f"Falta la columna 'Glucemia' en {nombre}")
@@ -454,7 +481,6 @@ class Programa(State):
         "los que se mantiene una glucemia capilar de 150, con el fin de evitar tanto la hiperglucemia como la hipoglucemia " \
         "grave y reducir así la morbi-mortalidad asociada.")
 
-    #MAL PREGUNTAAR DOCTORAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
     def resucitacion_precoz_sepsis(self):
         resultado = self.limpieza()
 
@@ -462,39 +488,112 @@ class Programa(State):
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
                 df = pd.read_csv(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
 
-                if "Sepsis" not in df.columns:
-                    raise ValueError(f"Falta la columna 'Alta Precoz' en {nombre}")
+                if "SEPSIS" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Sepsis' en {nombre}")
                 
-                if "RASS" not in df.columns:
+                if "SHOCK_SEPTICO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Shock Septico' en {nombre}")
+                
+                if "PAM_INGRESO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'PAM ingreso' en {nombre}")
+                
+                if "PAM_6H" not in df.columns:
+                    raise ValueError(f"Falta la columna 'PAM 6h' en {nombre}")
+                
+                if "PAM_24H" not in df.columns:
+                    raise ValueError(f"Falta la columna 'PAM 24h' en {nombre}")
+                
+                if "DIURESIS_INGRESO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Diuresis Ingreso' en {nombre}")
+                
+                if "DIURESIS_6H" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Diuresis 6h' en {nombre}")
+                
+                if "DIURESIS_24H" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Diuresis 24h' en {nombre}")
+                
+                if "LACTATO_INGRESO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Lactato Ingreso' en {nombre}")
+                
+                if "LACTATO_6H" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Lactato 6h' en {nombre}")
+                
+                if "LACTATO_24H" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Lactato 24h' en {nombre}")
+                
+                if "FECHA_ALTA" not in df.columns:
                     raise ValueError(f"Falta la columna 'Fecha Alta' en {nombre}")
             
                 #Logica de calculo
-                alta_precoz = df["ALTA_PRECOZ"].fillna(False)
-                alta = df["FECHA_ALTA"].notna()
-                numero_alta_total = alta.sum()
+                sepsis = df["SEPSIS"].fillna(False)
+                ss = df["SHOCK_SEPTICO"].fillna(False)
+                pam_ingreso = df["PAM_INGRESO"].fillna(0)
+                pam_6 = df["PAM_6H"].fillna(0)
+                pam_24 = df["PAM_24H"].fillna(0)
+                diuresis_ingreso = df["DIURESIS_INGRESO"].fillna(0)
+                diuresis_6 = df["DIURESIS_6H"].fillna(0)
+                diuresis_24 = df["DIURESIS_24H"].fillna(0)
+                lactato_ingreso = df["LACTATO_INGRESO"].fillna(0)
+                lactato_6 = df["LACTATO_6H"].fillna(0)
+                lactato_24 = df["LACTATO_24H"].fillna(0)
+                alta = df["FECHA_ALTA"].fillna("")
+            
+                #Calculamos la resucitacion con la PAM, Diuresis y el Lactato mayores a un numero o cambio del 50% en lactato
+                resucitacion_ingreso = ((pam_ingreso > 65)&(diuresis_ingreso > 0.5)&((lactato_ingreso > 0.9) & (lactato_ingreso < 1.1)))
+                resucitacion_6 = ((pam_6 > 65)&(diuresis_6 > 0.5)&(((lactato_6 > 0.9) & (lactato_6 < 1.1))|((lactato_ingreso*0.5) >= lactato_6)))
+                resucitacion_24 = ((pam_24 > 65)&(diuresis_24 > 0.5)&(((lactato_24 > 0.9) & (lactato_24 < 1.1))|((lactato_6*0.5) >= lactato_24)))
 
-                #Aquellos que tengan alta precoz y fecha de alta
-                num_alta_precoz = (alta & (alta_precoz == True)).sum()
+                #Donde tengan sepsis, SS y se de la resucitacion precoz
+                numerador = ((sepsis|ss)&(resucitacion_ingreso|resucitacion_6|resucitacion_24)).sum()
 
-                valor_final = (num_alta_precoz/numero_alta_total)*100 if numero_alta_total != 0 else 0.0
+                #Enfermos que tengan sepsis, SS y esten dados de alta
+                denominador = ((sepsis|ss)&(alta != "")).sum()
+
+                valor_final = (numerador/denominador)*100 if denominador != 0 else 0.0
                 resultado.append(float(valor_final))
 
                 data_resumen = {
-                    "ALTA_PRECOZ": ["RESUMEN GLOBAL alta precoz"],
-                    "TOTAL_ALTA": [f"Total: {numero_alta_total}"],
-                    "TOTAL_ALTA_PRECOZ": [f"Total: {num_alta_precoz}"],
-                    "INDICE_ALTA_PRECOZ": [f"Total: {float(valor_final)}"]
+                    "RESICITACION_PRECOS_SEPSIS": ["RESUMEN GLOBAL resucitacion precoz con sepsis"],
+                    "SEPSIS_SS_RESUCITACION": [f"Total:{numerador}"],
+                    "SEPSIS_SS_ALTA": [f"Total:{denominador}"],
+                    "RESUCITACION_INGRESO": [f"Total:{resucitacion_ingreso.sum()}"],
+                    "RESUCITACION_6H": [f"Total:{resucitacion_6.sum()}"],
+                    "RESUCITACION_24H": [f"Total:{resucitacion_24.sum()}"],
+                    "INDICADOR_RESUCITACION": [f"Total: {float(valor_final)}"],
+                    "SEPSIS": [f"Total: {sepsis.sum()}"],
+                    "SHOCK_SEPTICO": [f"Total: {ss.sum()}"],
+                    "PAM_INGRESO": [f"Total: {(pam_ingreso > 65).sum()}"],
+                    "PAM_6H": [f"Total: {(pam_6 > 65).sum()}"],
+                    "PAM_24H": [f"Total: {(pam_24 > 65).sum()}"],
+                    "DIURESIS_INGRESO": [f"Total: {(diuresis_ingreso > 0.5).sum()}"],
+                    "DIURESIS_6H": [f"Total: {(diuresis_6 > 0.5).sum()}"],
+                    "DIURESIS_24H": [f"Total: {(diuresis_24 > 0.5).sum()}"],
+                    "LACTATO_INGRESO": [f"Total: {((lactato_ingreso > 0.9) & (lactato_ingreso < 1.1)).sum()}"],
+                    "LACTATO_6H": [f"Total: {((lactato_6 > 0.9) & (lactato_6 < 1.1)).sum()}"],
+                    "LACTATO_24H": [f"Total: {((lactato_24 > 0.9) & (lactato_24 < 1.1)).sum()}"],
+                    "LACTATO_VARIACION_6": [f"Total: {((lactato_ingreso*0.5) >= lactato_6).sum()}"],
+                    "LACTATO_VARIACION_24": [f"Total: {((lactato_6*0.5) >= lactato_24).sum()}"],
+                    "FECHA_ALTA": [f"Total: {(alta != "").sum()}"]
                 }
                 self.csv_metodo(
-                    data_resumen, ["ALTA_PRECOZ"], [alta_precoz], 
-                    f"indicador_alta_precoz_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    data_resumen, ["SEPSIS","SHOCK_SEPTICO","PAM_INGRESO","PAM_6H","PAM_24H","DIURESIS_INGRESO","DIURESIS_6H",
+                                   "DIURESIS_24H","LACTATO_INGRESO","LACTATO_6H","LACTATO_24H","LACTATO_VARIACION_6",
+                                   "LACTATO_VARIACION_24","FECHA_ALTA"], 
+                    [sepsis,ss,pam_ingreso,pam_6,pam_24,diuresis_ingreso,diuresis_6,
+                     diuresis_24,lactato_ingreso,lactato_6,lactato_24,
+                     lactato_ingreso.astype(str) + " - " + lactato_6.astype(str),lactato_6.astype(str) + " - " + lactato_24.astype(str),alta], 
+                    f"indicador_resucitacion_precoz_{nombre.split(".")[0][len(nombre)-8:]}.csv"
                 )
                 
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Resucitación precoz de la sepsis:")
+        self.final(resultado, "Resucitación precoz de la sepsis: Es un indicador de proceso que mide el porcentaje de " \
+        "pacientes con sepsis o shock séptico que reciben el paquete de medidas de tratamiento inicial (administración de fluidos y " \
+        "vasopresores) en los plazos establecidos, con el fin de restaurar la perfusión tisular y reducir la mortalidad.")
 
     def traslado_intrahospitalario(self):
         resultado = self.limpieza()
@@ -503,6 +602,8 @@ class Programa(State):
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
                 df = pd.read_csv(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
 
                 if "LISTADO_DE_VERIFICACION" not in df.columns:
                     raise ValueError(f"Falta la columna 'Listado de verificacion' en {nombre}")
@@ -546,34 +647,59 @@ class Programa(State):
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
                 df = pd.read_csv(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
 
-                if "ANTIBIOTERAPIA" not in df.columns:
-                    raise ValueError(f"Falta la columna 'Antibioterapia' en {nombre}")
+                if "ANTIBIOTERAPIA_INGRESO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Antibioterapia Ingreso' en {nombre}")
+                
+                if "ANTIBIOTERAPIA_24H" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Antibioterapia 24h' en {nombre}")
                 
                 if "DESESCALADA_ANTIBIOTICA" not in df.columns:
                     raise ValueError(f"Falta la columna 'Desescalada Antibiotica' en {nombre}")
             
                 #Logica de calculo
-                terapia = df["ANTIBIOTERAPIA"].fillna("Ninguno")
+                terapia_in = df["ANTIBIOTERAPIA_INGRESO"].fillna("Ninguno")
+                terapia_fin = df["ANTIBIOTERAPIA_24H"].fillna("Ninguno")
                 desescalada = df["DESESCALADA_ANTIBIOTICA"].fillna(False)
 
-                num_infeccion = (terapia != "Ninguno").sum()
+                #Aquellos que tenga terapia
+                num_infeccion = ((terapia_in != "Ninguno")&(terapia_fin != "Ninguno")).sum()
 
-                #Aquellos que hagan desescalada y solo tengan un farmaco
-                trat_adecuado = ((desescalada == True) & (terapia != "Ninguno") & (~terapia.str.contains(",", na=False))).sum()
+                def verificar_coincidencia(row):
+                    #"Ninguno" no es coincidencia válida
+                    if row['in'] == "Ninguno" or row['fin'] == "Ninguno":
+                        return False
+                    
+                    #Convertimos los strings en listas
+                    lista_in = [x.strip() for x in row['in'].split(',')]
+                    lista_fin = [x.strip() for x in row['fin'].split(',')]
+                    
+                    #Comprobamos si hay algun elemento comun
+                    return any(farmaco in lista_fin for farmaco in lista_in)
 
+                #Creamos un DataFrame temporal para el apply
+                df_temp = pd.DataFrame({'in': terapia_in, 'fin': terapia_fin})
+                trat = df_temp.apply(verificar_coincidencia, axis=1)
+                #Aquellos que hagan desescalada y coincidan sus farmacos
+                trat_adecuado = (desescalada & (terapia_in != "Ninguno") & (terapia_fin != "Ninguno") & trat).sum()
+                    
                 valor_final = (trat_adecuado/num_infeccion)*100 if num_infeccion != 0 else 0.0
                 resultado.append(float(valor_final))
 
                 data_resumen = {
-                    "ANTIBIOTERAPIA": ["RESUMEN GLOBAL tratamiento empirico"],
+                    "TRATAMIENTO_ADECUADO": ["RESUMEN GLOBAL tratamiento empirico"],
+                    "ANTIBIOTERAPIA_INGRESO": [f"Total: {(terapia_in != "Ninguno").sum()}"],
+                    "ANTIBIOTERAPIA_24H": [f"Total: {(terapia_fin != "Ninguno").sum()}"],
                     "DESESCALADA_ANTIBIOTICA": [f"Total: {desescalada.sum()}"],
                     "TOTAL_INFECCIONES": [f"Total: {num_infeccion}"],
                     "TOTAL_TRAT_ADECUADO": [f"Total: {trat_adecuado}"],
                     "INDICE_TRAT_ADECUADO": [f"Total: {float(valor_final)}"]
                 }
                 self.csv_metodo(
-                    data_resumen, ["ANTIBIOTERAPIA", "DESESCALADA_ANTIBIOTICA"], [terapia, desescalada], 
+                    data_resumen, ["ANTIBIOTERAPIA_INGRESO","ANTIBIOTERAPIA_24H", "DESESCALADA_ANTIBIOTICA"], 
+                    [terapia_in, terapia_fin, desescalada], 
                     f"indicador_trat_adecuado_{nombre.split(".")[0][len(nombre)-8:]}.csv"
                 )
                 
@@ -591,6 +717,8 @@ class Programa(State):
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
                 df = pd.read_csv(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
 
                 if "EPISODIOS_NAV" not in df.columns:
                     raise ValueError(f"Falta la columna 'Episodios NAV' en {nombre}")
@@ -631,6 +759,8 @@ class Programa(State):
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
                 df = pd.read_csv(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
 
                 if "REGISTRO_INTUBACIONES" not in df.columns:
                     raise ValueError(f"Falta la columna 'Registro Intubaciones' en {nombre}")
@@ -675,6 +805,8 @@ class Programa(State):
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
                 df = pd.read_csv(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
 
                 if "ESPECIALIDAD_DE_INGRESO" not in df.columns:
                     raise ValueError(f"Falta la columna 'Especialidad de ingreso' en {nombre}")
@@ -713,6 +845,140 @@ class Programa(State):
         self.mostrar_resultado = True
         return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
 
+    def profilaxis_ulcera_enfermos_NE(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
+
+                if "TRATAMIENTO_CORTICOIDES" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Tratamiento Corticoides' en {nombre}")
+                
+                if "ANTECEDENTES_HEMORRAGIA_GI" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Antecedentes Hemorragia GI' en {nombre}")
+                
+                if "COAGULOPATIA" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Coagulopatia' en {nombre}")
+                
+                if "INSUFICIENCIA_RENAL" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Insuficiencia Renal' en {nombre}")
+                
+                if "INSUFICIENCIA_HEPATICA" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Insuficiencia Hepatica' en {nombre}")
+                
+                if "FECHA_INICIO_NE" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Fecha Inicio NE en {nombre}")
+                
+                if "PROFILAXIS_TVP" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Profilaxis TVP' en {nombre}")
+                        
+                #Logica de calculo
+                corticoides = df["TRATAMIENTO_CORTICOIDES"].fillna(False)
+                hemorragia = df["ANTECEDENTES_HEMORRAGIA_GI"].fillna(False)
+                coagulopatia = df["COAGULOPATIA"].fillna(False)
+                renal = df["INSUFICIENCIA_RENAL"].fillna(False)
+                hepatica = df["INSUFICIENCIA_HEPATICA"].fillna(False)
+                ne = df["FECHA_INICIO_NE"].fillna("")
+                profilaxis = df["PROFILAXIS_TVP"].fillna(False)
+
+                #Calculamos la hgi que tiene los siguiente componentes
+                hgi = ((corticoides == True)|(hemorragia == True)|(coagulopatia == True)|(renal == True)|(hepatica == True))
+                #Donde haya HGI, nutricion enteral y no haya profilaxis
+                ne_profilaxis_hgi = ((hgi == True)&(ne != "")&(profilaxis == False)).sum()
+                #Donde haya HGI y nutricion enteral
+                ne_hgi = ((hgi == True)&(ne != "")).sum()
+
+                valor_final = (ne_profilaxis_hgi/ne_hgi)*100 if ne_hgi != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "HGI_NE_NOPROFILAXIS": ["RESUMEN GLOBAL profilaxis de ulcera con NE"],
+                    "HGI_NE_NOPROFILAXIS_TOTAL": [f"Total: {ne_profilaxis_hgi}"],
+                    "HGI_NE": [f"Total: {ne_hgi}"],
+                    "HGI": [f"Total: {hgi.sum()}"],
+                    "CORTICOIDES": [f"Total: {corticoides.sum()}"],
+                    "ANTECEDENTES_HEMORRAGIA_GI": [f"Total: {hemorragia.sum()}"],
+                    "COAGULOPATIA": [f"Total: {coagulopatia.sum()}"],
+                    "INSUFICIENCIA_RENAL": [f"Total: {renal.sum()}"],
+                    "INSUFICIENCIA_HEPATICA": [f"Total: {hepatica.sum()}"],
+                    "FECHA_INICIO_NE": [f"Total: {(ne != "").sum()}"],
+                    "PROFILAXIS_TVP": [f"Total: {profilaxis.sum()}"],
+                    "INDICADOR_FINAL": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["CORTICOIDES", "ANTECEDENTES_HEMORRAGIA_GI", "COAGULOPATIA", 
+                                   "INSUFICIENCIA_RENAL", "INSUFICIENCIA_HEPATICA", "FECHA_INICIO_NE", "PROFILAXIS_TVP"], 
+                                  [corticoides, hemorragia, coagulopatia, renal, hepatica, ne, profilaxis], 
+                    f"indicador_profilaxis_ulceras_NE_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Profilaxis de ulcera por estrés con NE: Es un indicador de proceso que mide el porcentaje de " \
+        "pacientes con nutrición enteral que no reciben fármacos supresores del ácido gástrico innecesariamente, con el fin de " \
+        "evitar efectos adversos, ya que la propia nutrición se considera protectora.")
+
+    def sedacion_adecuada(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
+
+                if "RASS" not in df.columns:
+                    raise ValueError(f"Falta la columna 'RASS' en {nombre}")
+                
+                if "BIS" not in df.columns:
+                    raise ValueError(f"Falta la columna 'BIS' en {nombre}")
+                
+                #Logica de calculo
+                rass = pd.to_numeric(df["RASS"], errors="coerce")
+                bis = pd.to_numeric(df["BIS"], errors="coerce")
+
+                #Sedacion ligera -2 <= rass <= 0
+                sedacion_ligera = ((rass >= -2)&(rass <= 0))
+                #Sedacion profunda -5 < rass <= -4
+                sedacion_profunda = ((rass > -5) & (rass <= -4))
+                #Sedacion paralizado rass == -5 y 40 <= bis <= 60 o la bis sea nula que se acepta tambien como sedacion
+                sedacion_paralizado = (rass == -5) & (((bis >= 40) & (bis <= 60)) | bis.isna())
+
+                #Sedacion adecuada
+                sedacion_adecuada = (sedacion_ligera|sedacion_profunda|sedacion_paralizado).sum()
+                #Total sedacion
+                sedacion = ((rass.notna())|(bis.notna())).sum()
+
+                valor_final = (sedacion_adecuada/sedacion)*100 if sedacion != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "SEDACION_ADECUADA": ["RESUMEN GLOBAL profilaxis de ulcera con NE"],
+                    "RASS_LIGERA": [f"Total: {sedacion_ligera.sum()}"],
+                    "RASS_PROFUNDA": [f"Total: {sedacion_profunda.sum()}"],
+                    "RASS_PARALIZADO": [f"Total: {sedacion_paralizado.sum()}"],
+                    "BIS_PARALIZADO": [f"Total: {sedacion_paralizado.sum()}"],
+                    "SEDACION_ADECUADA": [f"Total: {sedacion_adecuada}"],
+                    "TOTAL_SEDACION": [f"Total: {sedacion}"],
+                    "INDICADOR_FINAL": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["RASS", "BIS","RASS_LIGERA","RASS_PROFUNDA","RASS_PARALIZADO","BIS_PARALIZADO"], 
+                    [rass,bis,rass[sedacion_ligera],rass[sedacion_profunda], rass[sedacion_paralizado],bis[sedacion_paralizado]], 
+                    f"indicador_sedacion_adecuada_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Sedación adecuada: Sedación adecuada es el mantenimiento de " \
+        "los resultados de las escalas de sedación dentro del rango prescrito (objetivo) para ese enfermo en particular.")
     
     
    

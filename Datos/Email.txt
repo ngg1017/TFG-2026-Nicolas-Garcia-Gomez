@@ -1,43 +1,3 @@
-Buenos días les escribo para pedirles los datos anodizados para ellos necesito los datos en formato de tablas o Excel que:
-1- Una o varias columnas con las fechas de ingresos, reingresos de todos los pacientes así como todos los pacientes dados de alta
-2- Una columna con los enfermos que desarrollen barotrauma
-3- Una columna con los pacientes con VMI y los días que la han empleado
-4- Una columna con los pacientes cuya posición sea inclinada y su inclinación
-5- Una columna con los pacientes que desarrollan UPP
-6- Una columna con los pacientes con **ventana de sedación**
-7- Una columna con los pacientes con profilaxis
-8- Una columna con los pacientes con TVP
-9- Una columna con los pacientes con glucemia
-10- Una columna con los pacientes con tratamiento con insulina
-11- Una columnas donde indique aquellos pacientes con altas precoces o no planificada
-12- Una columna donde se indique aquellos pacientes con sepsis 
-13- **Una columna donde indique si el paciente ha tenido SS**
-14- Todos aquellos pacientes que tengan un traslado realizado
-15- Todos aquellos pacientes que tengan traslado intrahospitalario
-16- Una columna donde se indique la antibioterapia del paciente y si ha había desescalada de ese paciente
-17- Un indicador de fallecimiento del paciente
-18- El APACHE de todos los pacientes
-19- Una columna donde se indique si hay tratamiento de corticoides del paciente
-20- Una columna donde se indique si hay antecedentes de hemorragia gastrointestinal 
-21- Una columna donde se indique si hay coagulopatía 
-22- Una columna donde se indique si hay insuficiencia renal
-23- Una columna donde se indique si hay insuficiencia hepática
-24- Un indicador de si el paciente tiene NE
-25- Un indicador de si recibe profilaxis farmacológica
-26- Pacientes con episodios NAV
-27- Pacientes con RASS
-28- Pacientes con BIS
-29- Una columna donde aparezcas todas las intubaciones del paciente
-30- Un indicador que digas las extubaciones programadas del paciente
-31- La especialidad de cada paciente por la que ha sido ingresado
-32- Un indicador de si el paciente ha sido ingresado por urgencia
-33- Un indicador de los eventos adversos durante el traslado del paciente
-34- Fecha en la que comenzó la NE
-35- Indicador de si el paciente tiene sutura intestinal
-36- Un indicador de si el paciente ha necesitado actos transfusionales 
-37- Una columna que refleje si el paciente tiene sangrado activo
-38- Si el paciente ha recibido alguna extubación debida a maniobras
-
 Te hago un pequeño resumen de las columnas necesarias y adjunto un Excel donde pongo las cabeceras a modo de ejemplo:
 
 1	Fecha Ingreso - Fecha (DD/MM/AAAA)
@@ -67,8 +27,6 @@ Te hago un pequeño resumen de las columnas necesarias y adjunto un Excel donde 
 13	Glucemia - Numérico (Decimal/mg/dL)
 
 14	Tratamiento Insulina - Booleano (Sí/No)
-
-15	Alta Precoz / No Planificada - Booleano (Sí/No)
 
 16	Sepsis - Booleano (Sí/No)
 
@@ -138,9 +96,7 @@ Te hago un pequeño resumen de las columnas necesarias y adjunto un Excel donde 
 
 49      Antibioterapia posterior a los cultivos(24h) - Texto (Fármaco/Familia)
 
-50      Coagulopatía  - Booleano (Si/No)
-
-51      Cantidad de trasfusión por día - Numérico 
+50      Cantidad de trasfusión por día - Numérico 
 
 
 Todas estas columnas así como si tipo de dato es orientativo ustedes decidirán cual es la mejor forma de hacerme llegar los daotos.
