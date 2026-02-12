@@ -2,14 +2,12 @@ import pandas as pd
 import reflex as rx
 from .State import State
 import unicodedata
-
+import re
 
 """
-cambiar metodos numericos por: 
-Asegura que son numeros (los errores se vuelven NaN)
-rass = pd.to_numeric(df["RASS"], errors="coerce")
-
-Meter strip() en normalizar_frame
+Implementar lista de exclusion igual que: tratamiento_empirico_infeccion "Ninguno"
+Ver como hago lo mismo en fechas 
+REINTUBACIONES QUE CONTENGA MAS DE UNA
 """
 
 #Hereda de mi clase State
@@ -18,14 +16,21 @@ class Programa(State):
     csv_final: list[dict]
     mostrar_resultado: bool
     texto: str
-
+    
+    #Metodo que nos permite encontrar el año del documento
+    def encontrar_año(self, nombre):
+        return re.findall(r"\d{4}", nombre)[0] if re.findall(r"\d{4}", nombre) else "0000"
+     
     #Metodo para normalizar las columnas de los dataframes
-    def normalizar_frame(self, columna: str):
+    def normalizar_frame(self, columna):
         #Quita los caracteres extraños y las tildes
-        columna_unicode = unicodedata.normalize("NFD", columna).encode("ascii", "ignore").decode("utf-8")
+        columna_unicode = unicodedata.normalize("NFD", columna.strip()).encode("ascii", "ignore").decode("utf-8")
         
-        #Pasa a mayusculas todo y reemplaza espacios o cualquier otro cararcter de saparacion por "_"
-        columnas_final = columna_unicode.upper().replace(" ","_").replace(".","_").replace("?","_").replace("/","_").replace(",","_").replace(";","_").replace("__","_").replace("___","_")
+        #Cualquier cosa que no sea letra (A-Z) o numero (0-9) se vuelve "_"
+        col_limpia = re.sub(r"[^A-Z0-9]", "_", columna_unicode.upper())
+        
+        #Colapsa multiples guiones bajos en uno solo y quita guiones bajos que hayan quedado al final
+        columnas_final = re.sub(r"_+", "_", col_limpia).strip("_")
         return columnas_final
     
     #Metodo para parsear los datos aptos para la ventana flotante y los graficos(ordenandolos)
@@ -33,7 +38,7 @@ class Programa(State):
         #Creamos el diccionatio dentro de datos_final que se usa en el grafico ordenado por años
         #Ordenamos la lista de diccionarios csv_final por años para que se muestren y descarguen por orden 
         self.datos_final = [
-            {"name": nombre.split(".")[0][len(nombre)-8:], "valor": round(valor, 4)} 
+            {"name": self.encontrar_año(nombre), "valor": round(valor, 4)} 
             for nombre, valor in zip(self.nombres_archivos, resultado_final)
         ]
         self.datos_final.sort(key= lambda x: x["name"])
@@ -129,7 +134,10 @@ class Programa(State):
                 #Logica de calculo
                 fallecimiento = df["FALLECIMIENTO"].fillna(False)
                 numero_fallecidos = len(df[fallecimiento == True])
-                df["PROBABILIDAD_MORTALIDAD"] = df["APACHE"].apply(self.codigo_apache)
+
+                #Asegura que son numeros (los errores se vuelven NaN)
+                apache = pd.to_numeric(df["APACHE"], errors="coerce")
+                df["PROBABILIDAD_MORTALIDAD"] = apache.apply(self.codigo_apache)
                 suma_mortalidad = df.loc[fallecimiento == True, "PROBABILIDAD_MORTALIDAD"].sum()
                 
                 valor_final = (numero_fallecidos / suma_mortalidad)*100 if suma_mortalidad != 0 else 0.0
@@ -143,8 +151,9 @@ class Programa(State):
                     "PROBABILIDAD_MORTALIDAD": [f"SMR: {float(valor_final)}"]
                 }
                 self.csv_metodo(
-                    data_resumen, ["APACHE","FALLECIMIENTO"], [df["PROBABILIDAD_MORTALIDAD"], fallecimiento], 
-                    f"indicador_mortalidad_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    data_resumen, ["APACHE","FALLECIMIENTO"], [df["PROBABILIDAD_MORTALIDAD"], fallecimiento],
+                    #Busca 4 numeros seguidos (\d{4}) en el nombre y los extrae
+                    f"indicador_mortalidad_{self.encontrar_año(nombre)}.csv" 
                 )
                 
         except ValueError as e:
@@ -173,8 +182,8 @@ class Programa(State):
                 
                 #Logica de calculo
                 #Conversion a fechas
-                df["FECHA_ALTA"] = pd.to_datetime(df["FECHA_ALTA"].fillna(""), format='%d/%m/%Y')
-                df["FECHA_REINGRESO"] = pd.to_datetime(df["FECHA_REINGRESO"].fillna(""), format="%d/%m/%Y")
+                df["FECHA_ALTA"] = pd.to_datetime(df["FECHA_ALTA"], format="%d/%m/%Y", errors="coerce")
+                df["FECHA_REINGRESO"] = pd.to_datetime(df["FECHA_REINGRESO"], format="%d/%m/%Y", errors="coerce")
 
                 #Usamos total_seconds() / 3600 para que si pasan 3 dias, nos de 72 horas.
                 df["HORAS_DIFERENCIA"] = (df["FECHA_REINGRESO"] - df["FECHA_ALTA"]).dt.total_seconds() / 3600
@@ -184,7 +193,7 @@ class Programa(State):
                 numero_reingresos = (df["HORAS_DIFERENCIA"] > 48).sum()
 
                 #Contar altas
-                numero_alta = (df["FECHA_ALTA"] != "").sum()
+                numero_alta = (df["FECHA_ALTA"].notna()).sum()
 
                 valor_final = (numero_reingresos/numero_alta)*100 if numero_alta != 0 else 0.0
                 resultado.append(float(valor_final))
@@ -197,7 +206,7 @@ class Programa(State):
                 }
                 self.csv_metodo(
                     data_resumen, ["FECHA_ALTA","FECHA_REINGRESO"], [df["FECHA_ALTA"], df["FECHA_REINGRESO"]], 
-                    f"indicador_reingresos_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    f"indicador_reingresos_{self.encontrar_año(nombre)}.csv"
                 )
                 
         except ValueError as e:
@@ -206,7 +215,6 @@ class Programa(State):
         self.final(resultado, "Reingresos no programados: Es un indicador de resultado que mide la proporción de pacientes que, " \
         "tras haber sido dados de alta de la UCI a una planta de hospitalización, " \
         "deben ser reingresados de forma imprevista en la UCI en un periodo de 48 horas.")
-
 
     def incidencia_de_barotrauma(self):
         resultado = self.limpieza()
@@ -226,7 +234,7 @@ class Programa(State):
                 
                 #Logica de calculo
                 #Conversion a horas
-                horas_vmi = df["DIAS_VMI"].fillna(0)*24
+                horas_vmi = pd.to_numeric(df["DIAS_VMI"], errors="coerce")*24
 
                 numero_barotrauma = (df["BAROTRAUMA"].fillna(False) == True).sum()
 
@@ -243,8 +251,8 @@ class Programa(State):
                     "INDICE_BAROTRAUMA": [f"Baro: {float(valor_final)}"]
                 }
                 self.csv_metodo(
-                    data_resumen, ["BAROTRAUMA","DIAS_VMI"], [df["BAROTRAUMA"].fillna(False), df["DIAS_VMI"].fillna("0")], 
-                    f"indicador_barotrauma_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    data_resumen, ["BAROTRAUMA","DIAS_VMI"], [df["BAROTRAUMA"].fillna(False), (horas_vmi/24)], 
+                    f"indicador_barotrauma_{self.encontrar_año(nombre)}.csv"
                 )
                 
         except ValueError as e:
@@ -252,7 +260,6 @@ class Programa(State):
         
         self.final(resultado, "Indice de barotrauma: Es un indicador de seguridad y proceso que mide la aparición de complicaciones " \
         "pulmonares relacionadas con el daño físico provocado por la ventilación mecánica.")
-
 
     def posicion_semiincorporada_VMI(self):
         resultado = self.limpieza()
@@ -271,8 +278,8 @@ class Programa(State):
                     raise ValueError(f"Falta la columna 'Dias VMI' en {nombre}")
                 
                 #Logica de calculo
-                dias_vmi = df["DIAS_VMI"].fillna(0)
-                inclinacion = df["GRADOS_INCLINACION"].fillna(0)
+                dias_vmi = pd.to_numeric(df["DIAS_VMI"], errors="coerce")
+                inclinacion = pd.to_numeric(df["GRADOS_INCLINACION"], errors="coerce")
 
                 dias_vmi_totales = dias_vmi[dias_vmi > 0].sum()
                 #Inclinacion mayor a 20 y que tengan dias de vmi
@@ -289,7 +296,7 @@ class Programa(State):
                 }
                 self.csv_metodo(
                     data_resumen, ["GRADOS_INCLINACION","DIAS_VMI"], [inclinacion, dias_vmi], 
-                    f"indicador_posicion_semiincorporada_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    f"indicador_posicion_semiincorporada_{self.encontrar_año(nombre)}.csv"
                 )
                 
         except ValueError as e:
@@ -313,7 +320,7 @@ class Programa(State):
                     raise ValueError(f"Falta la columna 'UPP' en {nombre}")
             
                 #Logica de calculo
-                upp = df["UPP"].fillna(0)
+                upp = df["UPP"].fillna(False)
 
                 #Pacientes que tengan ulceras por presion
                 total_upp = upp[upp == True].sum()
@@ -330,7 +337,7 @@ class Programa(State):
                 }
                 self.csv_metodo(
                     data_resumen, ["UPP"], [upp], 
-                    f"indicador_upp_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    f"indicador_upp_{self.encontrar_año(nombre)}.csv"
                 )
                 
         except ValueError as e:
@@ -358,7 +365,7 @@ class Programa(State):
             
                 #Logica de calculo
                 sedacion = df["VENTANA_DE_SEDACION"].fillna(False)
-                dias_vmi = df["DIAS_VMI"].fillna(0)
+                dias_vmi = pd.to_numeric(df["DIAS_VMI"], errors="coerce")
 
                 #Simplemente que tengan sedacion y dias de vmi necesito otro tipo de datos para hacerlo correctamente
                 total_sedacion = dias_vmi[(sedacion == True) & (dias_vmi > 0)].sum()
@@ -375,7 +382,7 @@ class Programa(State):
                 }
                 self.csv_metodo(
                     data_resumen, ["VENTANA_DE_SEDACION", "DIAS_VMI"], [sedacion, dias_vmi], 
-                    f"indicador_sedacion_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    f"indicador_sedacion_{self.encontrar_año(nombre)}.csv"
                 )
                 
         except ValueError as e:
@@ -425,7 +432,7 @@ class Programa(State):
                 }
                 self.csv_metodo(
                     data_resumen, ["PROFILAXIS_TVP", "TVP"], [profilaxis, tvp], 
-                    f"indicador_tvp_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    f"indicador_tvp_{self.encontrar_año(nombre)}.csv"
                 )
                 
         except ValueError as e:
@@ -452,7 +459,7 @@ class Programa(State):
                     raise ValueError(f"Falta la columna 'Tratamiento insulina' en {nombre}")
             
                 #Logica de calculo
-                glucemia = df["GLUCEMIA"].fillna(0)
+                glucemia = pd.to_numeric(df["GLUCEMIA"], errors="coerce")
                 insulina = df["TRATAMIENTO_INSULINA"].fillna(False)
 
                 #Aquellos que tengas insulina y glucemia > 150 a la vez
@@ -471,7 +478,7 @@ class Programa(State):
                 }
                 self.csv_metodo(
                     data_resumen, ["GLUCEMIA", "TRATAMIENTO_INSULINA"], [glucemia, insulina], 
-                    f"indicador_glucemia_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    f"indicador_glucemia_{self.encontrar_año(nombre)}.csv"
                 )
                 
         except ValueError as e:
@@ -530,15 +537,15 @@ class Programa(State):
                 #Logica de calculo
                 sepsis = df["SEPSIS"].fillna(False)
                 ss = df["SHOCK_SEPTICO"].fillna(False)
-                pam_ingreso = df["PAM_INGRESO"].fillna(0)
-                pam_6 = df["PAM_6H"].fillna(0)
-                pam_24 = df["PAM_24H"].fillna(0)
-                diuresis_ingreso = df["DIURESIS_INGRESO"].fillna(0)
-                diuresis_6 = df["DIURESIS_6H"].fillna(0)
-                diuresis_24 = df["DIURESIS_24H"].fillna(0)
-                lactato_ingreso = df["LACTATO_INGRESO"].fillna(0)
-                lactato_6 = df["LACTATO_6H"].fillna(0)
-                lactato_24 = df["LACTATO_24H"].fillna(0)
+                pam_ingreso = pd.to_numeric(df["PAM_INGRESO"], errors="coerce")
+                pam_6 = pd.to_numeric(df["PAM_6H"], errors="coerce")
+                pam_24 = pd.to_numeric(df["PAM_24H"], errors="coerce")
+                diuresis_ingreso = pd.to_numeric(df["DIURESIS_INGRESO"], errors="coerce")
+                diuresis_6 = pd.to_numeric(df["DIURESIS_6H"], errors="coerce")
+                diuresis_24 = pd.to_numeric(df["DIURESIS_24H"], errors="coerce")
+                lactato_ingreso = pd.to_numeric(df["LACTATO_INGRESO"], errors="coerce")
+                lactato_6 = pd.to_numeric(df["LACTATO_6H"], errors="coerce")
+                lactato_24 = pd.to_numeric(df["LACTATO_24H"], errors="coerce")
                 alta = df["FECHA_ALTA"].fillna("")
             
                 #Calculamos la resucitacion con la PAM, Diuresis y el Lactato mayores a un numero o cambio del 50% en lactato
@@ -585,7 +592,7 @@ class Programa(State):
                     [sepsis,ss,pam_ingreso,pam_6,pam_24,diuresis_ingreso,diuresis_6,
                      diuresis_24,lactato_ingreso,lactato_6,lactato_24,
                      lactato_ingreso.astype(str) + " - " + lactato_6.astype(str),lactato_6.astype(str) + " - " + lactato_24.astype(str),alta], 
-                    f"indicador_resucitacion_precoz_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    f"indicador_resucitacion_precoz_{self.encontrar_año(nombre)}.csv"
                 )
                 
         except ValueError as e:
@@ -630,7 +637,7 @@ class Programa(State):
                 }
                 self.csv_metodo(
                     data_resumen, ["LISTADO_DE_VERIFICACION", "TRASLADO_INTRAHOSPITALARIO"], [listado, traslado], 
-                    f"indicador_listado_traslado_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    f"indicador_listado_traslado_{self.encontrar_año(nombre)}.csv"
                 )
                 
         except ValueError as e:
@@ -660,16 +667,19 @@ class Programa(State):
                     raise ValueError(f"Falta la columna 'Desescalada Antibiotica' en {nombre}")
             
                 #Logica de calculo
-                terapia_in = df["ANTIBIOTERAPIA_INGRESO"].fillna("Ninguno")
-                terapia_fin = df["ANTIBIOTERAPIA_24H"].fillna("Ninguno")
+                terapia_in = df["ANTIBIOTERAPIA_INGRESO"].fillna("ninguno").str.lower()
+                terapia_fin = df["ANTIBIOTERAPIA_24H"].fillna("ninguno").str.lower()
                 desescalada = df["DESESCALADA_ANTIBIOTICA"].fillna(False)
 
+                #Palabras a excluir
+                excluir = ["ninguno", "nada", "no", ""]
+
                 #Aquellos que tenga terapia
-                num_infeccion = ((terapia_in != "Ninguno")&(terapia_fin != "Ninguno")).sum()
+                num_infeccion = (~terapia_in.isin(excluir) & ~terapia_fin.isin(excluir)).sum()
 
                 def verificar_coincidencia(row):
-                    #"Ninguno" no es coincidencia válida
-                    if row['in'] == "Ninguno" or row['fin'] == "Ninguno":
+                    #"ninguno" no es coincidencia válida
+                    if row['in'] in excluir or row['fin'] in excluir:
                         return False
                     
                     #Convertimos los strings en listas
@@ -683,15 +693,15 @@ class Programa(State):
                 df_temp = pd.DataFrame({'in': terapia_in, 'fin': terapia_fin})
                 trat = df_temp.apply(verificar_coincidencia, axis=1)
                 #Aquellos que hagan desescalada y coincidan sus farmacos
-                trat_adecuado = (desescalada & (terapia_in != "Ninguno") & (terapia_fin != "Ninguno") & trat).sum()
+                trat_adecuado = (desescalada & ~terapia_in.isin(excluir) & ~terapia_fin.isin(excluir) & trat).sum()
                     
                 valor_final = (trat_adecuado/num_infeccion)*100 if num_infeccion != 0 else 0.0
                 resultado.append(float(valor_final))
 
                 data_resumen = {
                     "TRATAMIENTO_ADECUADO": ["RESUMEN GLOBAL tratamiento empirico"],
-                    "ANTIBIOTERAPIA_INGRESO": [f"Total: {(terapia_in != "Ninguno").sum()}"],
-                    "ANTIBIOTERAPIA_24H": [f"Total: {(terapia_fin != "Ninguno").sum()}"],
+                    "ANTIBIOTERAPIA_INGRESO": [f"Total: {(~terapia_in.isin(excluir)).sum()}"],
+                    "ANTIBIOTERAPIA_24H": [f"Total: {(~terapia_fin.isin(excluir)).sum()}"],
                     "DESESCALADA_ANTIBIOTICA": [f"Total: {desescalada.sum()}"],
                     "TOTAL_INFECCIONES": [f"Total: {num_infeccion}"],
                     "TOTAL_TRAT_ADECUADO": [f"Total: {trat_adecuado}"],
@@ -700,7 +710,7 @@ class Programa(State):
                 self.csv_metodo(
                     data_resumen, ["ANTIBIOTERAPIA_INGRESO","ANTIBIOTERAPIA_24H", "DESESCALADA_ANTIBIOTICA"], 
                     [terapia_in, terapia_fin, desescalada], 
-                    f"indicador_trat_adecuado_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    f"indicador_trat_adecuado_{self.encontrar_año(nombre)}.csv"
                 )
                 
         except ValueError as e:
@@ -727,8 +737,8 @@ class Programa(State):
                     raise ValueError(f"Falta la columna 'Dias VMI' en {nombre}")
             
                 #Logica de calculo
-                nav = df["EPISODIOS_NAV"].fillna(0)
-                vmi = df["DIAS_VMI"].fillna(0)
+                nav = pd.to_numeric(df["EPISODIOS_NAV"], errors="coerce")
+                vmi = pd.to_numeric(df["DIAS_VMI"], errors="coerce")
 
                 #Simplemente hay que hacer el calculo
                 valor_final = (nav.sum()/vmi.sum())*1000 if vmi.sum() != 0 else 0.0
@@ -742,7 +752,7 @@ class Programa(State):
                 }
                 self.csv_metodo(
                     data_resumen, ["EPISODIOS_NAV", "DIAS_VMI"], [nav, vmi], 
-                    f"indicador_nav_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    f"indicador_nav_{self.encontrar_año(nombre)}.csv"
                 )
                 
         except ValueError as e:
@@ -788,7 +798,7 @@ class Programa(State):
                 }
                 self.csv_metodo(
                     data_resumen, ["REGISTRO_INTUBACIONES", "EXTUBACION_PROGRAMADA"], [intuba, extuba], 
-                    f"indicador_reintubaciones_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    f"indicador_reintubaciones_{self.encontrar_año(nombre)}.csv"
                 )
                 
         except ValueError as e:
@@ -831,7 +841,7 @@ class Programa(State):
                 self.csv_metodo(
                     data_resumen, ["ESPECIALIDAD_DE_INGRESO", "ESPECIALIDAD", "TOTAL_POR_ESPECIALIDAD", "INDICE_ESPECIALIDAD"], 
                     [especialidad, df_temp["nombre"], df_temp["conteo"] * len(df), df_temp["conteo"] * 100], 
-                    f"indicador_especialidad_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    f"indicador_especialidad_{self.encontrar_año(nombre)}.csv"
                 )
                 
         except ValueError as e:
@@ -913,7 +923,7 @@ class Programa(State):
                     data_resumen, ["CORTICOIDES", "ANTECEDENTES_HEMORRAGIA_GI", "COAGULOPATIA", 
                                    "INSUFICIENCIA_RENAL", "INSUFICIENCIA_HEPATICA", "FECHA_INICIO_NE", "PROFILAXIS_TVP"], 
                                   [corticoides, hemorragia, coagulopatia, renal, hepatica, ne, profilaxis], 
-                    f"indicador_profilaxis_ulceras_NE_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    f"indicador_profilaxis_ulceras_NE_{self.encontrar_año(nombre)}.csv"
                 )
                 
         except ValueError as e:
@@ -971,7 +981,7 @@ class Programa(State):
                 self.csv_metodo(
                     data_resumen, ["RASS", "BIS","RASS_LIGERA","RASS_PROFUNDA","RASS_PARALIZADO","BIS_PARALIZADO"], 
                     [rass,bis,rass[sedacion_ligera],rass[sedacion_profunda], rass[sedacion_paralizado],bis[sedacion_paralizado]], 
-                    f"indicador_sedacion_adecuada_{nombre.split(".")[0][len(nombre)-8:]}.csv"
+                    f"indicador_sedacion_adecuada_{self.encontrar_año(nombre)}.csv"
                 )
                 
         except ValueError as e:
@@ -979,6 +989,301 @@ class Programa(State):
         
         self.final(resultado, "Sedación adecuada: Sedación adecuada es el mantenimiento de " \
         "los resultados de las escalas de sedación dentro del rango prescrito (objetivo) para ese enfermo en particular.")
+
+    def ingresos_urgentes(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
+
+                if "INGRESO_POR_URGENCIA" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Ingreso por Urgencia' en {nombre}")
+                
+                #Logica de calculo
+                urgencia = df["INGRESO_POR_URGENCIA"].fillna(False)
+
+                #Total de urgentes y de pacientes
+                total_urgentes = (urgencia).sum()
+                total = len(df)
+
+
+                valor_final = (total_urgentes/total)*100 if total != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "INGRESOS_URGENTES": ["RESUMEN GLOBAL ingresos urgentes"],
+                    "INGRESO_POR_URGENCIA": [f"Total: {total_urgentes}"],
+                    "PACIENTES_TOTALES": [f"Total: {total}"],
+                    "INDICADOR_FINAL": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["INGRESOS_URGENTES"], [urgencia], 
+                    f"indicador_ingreso_urgente_{self.encontrar_año(nombre)}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Porcentaje de ingresos urgentes: Indicador de estructura y proceso que " \
+        "mide la proporción de pacientes que ingresan en el Servicio de Medicina Intensiva (SMI) de forma no programada. " \
+        "Estos ingresos suelen proceder de Urgencias, plantas de hospitalización (tras un deterioro agudo) o tras cirugías de emergencia.")
+
+    def adversos_traslado(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
+
+                if "TRASLADO_INTRAHOSPITALARIO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Traslado Intrahospitalario' en {nombre}")
+                
+                if "EVENTOS_ADVERSOS_TRASLADO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Eventos Adversos Traslado' en {nombre}")
+                
+                #Logica de calculo
+                traslado = df["TRASLADO_INTRAHOSPITALARIO"].fillna(False)
+                adverso = df["EVENTOS_ADVERSOS_TRASLADO"].fillna("Ninguno")
+
+                #Total de traslados
+                total_traslado = traslado.sum()
+                #Total de eventos adversos
+                total_adversos = (traslado&(adverso != "Ninguno")).sum()
+
+
+                valor_final = (total_adversos/total_traslado)*100 if total_traslado != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "EVENTO_ADVERSO": ["RESUMEN GLOBAL evento adverso traslado"],
+                    "TRASLADO_INTRAHOSPITALARIO": [f"Total: {total_traslado}"],
+                    "EVENTOS_ADVERSOS_TRASLADO": [f"Total: {total_adversos}"],
+                    "INDICADOR_FINAL": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["TRASLADO_INTRAHOSPITALARIO", "EVENTOS_ADVERSOS_TRASLADO"], [traslado,adverso], 
+                    f"indicador_adverso_traslado_{self.encontrar_año(nombre)}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Eventos adversos durante el traslado: Es un indicador de seguridad que mide la incidencia de " \
+        "incidentes o accidentes que ocurren durante el traslado de un paciente crítico fuera de la UCI (traslados intrahospitalarios), " \
+        "ya sea para pruebas diagnósticas (TAC, Resonancia) o intervenciones (Quirófano).")
+
+    def ne_precoz(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
+
+                if "FECHA_INICIO_NE" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Fecha Inicio NE' en {nombre}")
+                
+                if "FECHA_INGRESO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Fecha Ingreso' en {nombre}")
+                
+                #Logica de calculo
+                #Conversion a fechas
+                ne = pd.to_datetime(df["FECHA_INICIO_NE"], format="%d/%m/%Y", errors="coerce")
+                ingreso = pd.to_datetime(df["FECHA_INGRESO"], format="%d/%m/%Y", errors="coerce")
+
+                #Usamos total_seconds() / 3600 para que si pasan 3 dias, nos de 72 horas.
+                diferencia = (ne - ingreso).dt.total_seconds() / 3600
+
+                #Filtramos donde la diferencia sea menor a 48 y sumamos los casos
+                precoz = ((diferencia >= 0) & (diferencia <= 48)).sum()
+                total_ne = (ne.notna()).sum()
+
+
+                valor_final = (precoz/total_ne)*100 if total_ne != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "NE_PRECOZ": ["RESUMEN GLOBAL nutricion enteral precoz"],
+                    "FECHA_INGRESO": [f"Total: {(ingreso.notna()).sum()}"],
+                    "FECHA_INICIO_NE": [f"Total: {total_ne}"],
+                    "DIFERENCIA": [f"Total: {precoz}"],
+                    "INDICADOR_FINAL": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["FECHA_INGRESO", "FECHA_INICIO_NE","DIFERENCIA"], [ingreso,ne,diferencia], 
+                    f"indicador_ne_precoz_{self.encontrar_año(nombre)}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Nutrición enteral precoz: Es un indicador de proceso que mide la capacidad " \
+        "del servicio para iniciar el soporte nutricional por vía digestiva (enteral) en las primeras 48 horas desde " \
+        "el ingreso del paciente crítico, siempre que no existan contraindicaciones.")
+
+    def sobretransfusion_hematies(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
+
+                if "ACTOS_TRANSFUSIONALES" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Actos Transfusionales' en {nombre}")
+                
+                if "SANGRADO_ACTIVO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Sangrado Activo' en {nombre}")
+                
+                if "CANTIDAD_TRANSFUSION_DIA" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Cantidad Transfusion Dia' en {nombre}")
+                
+                #Logica de calculo
+                trans = df["ACTOS_TRANSFUSIONALES"].fillna(False)
+                sangrado = df["SANGRADO_ACTIVO"].fillna(False)
+                cantidad_trans = pd.to_numeric(df["CANTIDAD_TRANSFUSION_DIA"], errors="coerce")
+
+                #Actos trasnfusionales, sin sangrado en los que la cantidad de CH > 1
+                numerador = (trans&~sangrado&(cantidad_trans > 1)).sum()
+
+                #Actos trasnfusionales, sin sangrado
+                denominador = (trans&~sangrado).sum()
+
+                valor_final = (numerador/denominador)*100 if denominador != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "SOBRETRANSFUSION_HEMATIES": ["RESUMEN GLOBAL sobretransfusion hematies"],
+                    "ACTOS_TRANSFUSIONALES": [f"Total: {trans.sum()}"],
+                    "SANGRADO_ACTIVO": [f"Total: {~sangrado.sum()}"],
+                    "CANTIDAD_TRANSFUSION_DIA": [f"Total: {(cantidad_trans > 1).sum()}"],
+                    "TRANS_SIN_SANGRADO_CH>1": [f"Total: {numerador}"],
+                    "TRANS_SIN_SANGRADO": [f"Total: {denominador}"],
+                    "INDICADOR_FINAL": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["ACTOS_TRANSFUSIONALES", "SANGRADO_ACTIVO","CANTIDAD_TRANSFUSION_DIA"], [trans,sangrado,cantidad_trans], 
+                    f"indicador_sobretransfusion_{self.encontrar_año(nombre)}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Sobretransfusión de hematies: Es un indicador de proceso que mide el porcentaje de " \
+        "pacientes que reciben una transfusión de concentrados de hematíes (CH) cuando se trasfunde " \
+        "más de una unidad sin reevaluar al paciente.")
+    
+    def retirada_accidental(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
+
+                if "EXTUBACION_POR_MANIOBRAS" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Extubacion por Maniobras' en {nombre}")
+                
+                if "DIAS_VMI" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Dias VMI' en {nombre}")
+                
+                #Logica de calculo
+                extubacion = df["EXTUBACION_POR_MANIOBRAS"].fillna(False)
+                dias = pd.to_numeric(df["DIAS_VMI"], errors="coerce")
+
+                #Numero extubaciones
+                num_extubaciones = extubacion.sum()
+                #Numero de TET = VMI
+                num_vmi = dias.sum()
+
+                valor_final = (num_extubaciones/num_vmi)*1000 if num_vmi != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "RETIRADA_ACCIDENTAL": ["RESUMEN GLOBAL retirada accidental por maniobras"],
+                    "EXTUBACION_POR_MANIOBRAS": [f"Total: {num_extubaciones}"],
+                    "DIAS_VMI": [f"Total: {num_vmi}"],
+                    "INDICADOR_FINAL": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["EXTUBACION_POR_MANIOBRAS", "DIAS_VMI"], [extubacion,dias], 
+                    f"indicador_retirada_accidental_{self.encontrar_año(nombre)}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "TET por maniobras: Mide el número de episodios de salida no planificada del " \
+        "tubo endotraqueal (TET) en pacientes sometidos a ventilación mecánica. Se considera una de las complicaciones más graves de " \
+        "la vía aérea en la UCI debido al riesgo de hipoxia, parada cardiorrespiratoria o trauma laríngeo")
+
+    def tabla_resumen(self):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = pd.read_csv(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
+
+                if "ACTOS_TRANSFUSIONALES" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Actos Transfusionales' en {nombre}")
+                
+                if "SANGRADO_ACTIVO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Sangrado Activo' en {nombre}")
+                
+                if "CANTIDAD_TRANSFUSION_DIA" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Cantidad Transfusion Dia' en {nombre}")
+                
+                #Logica de calculo
+                trans = df["ACTOS_TRANSFUSIONALES"].fillna(False)
+                sangrado = df["SANGRADO_ACTIVO"].fillna(False)
+                cantidad_trans = df["CANTIDAD_TRANSFUSION_DIA"].fillna(0)
+
+                #Actos trasnfusionales, sin sangrado en los que la cantidad de CH > 1
+                numerador = (trans&~sangrado&(cantidad_trans > 1)).sum()
+
+                #Actos trasnfusionales, sin sangrado
+                denominador = (trans&~sangrado).sum()
+
+                valor_final = (numerador/denominador)*1000 if denominador != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "SOBRETRANSFUSION_HEMATIES": ["RESUMEN GLOBAL sobretransfusion hematies"],
+                    "ACTOS_TRANSFUSIONALES": [f"Total: {trans.sum()}"],
+                    "SANGRADO_ACTIVO": [f"Total: {~sangrado.sum()}"],
+                    "CANTIDAD_TRANSFUSION_DIA": [f"Total: {(cantidad_trans > 1).sum()}"],
+                    "TRANS_SIN_SANGRADO_CH>1": [f"Total: {numerador}"],
+                    "TRANS_SIN_SANGRADO": [f"Total: {denominador}"],
+                    "INDICADOR_FINAL": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["ACTOS_TRANSFUSIONALES", "SANGRADO_ACTIVO","CANTIDAD_TRANSFUSION_DIA"], [trans,sangrado,cantidad_trans], 
+                    f"indicador_sobretransfusion_{self.encontrar_año(nombre)}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Retirada accidental del tubo endotraqueal:")
+
+
+        
     
     
    

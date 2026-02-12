@@ -55,7 +55,12 @@ def seleccion(icon: str) -> rx.Component:
                             rx.menu.item("Especialidad con mayor ingreso", on_click=Programa.especialidad_ingreso),
                             rx.menu.item("Profilaxis de la ulcera por estrés en enfermos con NE", on_click=Programa.profilaxis_ulcera_enfermos_NE),
                             rx.menu.item("Sedación adecuada", on_click=Programa.sedacion_adecuada),
-                            rx.menu.item("", on_click=Programa.sedacion_adecuada),
+                            rx.menu.item("Ingresos urgentes", on_click=Programa.ingresos_urgentes),
+                            rx.menu.item("Eventos adversos durante el traslado intrahospitalario", on_click=Programa.adversos_traslado),
+                            rx.menu.item("Nutrición enteral precoz", on_click=Programa.ne_precoz),
+                            rx.menu.item("Sobretransfusión de concentrados de hematies", on_click=Programa.sobretransfusion_hematies),
+                            rx.menu.item("Retirada accidental del tubo endotraqueal", on_click=Programa.retirada_accidental),
+                            rx.menu.item("Tabla resumen", on_click=Programa.tabla_resumen),
 
                             #Aseguramos que el menu flote por encima de todo
                             z_index="2000", 
