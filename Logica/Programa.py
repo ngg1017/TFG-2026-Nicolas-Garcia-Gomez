@@ -4,25 +4,21 @@ from .State import State
 import unicodedata
 import re
 
-"""
-Implementar lista de exclusion igual que: tratamiento_empirico_infeccion "Ninguno"
-Ver como hago lo mismo en fechas 
-REINTUBACIONES QUE CONTENGA MAS DE UNA
-"""
-
 #Hereda de mi clase State
 class Programa(State):
     datos_final: list[dict]
     csv_final: list[dict]
     mostrar_resultado: bool
+    drawer_abierto: bool
+    ind_especi: bool
     texto: str
     
     #Metodo que nos permite encontrar el año del documento
-    def encontrar_año(self, nombre):
+    def encontrar_año(self, nombre: str):
         return re.findall(r"\d{4}", nombre)[0] if re.findall(r"\d{4}", nombre) else "0000"
      
     #Metodo para normalizar las columnas de los dataframes
-    def normalizar_frame(self, columna):
+    def normalizar_frame(self, columna: str):
         #Quita los caracteres extraños y las tildes
         columna_unicode = unicodedata.normalize("NFD", columna.strip()).encode("ascii", "ignore").decode("utf-8")
         
@@ -38,7 +34,7 @@ class Programa(State):
         #Creamos el diccionatio dentro de datos_final que se usa en el grafico ordenado por años
         #Ordenamos la lista de diccionarios csv_final por años para que se muestren y descarguen por orden 
         self.datos_final = [
-            {"name": self.encontrar_año(nombre), "valor": round(valor, 4)} 
+            {"name": self.encontrar_año(nombre), "valor": round(valor, 4) if self.ind_especi == False else valor} 
             for nombre, valor in zip(self.nombres_archivos, resultado_final)
         ]
         self.datos_final.sort(key= lambda x: x["name"])
@@ -47,9 +43,15 @@ class Programa(State):
     #Metodo para cerrar la ventana flotante
     def cerrar_ventana(self):
         self.mostrar_resultado = False
+        self.ind_especi = False
+    
+    #Metodo para abrir el drawer
+    def manejo_drawer(self, bandera: bool):
+        self.drawer_abierto = bandera
     
     #Metodo para limpiar todas las variables necesarias e instanciar la lista de resultados
     def limpieza(self):
+        self.manejo_drawer(False)
         self.datos_final = []
         self.texto = ""
         self.csv_final = []
@@ -64,7 +66,7 @@ class Programa(State):
         return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
     
     #Metodo que crea el csv que se va a descargar con las columnas y sus transformaciones correspondientes de cada indicador
-    def csv_metodo(self,resumen: dict, nombres: list[str], datos: list[pd.DataFrame], nombre_archivo):
+    def csv_metodo(self,resumen: dict, nombres: list[str], datos: list[pd.DataFrame], nombre_archivo: str):
         #Creamos el resumen (la fila de arriba)
         df_resumen = pd.DataFrame(resumen)
 
@@ -546,7 +548,7 @@ class Programa(State):
                 lactato_ingreso = pd.to_numeric(df["LACTATO_INGRESO"], errors="coerce")
                 lactato_6 = pd.to_numeric(df["LACTATO_6H"], errors="coerce")
                 lactato_24 = pd.to_numeric(df["LACTATO_24H"], errors="coerce")
-                alta = df["FECHA_ALTA"].fillna("")
+                alta = pd.to_datetime(df["FECHA_ALTA"], format="%d/%m/%Y", errors="coerce")
             
                 #Calculamos la resucitacion con la PAM, Diuresis y el Lactato mayores a un numero o cambio del 50% en lactato
                 resucitacion_ingreso = ((pam_ingreso > 65)&(diuresis_ingreso > 0.5)&((lactato_ingreso > 0.9) & (lactato_ingreso < 1.1)))
@@ -557,7 +559,7 @@ class Programa(State):
                 numerador = ((sepsis|ss)&(resucitacion_ingreso|resucitacion_6|resucitacion_24)).sum()
 
                 #Enfermos que tengan sepsis, SS y esten dados de alta
-                denominador = ((sepsis|ss)&(alta != "")).sum()
+                denominador = ((sepsis|ss)&(alta.notna())).sum()
 
                 valor_final = (numerador/denominador)*100 if denominador != 0 else 0.0
                 resultado.append(float(valor_final))
@@ -583,7 +585,7 @@ class Programa(State):
                     "LACTATO_24H": [f"Total: {((lactato_24 > 0.9) & (lactato_24 < 1.1)).sum()}"],
                     "LACTATO_VARIACION_6": [f"Total: {((lactato_ingreso*0.5) >= lactato_6).sum()}"],
                     "LACTATO_VARIACION_24": [f"Total: {((lactato_6*0.5) >= lactato_24).sum()}"],
-                    "FECHA_ALTA": [f"Total: {(alta != "").sum()}"]
+                    "FECHA_ALTA": [f"Total: {(alta.notna()).sum()}"]
                 }
                 self.csv_metodo(
                     data_resumen, ["SEPSIS","SHOCK_SEPTICO","PAM_INGRESO","PAM_6H","PAM_24H","DIURESIS_INGRESO","DIURESIS_6H",
@@ -779,20 +781,20 @@ class Programa(State):
                     raise ValueError(f"Falta la columna 'Extubacion Programada' en {nombre}")
             
                 #Logica de calculo
-                intuba = df["REGISTRO_INTUBACIONES"].fillna("")
+                intuba = df["REGISTRO_INTUBACIONES"].fillna(pd.NA)
                 extuba = df["EXTUBACION_PROGRAMADA"].fillna(False)
 
-                #Aquellos que contengan mas de un registro en intubaciones
-                reintubaciones = (intuba.str.contains(",", na=False)).sum()
-                num_extuba = ((intuba != "")&(extuba == True)).sum()
+                #Aquellos que contengan mas de un registro en intubaciones busco varios caracteres con expresiones regulares
+                reintubaciones = (intuba.str.contains(r",|-|y|;", na=False)).sum()
+                num_extuba = ((intuba.notna())&(extuba == True)).sum()
 
                 valor_final = (reintubaciones/num_extuba)*100 if num_extuba != 0 else 0.0
                 resultado.append(float(valor_final))
 
                 data_resumen = {
-                    "REGISTRO_INTUBACIONES": ["RESUMEN GLOBAL nuemonia asociada a VMI"],
+                    "REGISTRO_INTUBACIONES": ["RESUMEN GLOBAL reintubaciones"],
                     "EXTUBACION_PROGRAMADA": [f"Total: {num_extuba}"],
-                    "TOTAL_INTUBACIONES": [f"Total: {(intuba != "").sum()}"],
+                    "TOTAL_INTUBACIONES": [f"Total: {(intuba.notna()).sum()}"],
                     "TOTAL_REINTUBACIONES": [f"Total: {reintubaciones}"],
                     "INDICE_REINTUBACIONES": [f"Total: {float(valor_final)}"]
                 }
@@ -823,12 +825,19 @@ class Programa(State):
             
                 #Logica de calculo
                 especialidad = df["ESPECIALIDAD_DE_INGRESO"].fillna("No especificada")
+                #Metodo de pandas que agrupa y contabiliza las apariciones(normalizadas)
                 valores = especialidad.value_counts(normalize=True)
 
-                #Me salto el metodo de parsear los datos pero se muestran en el grafico mal
+                #Esta lista la creamos para guardar todas las especialidades de un año
+                lista_dic = []
                 for (nomb,valor) in zip (valores.index, valores.values):
-                    self.datos_final.append({"name": nomb, "valor": valor * 100})
+                    #Creamos un diccionario con la especialidad y su valor
+                    diccionario = {"especialidad": f"{nomb}_{self.encontrar_año(nombre)}", "indicador": round(float(valor * 100), 4)}
+                    lista_dic.append(diccionario)
+                #Introducimos la lista de diccionarios al resultado esto nos permite que cada año reciba una lista con sus indicadores
+                resultado.append(lista_dic)
                 
+                #Creamos un df con el metodo reset_index() para poder usarlos en el csv a descargar
                 df_temp = valores.reset_index()
                 df_temp.columns = ["nombre", "conteo"] 
 
@@ -847,14 +856,12 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        #Me salto el metodo final ya que hay variaciones en los datos
-        #Tengo que modificarlo de tal forma que me muestre las especialidades por año descaargandome solo por años
-        self.datos_final.sort(key= lambda x: x["name"])
-        self.csv_final.sort(key= lambda x: x["name"])
-        self.texto = "Especialidad con mayor ingreso:"
-        self.mostrar_resultado = True
-        return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
-
+        #Flag que nos permite identificar cuando se activa este indicador para modificar los graficos
+        self.ind_especi = True
+        self.final(resultado, "Especialidad con mayor ingreso: Identifica la especialidad médica o quirúrgica que genera " \
+        "el mayor número de ingresos en el Servicio de Medicina Intensiva (SMI). Esto es fundamental para la planificación de " \
+        "recursos, la formación del personal y la creación de protocolos específicos.")
+        
     def profilaxis_ulcera_enfermos_NE(self):
         resultado = self.limpieza()
 
@@ -892,15 +899,15 @@ class Programa(State):
                 coagulopatia = df["COAGULOPATIA"].fillna(False)
                 renal = df["INSUFICIENCIA_RENAL"].fillna(False)
                 hepatica = df["INSUFICIENCIA_HEPATICA"].fillna(False)
-                ne = df["FECHA_INICIO_NE"].fillna("")
+                ne = pd.to_datetime(df["FECHA_INICIO_NE"], format="%d/%m/%Y", errors="coerce")
                 profilaxis = df["PROFILAXIS_TVP"].fillna(False)
 
                 #Calculamos la hgi que tiene los siguiente componentes
                 hgi = ((corticoides == True)|(hemorragia == True)|(coagulopatia == True)|(renal == True)|(hepatica == True))
                 #Donde haya HGI, nutricion enteral y no haya profilaxis
-                ne_profilaxis_hgi = ((hgi == True)&(ne != "")&(profilaxis == False)).sum()
+                ne_profilaxis_hgi = ((hgi == True)&(ne.notna())&(profilaxis == False)).sum()
                 #Donde haya HGI y nutricion enteral
-                ne_hgi = ((hgi == True)&(ne != "")).sum()
+                ne_hgi = ((hgi == True)&(ne.notna())).sum()
 
                 valor_final = (ne_profilaxis_hgi/ne_hgi)*100 if ne_hgi != 0 else 0.0
                 resultado.append(float(valor_final))
@@ -915,7 +922,7 @@ class Programa(State):
                     "COAGULOPATIA": [f"Total: {coagulopatia.sum()}"],
                     "INSUFICIENCIA_RENAL": [f"Total: {renal.sum()}"],
                     "INSUFICIENCIA_HEPATICA": [f"Total: {hepatica.sum()}"],
-                    "FECHA_INICIO_NE": [f"Total: {(ne != "").sum()}"],
+                    "FECHA_INICIO_NE": [f"Total: {(ne.notna()).sum()}"],
                     "PROFILAXIS_TVP": [f"Total: {profilaxis.sum()}"],
                     "INDICADOR_FINAL": [f"Total: {float(valor_final)}"]
                 }
@@ -1050,12 +1057,14 @@ class Programa(State):
                 
                 #Logica de calculo
                 traslado = df["TRASLADO_INTRAHOSPITALARIO"].fillna(False)
-                adverso = df["EVENTOS_ADVERSOS_TRASLADO"].fillna("Ninguno")
+                adverso = df["EVENTOS_ADVERSOS_TRASLADO"].fillna("ninguno").str.lower()
+                excluir = ["ninguno", "nada", "no", ""]
+                
 
                 #Total de traslados
                 total_traslado = traslado.sum()
                 #Total de eventos adversos
-                total_adversos = (traslado&(adverso != "Ninguno")).sum()
+                total_adversos = (traslado&~adverso.isin(excluir)).sum()
 
 
                 valor_final = (total_adversos/total_traslado)*100 if total_traslado != 0 else 0.0

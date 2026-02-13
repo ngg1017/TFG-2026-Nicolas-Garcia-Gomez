@@ -10,10 +10,11 @@ def seleccion(icon: str) -> rx.Component:
 
         #Al hacer click dispara la apertura del Drawer
         rx.drawer.trigger(
-            rx.button(icon, size="2", font_size="13px")
+            rx.button(icon, size="2", font_size="13px"),
+            on_click=Programa.manejo_drawer(True)
         ),
-        #Es la capa oscura que cubre el resto de la página cuando el Drawer se abre
-        rx.drawer.overlay(z_index="1000"),
+        #Es la capa oscura que cubre el resto de la pagina cuando el Drawer se abre
+        rx.drawer.overlay(),
         rx.drawer.portal(
 
             #El contenedor real del panel que se desliza desde la izquierda
@@ -21,7 +22,9 @@ def seleccion(icon: str) -> rx.Component:
                 rx.vstack(
 
                     #Boton que cierra el Drawer
-                    rx.drawer.close(rx.box(rx.button("Cerrar"))),
+                    rx.drawer.close(rx.box(rx.button(
+                        "Cerrar",
+                        on_click=Programa.manejo_drawer(False)))),
 
                     #Inicia el componente de menú desplegable lo uso en lugar de rx.select para evitar conflictos de capas dentro del Drawer
                     rx.menu.root(
@@ -63,7 +66,7 @@ def seleccion(icon: str) -> rx.Component:
                             rx.menu.item("Tabla resumen", on_click=Programa.tabla_resumen),
 
                             #Aseguramos que el menu flote por encima de todo
-                            z_index="2000", 
+                            z_index="500", 
                             background_color=Color.ACENTO.value,
                             color=TextoColor.SECUNDARIO.value,
                         ),
@@ -71,14 +74,13 @@ def seleccion(icon: str) -> rx.Component:
                     width="100%",
                 ),
                 #Difinimos el estilo del panel
-                z_index="1001", 
                 width="20em",
                 background_color=Color.PRIMARIO.value,
                 padding="2em",
-            ),
-            #Mantiene la jerarquia de capas del portal alineada con el overlay
-            z_index="1000",
+            )
         ),
         #Indica que el panel se abre desde la izquierda de la pantalla
         direction="left",
+        #Cuando le clicamos se cierre
+        open=Programa.drawer_abierto
     )
