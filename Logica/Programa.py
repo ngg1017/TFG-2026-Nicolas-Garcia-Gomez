@@ -59,11 +59,16 @@ class Programa(State):
         return resultado
     
     #Metodo que hace el proceso final de todos los metodos.
-    def final(self, datos: list[float], texto: str):
-        self.parsear_datos(datos)
-        self.texto = texto
-        self.mostrar_resultado = True
-        return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
+    def final(self, datos: list[float], texto: str, ocultar = False,):
+        if ocultar == False: 
+            self.parsear_datos(datos)
+            self.texto = texto
+            self.mostrar_resultado = True
+            return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
+        
+        #Si ocultar=True(tabla resumen) solo muestra la tabla resumen
+        else:
+            return self.parsear_datos(datos)
     
     #Metodo que crea el csv que se va a descargar con las columnas y sus transformaciones correspondientes de cada indicador
     def csv_metodo(self,resumen: dict, nombres: list[str], datos: list[pd.DataFrame], nombre_archivo: str):
@@ -112,7 +117,7 @@ class Programa(State):
         elif apache <= 34: return 0.75
         else: return 0.85
 
-    def mortalidad_estandarizada(self):
+    def mortalidad_estandarizada(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -162,11 +167,12 @@ class Programa(State):
             return rx.window_alert(f"Error crítico: {e}") 
         
         #Metodo que hace todas las operaciones finales para ahorrarnos algo de codigo.
+        #Le pasamos la bandera ocultar por si seleccionamos el resumen
         self.final(resultado, "Mortalidad estandarizada: Es un indicador de resultado que mide la calidad y efectividad " \
         "de un Servicio de Medicina Intensiva (SMI). " \
-        "Su propósito es corregir las limitaciones de la 'mortalidad cruda'.")
+        "Su propósito es corregir las limitaciones de la 'mortalidad cruda'.", ocultar=ocultar)
         
-    def reingresos_no_programados(self):
+    def reingresos_no_programados(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -216,9 +222,9 @@ class Programa(State):
         
         self.final(resultado, "Reingresos no programados: Es un indicador de resultado que mide la proporción de pacientes que, " \
         "tras haber sido dados de alta de la UCI a una planta de hospitalización, " \
-        "deben ser reingresados de forma imprevista en la UCI en un periodo de 48 horas.")
+        "deben ser reingresados de forma imprevista en la UCI en un periodo de 48 horas.", ocultar=ocultar)
 
-    def incidencia_de_barotrauma(self):
+    def incidencia_de_barotrauma(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -258,12 +264,12 @@ class Programa(State):
                 )
                 
         except ValueError as e:
-            return rx.window_alert(f"Error crítico: {e}") 
+            return rx.window_alert(f"Error crítico: {e}")
         
         self.final(resultado, "Indice de barotrauma: Es un indicador de seguridad y proceso que mide la aparición de complicaciones " \
-        "pulmonares relacionadas con el daño físico provocado por la ventilación mecánica.")
+        "pulmonares relacionadas con el daño físico provocado por la ventilación mecánica.", ocultar=ocultar)
 
-    def posicion_semiincorporada_VMI(self):
+    def posicion_semiincorporada_VMI(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -306,9 +312,9 @@ class Programa(State):
         
         self.final(resultado, "Posicion semiincorporada con VMI: Es un indicador de proceso que mide el porcentaje de pacientes " \
         "con ventilación mecánica invasiva que se mantienen con el cabecero de la cama elevado 20º, con el fin de prevenir " \
-        "la neumonía asociada a la ventilación")
+        "la neumonía asociada a la ventilación", ocultar=ocultar)
     
-    def incidencia_ulceras_presion(self):
+    def incidencia_ulceras_presion(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -347,9 +353,9 @@ class Programa(State):
         
         self.final(resultado, "Incidencias úlcera por presión UPP: Es un indicador de seguridad que mide el porcentaje " \
         "de pacientes que desarrollan lesiones en la piel o tejidos subyacentes por presión prolongada durante su estancia en " \
-        "la UCI, con el objetivo de evaluar la efectividad de las medidas de prevención y cuidados de enfermería")
+        "la UCI, con el objetivo de evaluar la efectividad de las medidas de prevención y cuidados de enfermería", ocultar=ocultar)
 
-    def valoracion_interrupcion_sedacion(self):
+    def valoracion_interrupcion_sedacion(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -396,9 +402,9 @@ class Programa(State):
         "Debido a la estructura de la base de datos, " \
         "donde la interrupción de la sedación se registra como una variable dicotómica (Sí/No) por paciente y no de forma diaria, el indicador " \
         "se ha calculado asumiendo que el cumplimiento del protocolo se extiende a la totalidad de los días de ventilación " \
-        "mecánica del paciente registrado.")
+        "mecánica del paciente registrado.", ocultar=ocultar)
     
-    def prevencion_enfermedad_tromboembolica(self):
+    def prevencion_enfermedad_tromboembolica(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -442,9 +448,9 @@ class Programa(State):
         
         self.final(resultado, "Prevención enfermedad tromboembólica: Es un indicador de proceso que mide el porcentaje de pacientes " \
         "que reciben profilaxis antitrombótica adecuada (farmacológica o mecánica), " \
-        "con el fin de evitar complicaciones graves como la trombosis venosa profunda o el tromboembolismo pulmonar.")
+        "con el fin de evitar complicaciones graves como la trombosis venosa profunda o el tromboembolismo pulmonar.", ocultar=ocultar)
 
-    def mantenimiento_niveles_glucemia(self):
+    def mantenimiento_niveles_glucemia(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -488,9 +494,9 @@ class Programa(State):
         
         self.final(resultado, "Mantenimiento de niveles de glucemia: Es un indicador de proceso que mide el porcentaje de pacientes en " \
         "los que se mantiene una glucemia capilar de 150, con el fin de evitar tanto la hiperglucemia como la hipoglucemia " \
-        "grave y reducir así la morbi-mortalidad asociada.")
+        "grave y reducir así la morbi-mortalidad asociada.", ocultar=ocultar)
 
-    def resucitacion_precoz_sepsis(self):
+    def resucitacion_precoz_sepsis(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -602,9 +608,9 @@ class Programa(State):
         
         self.final(resultado, "Resucitación precoz de la sepsis: Es un indicador de proceso que mide el porcentaje de " \
         "pacientes con sepsis o shock séptico que reciben el paquete de medidas de tratamiento inicial (administración de fluidos y " \
-        "vasopresores) en los plazos establecidos, con el fin de restaurar la perfusión tisular y reducir la mortalidad.")
+        "vasopresores) en los plazos establecidos, con el fin de restaurar la perfusión tisular y reducir la mortalidad.", ocultar=ocultar)
 
-    def traslado_intrahospitalario(self):
+    def traslado_intrahospitalario(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -647,9 +653,9 @@ class Programa(State):
         
         self.final(resultado, "Traslado intrahospitalario: Es un indicador de proceso que mide el porcentaje de traslados de pacientes " \
         "críticos fuera de la UCI (a pruebas de imagen o quirófano) realizados utilizando un listado de verificación (check-list) " \
-        "estandarizado, con el fin de minimizar los eventos adversos y garantizar la seguridad durante el transporte.")
+        "estandarizado, con el fin de minimizar los eventos adversos y garantizar la seguridad durante el transporte.", ocultar=ocultar)
 
-    def tratamiento_empirico_infeccion(self):
+    def tratamiento_empirico_infeccion(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -720,9 +726,10 @@ class Programa(State):
         
         self.final(resultado, "Tratamiento empírico adecuado: Es un indicador de proceso que mide el porcentaje de " \
         "pacientes con sospecha de infección grave que reciben una terapia antibiótica inicial ajustada a las guías clínicas y a los " \
-        "mapas de resistencias locales en menos de una hora, con el fin de reducir drásticamente la mortalidad y la disfunción orgánica")
+        "mapas de resistencias locales en menos de una hora, con el fin de reducir drásticamente la mortalidad y la " \
+        "disfunción orgánica", ocultar=ocultar)
 
-    def neumonia_asociada_vmi(self):
+    def neumonia_asociada_vmi(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -762,9 +769,9 @@ class Programa(State):
         
         self.final(resultado, "Neumonia asociada a VMI: Es un indicador de seguridad que mide el número de episodios " \
         "de neumonía desarrollados por cada 1.000 días de ventilación mecánica, con el " \
-        "fin de evaluar la eficacia de las medidas preventivas y reducir las complicaciones infecciosas del paciente crítico")
+        "fin de evaluar la eficacia de las medidas preventivas y reducir las complicaciones infecciosas del paciente crítico", ocultar=ocultar)
 
-    def reintubacion(self):
+    def reintubacion(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -808,9 +815,9 @@ class Programa(State):
         
         self.final(resultado, "Reintubación: Es un indicador de resultado que mide el porcentaje de pacientes que requieren " \
         "la inserción de un tubo endotraqueal posterior a una extubación planificada, con el objetivo de evaluar " \
-        "el éxito del destete y evitar el aumento de la morbimortalidad asociada al fracaso de la extubación.")
+        "el éxito del destete y evitar el aumento de la morbimortalidad asociada al fracaso de la extubación.", ocultar=ocultar)
     
-    def especialidad_ingreso(self):
+    def especialidad_ingreso(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -860,9 +867,9 @@ class Programa(State):
         self.ind_especi = True
         self.final(resultado, "Especialidad con mayor ingreso: Identifica la especialidad médica o quirúrgica que genera " \
         "el mayor número de ingresos en el Servicio de Medicina Intensiva (SMI). Esto es fundamental para la planificación de " \
-        "recursos, la formación del personal y la creación de protocolos específicos.")
+        "recursos, la formación del personal y la creación de protocolos específicos.", ocultar=ocultar)
         
-    def profilaxis_ulcera_enfermos_NE(self):
+    def profilaxis_ulcera_enfermos_NE(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -938,9 +945,9 @@ class Programa(State):
         
         self.final(resultado, "Profilaxis de ulcera por estrés con NE: Es un indicador de proceso que mide el porcentaje de " \
         "pacientes con nutrición enteral que no reciben fármacos supresores del ácido gástrico innecesariamente, con el fin de " \
-        "evitar efectos adversos, ya que la propia nutrición se considera protectora.")
+        "evitar efectos adversos, ya que la propia nutrición se considera protectora.", ocultar=ocultar)
 
-    def sedacion_adecuada(self):
+    def sedacion_adecuada(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -995,9 +1002,9 @@ class Programa(State):
             return rx.window_alert(f"Error crítico: {e}") 
         
         self.final(resultado, "Sedación adecuada: Sedación adecuada es el mantenimiento de " \
-        "los resultados de las escalas de sedación dentro del rango prescrito (objetivo) para ese enfermo en particular.")
+        "los resultados de las escalas de sedación dentro del rango prescrito (objetivo) para ese enfermo en particular.", ocultar=ocultar)
 
-    def ingresos_urgentes(self):
+    def ingresos_urgentes(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -1037,9 +1044,10 @@ class Programa(State):
         
         self.final(resultado, "Porcentaje de ingresos urgentes: Indicador de estructura y proceso que " \
         "mide la proporción de pacientes que ingresan en el Servicio de Medicina Intensiva (SMI) de forma no programada. " \
-        "Estos ingresos suelen proceder de Urgencias, plantas de hospitalización (tras un deterioro agudo) o tras cirugías de emergencia.")
+        "Estos ingresos suelen proceder de Urgencias, plantas de hospitalización "
+        "(tras un deterioro agudo) o tras cirugías de emergencia.", ocultar=ocultar)
 
-    def adversos_traslado(self):
+    def adversos_traslado(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -1086,9 +1094,9 @@ class Programa(State):
         
         self.final(resultado, "Eventos adversos durante el traslado: Es un indicador de seguridad que mide la incidencia de " \
         "incidentes o accidentes que ocurren durante el traslado de un paciente crítico fuera de la UCI (traslados intrahospitalarios), " \
-        "ya sea para pruebas diagnósticas (TAC, Resonancia) o intervenciones (Quirófano).")
+        "ya sea para pruebas diagnósticas (TAC, Resonancia) o intervenciones (Quirófano).", ocultar=ocultar)
 
-    def ne_precoz(self):
+    def ne_precoz(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -1137,9 +1145,9 @@ class Programa(State):
         
         self.final(resultado, "Nutrición enteral precoz: Es un indicador de proceso que mide la capacidad " \
         "del servicio para iniciar el soporte nutricional por vía digestiva (enteral) en las primeras 48 horas desde " \
-        "el ingreso del paciente crítico, siempre que no existan contraindicaciones.")
+        "el ingreso del paciente crítico, siempre que no existan contraindicaciones.", ocultar=ocultar)
 
-    def sobretransfusion_hematies(self):
+    def sobretransfusion_hematies(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -1191,9 +1199,9 @@ class Programa(State):
         
         self.final(resultado, "Sobretransfusión de hematies: Es un indicador de proceso que mide el porcentaje de " \
         "pacientes que reciben una transfusión de concentrados de hematíes (CH) cuando se trasfunde " \
-        "más de una unidad sin reevaluar al paciente.")
+        "más de una unidad sin reevaluar al paciente.", ocultar=ocultar)
     
-    def retirada_accidental(self):
+    def retirada_accidental(self, ocultar = False):
         resultado = self.limpieza()
 
         try:
@@ -1237,59 +1245,108 @@ class Programa(State):
         
         self.final(resultado, "TET por maniobras: Mide el número de episodios de salida no planificada del " \
         "tubo endotraqueal (TET) en pacientes sometidos a ventilación mecánica. Se considera una de las complicaciones más graves de " \
-        "la vía aérea en la UCI debido al riesgo de hipoxia, parada cardiorrespiratoria o trauma laríngeo")
+        "la vía aérea en la UCI debido al riesgo de hipoxia, parada cardiorrespiratoria o trauma laríngeo", ocultar=ocultar)
 
-    def tabla_resumen(self):
-        resultado = self.limpieza()
+    def tabla_resumen(self):        
+        data_resumen = {"RESUMEN_INDICADORES": ["Mortalidad Estandarizada", "Reingresos no programados", "Incidencia de barotrauma",
+                        "Posicion semiincorporada con VMI", "Incidencias úlcera por presión", "Valoración diaria de la interrupción de la sedación",
+                        "Prevención de la enfermedad tromboembólica", "Mantenimiento de niveles de glucemia", "Resucitación precoz de la sepsis",
+                        "Traslado intrahospitalario", "Tratamiento empírico adecuado en infección", "Neumonia asociada a ventilacion mecanica",
+                        "Reintubación", "Profilaxis de la ulcera por estrés en enfermos con NE", "Sedación adecuada", "Ingresos urgentes",
+                        "Eventos adversos durante el traslado intrahospitalario", "Nutrición enteral precoz", 
+                        "Sobretransfusión de concentrados de hematies","Retirada accidental del tubo endotraqueal"]
+                        }
+        df_resumen = pd.DataFrame(data_resumen)
+        listas = [[self.encontrar_año(nombre)] for _, nombre in enumerate(self.nombres_archivos)]
 
-        try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
-                df.columns = [self.normalizar_frame(col) for col in df.columns]
-                if df.columns.duplicated().any():
-                    df = df.loc[:, ~df.columns.duplicated()]
-
-                if "ACTOS_TRANSFUSIONALES" not in df.columns:
-                    raise ValueError(f"Falta la columna 'Actos Transfusionales' en {nombre}")
-                
-                if "SANGRADO_ACTIVO" not in df.columns:
-                    raise ValueError(f"Falta la columna 'Sangrado Activo' en {nombre}")
-                
-                if "CANTIDAD_TRANSFUSION_DIA" not in df.columns:
-                    raise ValueError(f"Falta la columna 'Cantidad Transfusion Dia' en {nombre}")
-                
-                #Logica de calculo
-                trans = df["ACTOS_TRANSFUSIONALES"].fillna(False)
-                sangrado = df["SANGRADO_ACTIVO"].fillna(False)
-                cantidad_trans = df["CANTIDAD_TRANSFUSION_DIA"].fillna(0)
-
-                #Actos trasnfusionales, sin sangrado en los que la cantidad de CH > 1
-                numerador = (trans&~sangrado&(cantidad_trans > 1)).sum()
-
-                #Actos trasnfusionales, sin sangrado
-                denominador = (trans&~sangrado).sum()
-
-                valor_final = (numerador/denominador)*1000 if denominador != 0 else 0.0
-                resultado.append(float(valor_final))
-
-                data_resumen = {
-                    "SOBRETRANSFUSION_HEMATIES": ["RESUMEN GLOBAL sobretransfusion hematies"],
-                    "ACTOS_TRANSFUSIONALES": [f"Total: {trans.sum()}"],
-                    "SANGRADO_ACTIVO": [f"Total: {~sangrado.sum()}"],
-                    "CANTIDAD_TRANSFUSION_DIA": [f"Total: {(cantidad_trans > 1).sum()}"],
-                    "TRANS_SIN_SANGRADO_CH>1": [f"Total: {numerador}"],
-                    "TRANS_SIN_SANGRADO": [f"Total: {denominador}"],
-                    "INDICADOR_FINAL": [f"Total: {float(valor_final)}"]
-                }
-                self.csv_metodo(
-                    data_resumen, ["ACTOS_TRANSFUSIONALES", "SANGRADO_ACTIVO","CANTIDAD_TRANSFUSION_DIA"], [trans,sangrado,cantidad_trans], 
-                    f"indicador_sobretransfusion_{self.encontrar_año(nombre)}.csv"
-                )
-                
-        except ValueError as e:
-            return rx.window_alert(f"Error crítico: {e}") 
+        def recuperar_datos():
+            for elem in range(len(self.datos_final)): 
+                listas[elem].append(self.datos_final[elem]["valor"])
         
-        self.final(resultado, "Retirada accidental del tubo endotraqueal:")
+        def final():
+            espe = []
+            valores = []
+
+            res = self.especialidad_ingreso(True)
+            if res is not None: return res
+
+            for elem in range(len(self.datos_final)):
+                df_resumen[listas[elem][0]] = listas[elem][1:len(listas[elem])]
+
+                for i in self.datos_final[elem]["valor"]:
+                    espe.append(i["especialidad"])
+                    valores.append(i["indicador"])
+
+            df_especialidades = pd.DataFrame({'Especialidades': espe})
+            df_valores = pd.DataFrame({"Valores": valores})
+            df_final = pd.concat([df_resumen, df_especialidades, df_valores], axis=1)
+            return df_final
+            
+        res = self.mortalidad_estandarizada(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.reingresos_no_programados(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.incidencia_de_barotrauma(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.posicion_semiincorporada_VMI(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.incidencia_ulceras_presion(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.valoracion_interrupcion_sedacion(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.prevencion_enfermedad_tromboembolica(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.mantenimiento_niveles_glucemia(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.resucitacion_precoz_sepsis(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.traslado_intrahospitalario(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.tratamiento_empirico_infeccion(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.neumonia_asociada_vmi(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.reintubacion(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.profilaxis_ulcera_enfermos_NE(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.sedacion_adecuada(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.ingresos_urgentes(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.adversos_traslado(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.ne_precoz(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.sobretransfusion_hematies(True)
+        if res is not None: return res
+        recuperar_datos()
+        res = self.retirada_accidental(True)
+        if res is not None: return res
+        recuperar_datos()
+
+        a = final()
+        print(a)
+
+
 
 
         

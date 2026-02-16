@@ -3,10 +3,6 @@ from Practicas_2026_Nicolas_Garcia_Gomez.estilos.colores import TextoColor, Colo
 from Logica.Programa import Programa
 from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_barras import graf_barras
 
-"""
-Ajustar texto a la izquierda
-"""
-
 #Devulve la ventana flotante
 def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
 
@@ -33,7 +29,7 @@ def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
                 rx.text(
                     texto.split(":")[1], 
                     width="auto", 
-                    text_align="center"
+                    text_align = "start"
                 ),
                 rx.cond(
                     #Condicional para que en el indicador por especialidad no salgan las tarjetas

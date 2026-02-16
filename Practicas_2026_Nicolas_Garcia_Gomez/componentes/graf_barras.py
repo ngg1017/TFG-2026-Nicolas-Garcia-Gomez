@@ -1,10 +1,6 @@
 import reflex as rx
 from Practicas_2026_Nicolas_Garcia_Gomez.estilos.colores import Color
 
-"""
-Tamaño del texto del eje y
-"""
-
 #Para crear graficos de barras
 def graf_barras(datos: list[dict], bool_esp: bool) -> rx.Component:
     return rx.cond(
@@ -24,7 +20,12 @@ def graf_barras(datos: list[dict], bool_esp: bool) -> rx.Component:
             rx.recharts.x_axis(
                 data_key="especialidad", 
                 interval=0,
-                ),
+                #Rota las letras 10 grados hacia abajo
+                angle=-10,
+                #Alinea el final del texto con la marca del eje        
+                text_anchor="end",    
+                height=50,
+            ),
             #Eje y
             rx.recharts.y_axis(),
             data=item["valor"],

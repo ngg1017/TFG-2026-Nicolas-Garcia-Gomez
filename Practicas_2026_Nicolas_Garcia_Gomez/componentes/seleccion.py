@@ -42,27 +42,44 @@ def seleccion(icon: str) -> rx.Component:
                         rx.menu.content(
 
                             #Opciones del menu
-                            rx.menu.item("Mortalidad Estandarizada", on_click=Programa.mortalidad_estandarizada),
-                            rx.menu.item("Reingresos no programados", on_click=Programa.reingresos_no_programados),
-                            rx.menu.item("Incidencia de barotrauma", on_click=Programa.incidencia_de_barotrauma),
-                            rx.menu.item("Posicion semiincorporada con VMI", on_click=Programa.posicion_semiincorporada_VMI),
-                            rx.menu.item("Incidencias úlcera por presión", on_click=Programa.incidencia_ulceras_presion),
-                            rx.menu.item("Valoración diaria de la interrupción de la sedación", on_click=Programa.valoracion_interrupcion_sedacion),
-                            rx.menu.item("Prevención de la enfermedad tromboembólica", on_click=Programa.prevencion_enfermedad_tromboembolica),
-                            rx.menu.item("Mantenimiento de niveles de glucemia", on_click=Programa.mantenimiento_niveles_glucemia),
-                            rx.menu.item("Resucitación precoz de la sepsis", on_click=Programa.resucitacion_precoz_sepsis),
-                            rx.menu.item("Traslado intrahospitalario", on_click=Programa.traslado_intrahospitalario),
-                            rx.menu.item("Tratamiento empírico adecuado en infección", on_click=Programa.tratamiento_empirico_infeccion),
-                            rx.menu.item("Neumonia asociada a ventilacion mecanica", on_click=Programa.neumonia_asociada_vmi),
-                            rx.menu.item("Reintubación", on_click=Programa.reintubacion),
-                            rx.menu.item("Especialidad con mayor ingreso", on_click=Programa.especialidad_ingreso),
-                            rx.menu.item("Profilaxis de la ulcera por estrés en enfermos con NE", on_click=Programa.profilaxis_ulcera_enfermos_NE),
-                            rx.menu.item("Sedación adecuada", on_click=Programa.sedacion_adecuada),
-                            rx.menu.item("Ingresos urgentes", on_click=Programa.ingresos_urgentes),
-                            rx.menu.item("Eventos adversos durante el traslado intrahospitalario", on_click=Programa.adversos_traslado),
-                            rx.menu.item("Nutrición enteral precoz", on_click=Programa.ne_precoz),
-                            rx.menu.item("Sobretransfusión de concentrados de hematies", on_click=Programa.sobretransfusion_hematies),
-                            rx.menu.item("Retirada accidental del tubo endotraqueal", on_click=Programa.retirada_accidental),
+                            rx.menu.item("Mortalidad Estandarizada", on_click=Programa.mortalidad_estandarizada(ocultar = False)),
+                            rx.menu.item("Reingresos no programados", on_click=Programa.reingresos_no_programados(ocultar = False)),
+                            rx.menu.item("Incidencia de barotrauma", on_click=Programa.incidencia_de_barotrauma(ocultar = False)),
+                            rx.menu.item("Posicion semiincorporada con VMI", on_click=Programa.posicion_semiincorporada_VMI(ocultar = False)),
+                            rx.menu.item("Incidencias úlcera por presión", on_click=Programa.incidencia_ulceras_presion(ocultar = False)),
+                            rx.menu.item(
+                                "Valoración diaria de la interrupción de la sedación", 
+                                on_click=Programa.valoracion_interrupcion_sedacion(ocultar = False)
+                                ),
+                            rx.menu.item(
+                                "Prevención de la enfermedad tromboembólica", 
+                                on_click=Programa.prevencion_enfermedad_tromboembolica(ocultar = False)
+                                ),
+                            rx.menu.item(
+                                "Mantenimiento de niveles de glucemia", 
+                                on_click=Programa.mantenimiento_niveles_glucemia(ocultar = False)
+                                ),
+                            rx.menu.item("Resucitación precoz de la sepsis", on_click=Programa.resucitacion_precoz_sepsis(ocultar = False)),
+                            rx.menu.item("Traslado intrahospitalario", on_click=Programa.traslado_intrahospitalario(ocultar = False)),
+                            rx.menu.item(
+                                "Tratamiento empírico adecuado en infección", 
+                                on_click=Programa.tratamiento_empirico_infeccion(ocultar = False)),
+                            rx.menu.item("Neumonia asociada a ventilacion mecanica", on_click=Programa.neumonia_asociada_vmi(ocultar = False)),
+                            rx.menu.item("Reintubación", on_click=Programa.reintubacion(ocultar = False)),
+                            rx.menu.item("Especialidad con mayor ingreso", on_click=Programa.especialidad_ingreso(ocultar = False)),
+                            rx.menu.item(
+                                "Profilaxis de la ulcera por estrés en enfermos con NE", 
+                                on_click=Programa.profilaxis_ulcera_enfermos_NE(ocultar = False)),
+                            rx.menu.item("Sedación adecuada", on_click=Programa.sedacion_adecuada(ocultar = False)),
+                            rx.menu.item("Ingresos urgentes", on_click=Programa.ingresos_urgentes(ocultar = False)),
+                            rx.menu.item(
+                                "Eventos adversos durante el traslado intrahospitalario", 
+                                on_click=Programa.adversos_traslado(ocultar = False)),
+                            rx.menu.item("Nutrición enteral precoz", on_click=Programa.ne_precoz(ocultar = False)),
+                            rx.menu.item(
+                                "Sobretransfusión de concentrados de hematies", 
+                                on_click=Programa.sobretransfusion_hematies(ocultar = False)),
+                            rx.menu.item("Retirada accidental del tubo endotraqueal", on_click=Programa.retirada_accidental(ocultar = False)),
                             rx.menu.item("Tabla resumen", on_click=Programa.tabla_resumen),
 
                             #Aseguramos que el menu flote por encima de todo
