@@ -6,12 +6,20 @@ import re
 
 #Hereda de mi clase State
 class Programa(State):
+    #Almecen de todos los datos a mostrar
     datos_final: list[dict]
     csv_final: list[dict]
+    texto: str
+
+    #Indicadores para mostrar la ventana, el drawer y el indicador por especialidad
     mostrar_resultado: bool
     drawer_abierto: bool
     ind_especi: bool
-    texto: str
+
+    #Indicadores para mostrar la table resumen
+    ind_resumen: bool
+    columnas: list[str]
+    datos: list[list]
     
     #Metodo que nos permite encontrar el año del documento
     def encontrar_año(self, nombre: str):
@@ -44,6 +52,7 @@ class Programa(State):
     def cerrar_ventana(self):
         self.mostrar_resultado = False
         self.ind_especi = False
+        self.ind_resumen = False
     
     #Metodo para abrir el drawer
     def manejo_drawer(self, bandera: bool):
@@ -59,7 +68,7 @@ class Programa(State):
         return resultado
     
     #Metodo que hace el proceso final de todos los metodos.
-    def final(self, datos: list[float], texto: str, ocultar = False,):
+    def final(self, datos: list[float], texto: str, ocultar = False):
         if ocultar == False: 
             self.parsear_datos(datos)
             self.texto = texto
@@ -67,9 +76,8 @@ class Programa(State):
             return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
         
         #Si ocultar=True(tabla resumen) solo muestra la tabla resumen
-        else:
-            return self.parsear_datos(datos)
-    
+        else: return self.parsear_datos(datos)
+        
     #Metodo que crea el csv que se va a descargar con las columnas y sus transformaciones correspondientes de cada indicador
     def csv_metodo(self,resumen: dict, nombres: list[str], datos: list[pd.DataFrame], nombre_archivo: str):
         #Creamos el resumen (la fila de arriba)
@@ -1247,7 +1255,12 @@ class Programa(State):
         "tubo endotraqueal (TET) en pacientes sometidos a ventilación mecánica. Se considera una de las complicaciones más graves de " \
         "la vía aérea en la UCI debido al riesgo de hipoxia, parada cardiorrespiratoria o trauma laríngeo", ocultar=ocultar)
 
-    def tabla_resumen(self):        
+    def tabla_resumen(self):
+        #Limpiamos las variables y activamos el booleano    
+        self.limpieza()
+        self.ind_resumen = True
+
+        #Definimos la columna de indicadores
         data_resumen = {"RESUMEN_INDICADORES": ["Mortalidad Estandarizada", "Reingresos no programados", "Incidencia de barotrauma",
                         "Posicion semiincorporada con VMI", "Incidencias úlcera por presión", "Valoración diaria de la interrupción de la sedación",
                         "Prevención de la enfermedad tromboembólica", "Mantenimiento de niveles de glucemia", "Resucitación precoz de la sepsis",
@@ -1256,14 +1269,22 @@ class Programa(State):
                         "Eventos adversos durante el traslado intrahospitalario", "Nutrición enteral precoz", 
                         "Sobretransfusión de concentrados de hematies","Retirada accidental del tubo endotraqueal"]
                         }
+        
         df_resumen = pd.DataFrame(data_resumen)
+        #Crea una lista de listas. Cada sublista comienza con el año, se usa para acumular los resultados de ese año especifico
         listas = [[self.encontrar_año(nombre)] for _, nombre in enumerate(self.nombres_archivos)]
-
+        
+        #Recorre los resultados tras ejecutar cada indicador y añade el valor numerico obtenido a su sublista correspondiente en listas
         def recuperar_datos():
             for elem in range(len(self.datos_final)): 
                 listas[elem].append(self.datos_final[elem]["valor"])
         
-        def final():
+        #Ensambla todo al terminar:
+        #Ejecuta especialidad_ingreso para obtener datos especificos de especialidades
+        #Asigna a df_resumen nuevas columnas usando el año como nombre y los valores recolectados como datos
+        #Crea DataFrames adicionales para Especialidades y Valores
+        #axis=1: Une lateralmente el resumen de indicadores con el desglose de especialidades
+        def parseo_final():
             espe = []
             valores = []
 
@@ -1281,7 +1302,10 @@ class Programa(State):
             df_valores = pd.DataFrame({"Valores": valores})
             df_final = pd.concat([df_resumen, df_especialidades, df_valores], axis=1)
             return df_final
-            
+        
+        #Ejecutamos el metodo de calculo con True para el resumen(no dispara la interfaz individual)
+        #Si el calculo falla o devuelve algo inesperado, detiene el proceso
+        #Toma el resultado recien calculado y lo guarda en la estructura de listas
         res = self.mortalidad_estandarizada(True)
         if res is not None: return res
         recuperar_datos()
@@ -1343,15 +1367,16 @@ class Programa(State):
         if res is not None: return res
         recuperar_datos()
 
-        a = final()
-        print(a)
+        #Convierte los nombres de las columnas y las filas de datos del DataFrame a una lista de Python para que Reflex pueda leerlas
+        csv_descargar = parseo_final()
+        self.columnas = csv_descargar.columns.tolist()
+        self.datos = csv_descargar.values.tolist()
+        self.limpieza()
 
-
-
-
-        
-    
-    
-   
-
-        
+        #Guardamos el resultado final, prepara el objeto para que el usuario pueda descargar el resumen como CSV
+        #Disparamos la ventana flotante y modificamos el texto saltandonos el metodo final
+        self.datos_final.append({"name": "Resumen", "valor": csv_descargar})
+        self.csv_final.append({"name": "Resumen.csv", "valor": csv_descargar})
+        self.mostrar_resultado = True
+        self.texto = "Tabla resumen: Permite ver de manera global los indicadores de cada año"
+        return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
