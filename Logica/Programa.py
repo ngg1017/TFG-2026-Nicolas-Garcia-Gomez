@@ -20,6 +20,9 @@ class Programa(State):
     ind_resumen: bool
     columnas: list[str]
     datos: list[list]
+
+    #Indicador para controlar los graficos que se visualizan
+    ind_grafico: str
     
     #Metodo que nos permite encontrar el año del documento
     def encontrar_año(self, nombre: str):
@@ -53,6 +56,7 @@ class Programa(State):
         self.mostrar_resultado = False
         self.ind_especi = False
         self.ind_resumen = False
+        self.ind_grafico = ""
     
     #Metodo para abrir el drawer
     def manejo_drawer(self, bandera: bool):
@@ -112,6 +116,10 @@ class Programa(State):
             data=csv_string,
             filename=f"{nombre}"
         )
+    
+    #Metodo para cambiar la variable del grafico
+    def cambiar_grafico(self, grafico: str):
+        self.ind_grafico = grafico
 
     #Metodo para la conversion del codigo apache
     def codigo_apache(self, apache: int):

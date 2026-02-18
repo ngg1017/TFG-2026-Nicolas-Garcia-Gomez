@@ -2,23 +2,26 @@ import reflex as rx
 from Practicas_2026_Nicolas_Garcia_Gomez.estilos.colores import Color
 
 #Para crear graficos de barras
-def graf_barras(datos: list[dict], bool_esp: bool) -> rx.Component:
+def graf_area_vert(datos: list[dict], bool_esp: bool) -> rx.Component:
     return rx.cond(
         bool_esp,
         
         #Creo un grafico por archivo en vertical
         rx.foreach(
         datos,
-        lambda item: rx.recharts.bar_chart(
+        lambda item: rx.recharts.area_chart(
             #El contenido del grafico
-            rx.recharts.bar(
+            rx.recharts.area(
                 data_key="indicador",
                 stroke=Color.SECUNDARIO.value,
                 fill=Color.ACENTO.value
             ),
             #Eje x
-            rx.recharts.x_axis(
-                data_key="especialidad", 
+            rx.recharts.x_axis(type_="number"),
+            #Eje y
+            rx.recharts.y_axis(
+                data_key="especialidad",
+                type_="category", 
                 interval=0,
                 #Rota las letras 10 grados hacia abajo
                 angle=-10,
@@ -26,32 +29,34 @@ def graf_barras(datos: list[dict], bool_esp: bool) -> rx.Component:
                 text_anchor="end",    
                 height=50,
             ),
-            #Eje y
-            rx.recharts.y_axis(),
             rx.recharts.graphing_tooltip(),
+            rx.recharts.brush(data_key="especialidad", height=30, stroke=Color.ACENTO.value),
             data=item["valor"],
+            margin={"top": 20, "right": 20, "left": 100, "bottom": 20},
+            layout="vertical",
             width=1000,
             height=250,  
             )
         ),
     
         #Creamos el grafico de barras
-        rx.recharts.bar_chart(
+        rx.recharts.area_chart(
             #El contenido del grafico
-            rx.recharts.bar(
+            rx.recharts.area(
                 data_key="valor",
                 stroke=Color.SECUNDARIO.value,
                 fill=Color.ACENTO.value
             ),
             #Eje x
-            rx.recharts.x_axis(data_key="name"),
+            rx.recharts.x_axis(type_="number"),
             #Eje y
-            rx.recharts.y_axis(),
+            rx.recharts.y_axis(data_key = "name", type_="category"),
             rx.recharts.graphing_tooltip(),
             data=datos,
+            layout="vertical",
+            margin={"top": 20, "right": 20, "left": 20, "bottom": 20},
             width=550,
             height=250,
                 
         )
-    )                                
-                              
+    )

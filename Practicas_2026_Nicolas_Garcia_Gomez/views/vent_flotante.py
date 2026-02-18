@@ -2,6 +2,16 @@ import reflex as rx
 from Practicas_2026_Nicolas_Garcia_Gomez.estilos.colores import TextoColor, Color
 from Logica.Programa import Programa
 from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_barras import graf_barras
+from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_area import graf_area
+from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_area_vert import graf_area_vert
+from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_lineas import graf_lineas
+from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_lineas_vert import graf_lineas_vert
+from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_dispersion import graf_dispersion
+from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_pie import graf_pie
+
+
+
+
 
 #Devulve la ventana flotante
 def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
@@ -117,7 +127,13 @@ def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
                                     )
                                 ),
                                 rx.menu.content(
-                                    rx.menu.item("Gráfico de barras"),
+                                    rx.menu.item("Gráfico de barras", on_click=Programa.cambiar_grafico("barras")),
+                                    rx.menu.item("Gráfico de area", on_click=Programa.cambiar_grafico("area")),
+                                    rx.menu.item("Gráfico de area vertical", on_click=Programa.cambiar_grafico("vertical")),
+                                    rx.menu.item("Gráfico de lineas", on_click=Programa.cambiar_grafico("lineas")),
+                                    rx.menu.item("Gráfico de lineas vertical", on_click=Programa.cambiar_grafico("lin_vert")),
+                                    rx.menu.item("Gráfico de dispersión", on_click=Programa.cambiar_grafico("dispersion")),
+                                    rx.menu.item("Gráfico Pie Chart", on_click=Programa.cambiar_grafico("pie")),
                                     z_index="500", 
                                     background_color=Color.ACENTO.value,
                                     color=TextoColor.SECUNDARIO.value,
@@ -126,7 +142,17 @@ def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
                             padding_bottom = "10px",
                             padding_top = "9px"
                         ),
-                        graf_barras(datos, Programa.ind_especi),
+                        rx.match(
+                            Programa.ind_grafico,
+                            ("barras", graf_barras(datos, Programa.ind_especi)),
+                            ("area", graf_area(datos, Programa.ind_especi)),
+                            ("vertical", graf_area_vert(datos, Programa.ind_especi)),
+                            ("lineas", graf_lineas(datos, Programa.ind_especi)),
+                            ("lin_vert", graf_lineas_vert(datos, Programa.ind_especi)),
+                            ("dispersion", graf_dispersion(datos, Programa.ind_especi)),
+                            ("pie", graf_pie(datos, Programa.ind_especi)),
+                            rx.text("Selecciona un gráfico para que se muestren"),
+                        ),
                         align="center"
                     )
                 ),
