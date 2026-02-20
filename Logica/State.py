@@ -39,6 +39,7 @@ class State(rx.State):
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp:
                     contenido = await file.read()
                     tmp.write(contenido)
+                    print(tmp.name)
 
                     #Impide que se guarden mas de 3 y los borra fisicamente
                     while len(self.rutas_archivos) >= 3:
@@ -86,7 +87,8 @@ class State(rx.State):
         self.nombres_archivos_eliminados = []
         self.nombres_archivos_eliminados = self.nombres_archivos
         self.nombres_archivos = []
-        return rx.toast(f"Todos los archivos borrados: {[e for e in self.nombres_archivos_eliminados]}")
+        if len(self.nombres_archivos_eliminados) != 0:
+            return rx.toast(f"Todos los archivos borrados: {[e for e in self.nombres_archivos_eliminados]}")
 
         
         

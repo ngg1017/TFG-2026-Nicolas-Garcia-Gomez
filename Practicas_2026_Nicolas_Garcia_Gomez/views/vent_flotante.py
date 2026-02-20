@@ -1,15 +1,8 @@
 import reflex as rx
-from Practicas_2026_Nicolas_Garcia_Gomez.estilos.colores import TextoColor, Color
 from Logica.Programa import Programa
-from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_barras import graf_barras
-from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_barras_vert import graf_barras_vert
-from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_area import graf_area
-from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_area_vert import graf_area_vert
-from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_lineas import graf_lineas
-from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_lineas_vert import graf_lineas_vert
-from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_dispersion import graf_dispersion
-from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_pie import graf_pie
-from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graf_funnel import graf_funnel
+from Practicas_2026_Nicolas_Garcia_Gomez.estilos.colores import TextoColor, Color
+from Practicas_2026_Nicolas_Garcia_Gomez.componentes.graficos import (graf_barras, graf_barras_vert, graf_area, graf_area_vert, 
+                                                                      graf_lineas, graf_lineas_vert, graf_dispersion, graf_pie, graf_funnel)
 
 #Devulve la ventana flotante
 def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:

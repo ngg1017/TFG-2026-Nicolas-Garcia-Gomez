@@ -63,22 +63,26 @@ def seleccion(icon: str) -> rx.Component:
                             rx.menu.item("Traslado intrahospitalario", on_click=Programa.traslado_intrahospitalario(ocultar = False)),
                             rx.menu.item(
                                 "Tratamiento empírico adecuado en infección", 
-                                on_click=Programa.tratamiento_empirico_infeccion(ocultar = False)),
+                                on_click=Programa.tratamiento_empirico_infeccion(ocultar = False)
+                            ),
                             rx.menu.item("Neumonia asociada a ventilacion mecanica", on_click=Programa.neumonia_asociada_vmi(ocultar = False)),
                             rx.menu.item("Reintubación", on_click=Programa.reintubacion(ocultar = False)),
                             rx.menu.item("Especialidad con mayor ingreso", on_click=Programa.especialidad_ingreso(ocultar = False)),
                             rx.menu.item(
                                 "Profilaxis de la ulcera por estrés en enfermos con NE", 
-                                on_click=Programa.profilaxis_ulcera_enfermos_NE(ocultar = False)),
+                                on_click=Programa.profilaxis_ulcera_enfermos_NE(ocultar = False)
+                            ),
                             rx.menu.item("Sedación adecuada", on_click=Programa.sedacion_adecuada(ocultar = False)),
                             rx.menu.item("Ingresos urgentes", on_click=Programa.ingresos_urgentes(ocultar = False)),
                             rx.menu.item(
                                 "Eventos adversos durante el traslado intrahospitalario", 
-                                on_click=Programa.adversos_traslado(ocultar = False)),
+                                on_click=Programa.adversos_traslado(ocultar = False)
+                            ),
                             rx.menu.item("Nutrición enteral precoz", on_click=Programa.ne_precoz(ocultar = False)),
                             rx.menu.item(
                                 "Sobretransfusión de concentrados de hematies", 
-                                on_click=Programa.sobretransfusion_hematies(ocultar = False)),
+                                on_click=Programa.sobretransfusion_hematies(ocultar = False)
+                            ),
                             rx.menu.item("Retirada accidental del tubo endotraqueal", on_click=Programa.retirada_accidental(ocultar = False)),
                             rx.menu.item("Tabla resumen", on_click=Programa.tabla_resumen),
 

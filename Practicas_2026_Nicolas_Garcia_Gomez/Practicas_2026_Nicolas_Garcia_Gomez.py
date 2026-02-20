@@ -19,7 +19,7 @@ def index() -> rx.Component:
                 pie(),
                 width = "100%",
                 spacing = "9"
-            ),
+            )
         )
     )
 
@@ -31,7 +31,10 @@ app = rx.App(
 
 #Titulo y descripcion de la web
 app.add_page(
-    index,               #Le añadimos un indice
+    #Le añadimos los componentes
+    index,
+    #Borra cualquier residuo que haya quedado de sesiones anteriores
+    on_load=Programa.borrar_datos,
     title = "Indicadores de calidad REA",
     description = "Explciar como subir todos los componentes"
 )

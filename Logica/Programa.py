@@ -23,7 +23,14 @@ class Programa(State):
 
     #Indicador para controlar los graficos que se visualizan
     ind_grafico: str
-    
+
+    #MODIFICAR NO FUNCIONA
+    #Metodo que se ejecuta cuando el WebSocket se cierra
+    @rx.event
+    def on_disconnect(self):
+        print(f"Detectada desconexión para sesión: {self.get_token()}")
+        self.borrar_datos()
+
     #Metodo que nos permite encontrar el año del documento
     def encontrar_año(self, nombre: str):
         return re.findall(r"\d{4}", nombre)[0] if re.findall(r"\d{4}", nombre) else "0000"
@@ -571,11 +578,11 @@ class Programa(State):
                 lactato_6 = pd.to_numeric(df["LACTATO_6H"], errors="coerce")
                 lactato_24 = pd.to_numeric(df["LACTATO_24H"], errors="coerce")
                 alta = pd.to_datetime(df["FECHA_ALTA"], format="%d/%m/%Y", errors="coerce")
-            
+
                 #Calculamos la resucitacion con la PAM, Diuresis y el Lactato mayores a un numero o cambio del 50% en lactato
-                resucitacion_ingreso = ((pam_ingreso > 65)&(diuresis_ingreso > 0.5)&((lactato_ingreso > 0.9) & (lactato_ingreso < 1.1)))
-                resucitacion_6 = ((pam_6 > 65)&(diuresis_6 > 0.5)&(((lactato_6 > 0.9) & (lactato_6 < 1.1))|((lactato_ingreso*0.5) >= lactato_6)))
-                resucitacion_24 = ((pam_24 > 65)&(diuresis_24 > 0.5)&(((lactato_24 > 0.9) & (lactato_24 < 1.1))|((lactato_6*0.5) >= lactato_24)))
+                resucitacion_ingreso = ((pam_ingreso > 65)|(diuresis_ingreso > 0.5)|((lactato_ingreso > 0.9) & (lactato_ingreso < 1.1)))
+                resucitacion_6 = ((pam_6 > 65)|(diuresis_6 > 0.5)|(((lactato_6 > 0.9) & (lactato_6 < 1.1))|((lactato_ingreso*0.5) >= lactato_6)))
+                resucitacion_24 = ((pam_24 > 65)|(diuresis_24 > 0.5)|(((lactato_24 > 0.9) & (lactato_24 < 1.1))|((lactato_6*0.5) >= lactato_24)))
 
                 #Donde tengan sepsis, SS y se de la resucitacion precoz
                 numerador = ((sepsis|ss)&(resucitacion_ingreso|resucitacion_6|resucitacion_24)).sum()
@@ -681,59 +688,43 @@ class Programa(State):
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
 
-                if "ANTIBIOTERAPIA_INGRESO" not in df.columns:
-                    raise ValueError(f"Falta la columna 'Antibioterapia Ingreso' en {nombre}")
-                
-                if "ANTIBIOTERAPIA_24H" not in df.columns:
-                    raise ValueError(f"Falta la columna 'Antibioterapia 24h' en {nombre}")
-                
                 if "DESESCALADA_ANTIBIOTICA" not in df.columns:
                     raise ValueError(f"Falta la columna 'Desescalada Antibiotica' en {nombre}")
+                
+                if "RESISTENCIA_ANTIBIOTICOS" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Resistencia antibioticos' en {nombre}")
+                
+                if "SEPSIS" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Sepsis' en {nombre}")
+                
+                if "SHOCK_SEPTICO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Shock Septico' en {nombre}")
             
                 #Logica de calculo
-                terapia_in = df["ANTIBIOTERAPIA_INGRESO"].fillna("ninguno").str.lower()
-                terapia_fin = df["ANTIBIOTERAPIA_24H"].fillna("ninguno").str.lower()
                 desescalada = df["DESESCALADA_ANTIBIOTICA"].fillna(False)
+                resistencia = df["RESISTENCIA_ANTIBIOTICOS"].fillna(False)
+                sepsis = df["SEPSIS"].fillna(False)
+                ss = df["SHOCK_SEPTICO"].fillna(False)
 
-                #Palabras a excluir
-                excluir = ["ninguno", "nada", "no", ""]
+                #Aquellos que tenga ss o sepsis
+                num_infeccion = (sepsis | ss).sum()
 
-                #Aquellos que tenga terapia
-                num_infeccion = (~terapia_in.isin(excluir) & ~terapia_fin.isin(excluir)).sum()
-
-                def verificar_coincidencia(row):
-                    #"ninguno" no es coincidencia válida
-                    if row['in'] in excluir or row['fin'] in excluir:
-                        return False
-                    
-                    #Convertimos los strings en listas
-                    lista_in = [x.strip() for x in row['in'].split(',')]
-                    lista_fin = [x.strip() for x in row['fin'].split(',')]
-                    
-                    #Comprobamos si hay algun elemento comun
-                    return any(farmaco in lista_fin for farmaco in lista_in)
-
-                #Creamos un DataFrame temporal para el apply
-                df_temp = pd.DataFrame({'in': terapia_in, 'fin': terapia_fin})
-                trat = df_temp.apply(verificar_coincidencia, axis=1)
-                #Aquellos que hagan desescalada y coincidan sus farmacos
-                trat_adecuado = (desescalada & ~terapia_in.isin(excluir) & ~terapia_fin.isin(excluir) & trat).sum()
+                #Aquellos que hagan desescalada y no presenten resistencia
+                trat_adecuado = ((desescalada & ~resistencia) & (sepsis | ss)).sum()
                     
                 valor_final = (trat_adecuado/num_infeccion)*100 if num_infeccion != 0 else 0.0
                 resultado.append(float(valor_final))
 
                 data_resumen = {
                     "TRATAMIENTO_ADECUADO": ["RESUMEN GLOBAL tratamiento empirico"],
-                    "ANTIBIOTERAPIA_INGRESO": [f"Total: {(~terapia_in.isin(excluir)).sum()}"],
-                    "ANTIBIOTERAPIA_24H": [f"Total: {(~terapia_fin.isin(excluir)).sum()}"],
-                    "DESESCALADA_ANTIBIOTICA": [f"Total: {desescalada.sum()}"],
+                    "SIN_RESISTENCIA": [f"Total: {(~resistencia & (ss|sepsis)).sum()}"],
+                    "DESESCALADA_ANTIBIOTICA": [f"Total: {(desescalada & (ss|sepsis)).sum()}"],
                     "TOTAL_INFECCIONES": [f"Total: {num_infeccion}"],
                     "TOTAL_TRAT_ADECUADO": [f"Total: {trat_adecuado}"],
                     "INDICE_TRAT_ADECUADO": [f"Total: {float(valor_final)}"]
                 }
                 self.csv_metodo(
-                    data_resumen, ["ANTIBIOTERAPIA_INGRESO","ANTIBIOTERAPIA_24H", "DESESCALADA_ANTIBIOTICA"], 
-                    [terapia_in, terapia_fin, desescalada], 
+                    data_resumen, ["SIN_RESISTENCIA", "DESESCALADA_ANTIBIOTICA"], [resistencia, desescalada], 
                     f"indicador_trat_adecuado_{self.encontrar_año(nombre)}.csv"
                 )
                 
@@ -911,10 +902,10 @@ class Programa(State):
                     raise ValueError(f"Falta la columna 'Insuficiencia Hepatica' en {nombre}")
                 
                 if "FECHA_INICIO_NE" not in df.columns:
-                    raise ValueError(f"Falta la columna 'Fecha Inicio NE en {nombre}")
+                    raise ValueError(f"Falta la columna 'Fecha Inicio NE' en {nombre}")
                 
-                if "PROFILAXIS_TVP" not in df.columns:
-                    raise ValueError(f"Falta la columna 'Profilaxis TVP' en {nombre}")
+                if "OMEPRAZOL" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Omeprazol' en {nombre}")
                         
                 #Logica de calculo
                 corticoides = df["TRATAMIENTO_CORTICOIDES"].fillna(False)
@@ -923,10 +914,10 @@ class Programa(State):
                 renal = df["INSUFICIENCIA_RENAL"].fillna(False)
                 hepatica = df["INSUFICIENCIA_HEPATICA"].fillna(False)
                 ne = pd.to_datetime(df["FECHA_INICIO_NE"], format="%d/%m/%Y", errors="coerce")
-                profilaxis = df["PROFILAXIS_TVP"].fillna(False)
+                profilaxis = df["OMEPRAZOL"].fillna(False)
 
                 #Calculamos la hgi que tiene los siguiente componentes
-                hgi = ((corticoides == True)|(hemorragia == True)|(coagulopatia == True)|(renal == True)|(hepatica == True))
+                hgi = (corticoides|hemorragia|coagulopatia|renal|hepatica)
                 #Donde haya HGI, nutricion enteral y no haya profilaxis
                 ne_profilaxis_hgi = ((hgi == True)&(ne.notna())&(profilaxis == False)).sum()
                 #Donde haya HGI y nutricion enteral
@@ -946,12 +937,12 @@ class Programa(State):
                     "INSUFICIENCIA_RENAL": [f"Total: {renal.sum()}"],
                     "INSUFICIENCIA_HEPATICA": [f"Total: {hepatica.sum()}"],
                     "FECHA_INICIO_NE": [f"Total: {(ne.notna()).sum()}"],
-                    "PROFILAXIS_TVP": [f"Total: {profilaxis.sum()}"],
+                    "PROFILAXIS_HGI": [f"Total: {profilaxis.sum()}"],
                     "INDICADOR_FINAL": [f"Total: {float(valor_final)}"]
                 }
                 self.csv_metodo(
                     data_resumen, ["CORTICOIDES", "ANTECEDENTES_HEMORRAGIA_GI", "COAGULOPATIA", 
-                                   "INSUFICIENCIA_RENAL", "INSUFICIENCIA_HEPATICA", "FECHA_INICIO_NE", "PROFILAXIS_TVP"], 
+                                   "INSUFICIENCIA_RENAL", "INSUFICIENCIA_HEPATICA", "FECHA_INICIO_NE", "PROFILAXIS_HGI"], 
                                   [corticoides, hemorragia, coagulopatia, renal, hepatica, ne, profilaxis], 
                     f"indicador_profilaxis_ulceras_NE_{self.encontrar_año(nombre)}.csv"
                 )
@@ -979,9 +970,17 @@ class Programa(State):
                 if "BIS" not in df.columns:
                     raise ValueError(f"Falta la columna 'BIS' en {nombre}")
                 
+                if "RASS_OBJETIVO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'RASS objetivo' en {nombre}")
+                
+                if "BIS_OBJETIVO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'BIS objetivo' en {nombre}")
+                
                 #Logica de calculo
                 rass = pd.to_numeric(df["RASS"], errors="coerce")
                 bis = pd.to_numeric(df["BIS"], errors="coerce")
+                rass_objetivo = pd.to_numeric(df["RASS_OBJETIVO"], errors="coerce")
+                bis_objetivo = pd.to_numeric(df["BIS_OBJETIVO"], errors="coerce")
 
                 #Sedacion ligera -2 <= rass <= 0
                 sedacion_ligera = ((rass >= -2)&(rass <= 0))
@@ -991,26 +990,32 @@ class Programa(State):
                 sedacion_paralizado = (rass == -5) & (((bis >= 40) & (bis <= 60)) | bis.isna())
 
                 #Sedacion adecuada
-                sedacion_adecuada = (sedacion_ligera|sedacion_profunda|sedacion_paralizado).sum()
+                sedacion_adecuada = ((sedacion_ligera|sedacion_profunda|sedacion_paralizado)&((rass==rass_objetivo)|(bis==bis_objetivo))).sum()
                 #Total sedacion
-                sedacion = ((rass.notna())|(bis.notna())).sum()
+                sedacion = ((rass_objetivo.notna())|(bis_objetivo.notna())).sum()
 
                 valor_final = (sedacion_adecuada/sedacion)*100 if sedacion != 0 else 0.0
                 resultado.append(float(valor_final))
 
                 data_resumen = {
-                    "SEDACION_ADECUADA": ["RESUMEN GLOBAL profilaxis de ulcera con NE"],
+                    "SEDACION_ADECUADA_INDICADOR": ["RESUMEN GLOBAL sedacion adecuada"],
                     "RASS_LIGERA": [f"Total: {sedacion_ligera.sum()}"],
                     "RASS_PROFUNDA": [f"Total: {sedacion_profunda.sum()}"],
                     "RASS_PARALIZADO": [f"Total: {sedacion_paralizado.sum()}"],
                     "BIS_PARALIZADO": [f"Total: {sedacion_paralizado.sum()}"],
                     "SEDACION_ADECUADA": [f"Total: {sedacion_adecuada}"],
                     "TOTAL_SEDACION": [f"Total: {sedacion}"],
-                    "INDICADOR_FINAL": [f"Total: {float(valor_final)}"]
+                    "INDICADOR_FINAL": [f"Total: {float(valor_final)}"],
+                    "RASS": [f"Total: {(rass.notna()).sum()}"],
+                    "BIS": [f"Total: {(bis.notna()).sum()}"],
+                    "RASS_OBJETIVO": [f"Total: {(rass_objetivo.notna()).sum()}"],
+                    "BIS_OBJETIVO": [f"Total: {(bis_objetivo.notna()).sum()}"],
                 }
                 self.csv_metodo(
-                    data_resumen, ["RASS", "BIS","RASS_LIGERA","RASS_PROFUNDA","RASS_PARALIZADO","BIS_PARALIZADO"], 
-                    [rass,bis,rass[sedacion_ligera],rass[sedacion_profunda], rass[sedacion_paralizado],bis[sedacion_paralizado]], 
+                    data_resumen, ["RASS", "BIS","RASS_OBJETIVO","BIS_OBJETIVO", "RASS_LIGERA",
+                                   "RASS_PROFUNDA","RASS_PARALIZADO","BIS_PARALIZADO"], 
+                    [rass,bis,rass_objetivo, bis_objetivo,rass[sedacion_ligera],rass[sedacion_profunda], 
+                     rass[sedacion_paralizado],bis[sedacion_paralizado]], 
                     f"indicador_sedacion_adecuada_{self.encontrar_año(nombre)}.csv"
                 )
                 
