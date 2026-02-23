@@ -24,13 +24,6 @@ class Programa(State):
     #Indicador para controlar los graficos que se visualizan
     ind_grafico: str
 
-    #MODIFICAR NO FUNCIONA
-    #Metodo que se ejecuta cuando el WebSocket se cierra
-    @rx.event
-    def on_disconnect(self):
-        print(f"Detectada desconexión para sesión: {self.get_token()}")
-        self.borrar_datos()
-
     #Metodo que nos permite encontrar el año del documento
     def encontrar_año(self, nombre: str):
         return re.findall(r"\d{4}", nombre)[0] if re.findall(r"\d{4}", nombre) else "0000"
@@ -1269,6 +1262,7 @@ class Programa(State):
         "la vía aérea en la UCI debido al riesgo de hipoxia, parada cardiorrespiratoria o trauma laríngeo", ocultar=ocultar)
 
     def tabla_resumen(self):
+
         #Limpiamos las variables y activamos el booleano    
         self.limpieza()
         self.ind_resumen = True

@@ -2,6 +2,7 @@ import reflex as rx
 import os
 import tempfile
 import time
+import asyncio
 
 class State(rx.State):
     rutas_archivos: list[str]
@@ -39,7 +40,6 @@ class State(rx.State):
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp:
                     contenido = await file.read()
                     tmp.write(contenido)
-                    print(tmp.name)
 
                     #Impide que se guarden mas de 3 y los borra fisicamente
                     while len(self.rutas_archivos) >= 3:
@@ -77,18 +77,67 @@ class State(rx.State):
         yield rx.toast(f"Se cargaron: {self.cargados} archivos con éxito")
     
     def borrar_datos(self):
-        #Borramos los archivos fisicos uno por uno
-        for ruta in self.rutas_archivos:
-            if os.path.exists(ruta):
-                os.remove(ruta)
+        self.borrar_datos_limpio()
+        return rx.toast("Todos los archivos han sido eliminador")
+    
+    #Para llamarla desde el frontend
+    @rx.event
+    def borrar_datos_limpio(self):
+            for ruta in self.rutas_archivos:
+                try:
+                    if os.path.exists(ruta):
+                        os.remove(ruta)
+                        print(f"Archivo eliminado: {ruta}")
+                except Exception as e:
+                    print(f"Error borrando {ruta}: {e}")
 
-        #Limpiamos las listas del estado
-        self.rutas_archivos = []
-        self.nombres_archivos_eliminados = []
-        self.nombres_archivos_eliminados = self.nombres_archivos
-        self.nombres_archivos = []
-        if len(self.nombres_archivos_eliminados) != 0:
-            return rx.toast(f"Todos los archivos borrados: {[e for e in self.nombres_archivos_eliminados]}")
+            #Limpiamos las listas del estado
+            self.rutas_archivos = []
+            self.nombres_archivos_eliminados = []
+            self.nombres_archivos_eliminados = self.nombres_archivos
+            self.nombres_archivos = []
+            if len(self.nombres_archivos_eliminados) != 0:
+                print(f"Todos los archivos borrados: {[e for e in self.nombres_archivos_eliminados]}")
+            
+    #Definimos este metodo como evento de Reflex que se ejecuta en segundo plano
+    @rx.event(background=True)
+    #Definimos el metodo como asincrono permitiendo que el servidor haga otras tareas mientras tanto 
+    async def loop_monitor_conexion(self):
+        #Importacion local para evitar errores circulares
+        import Practicas_2026_Nicolas_Garcia_Gomez.Practicas_2026_Nicolas_Garcia_Gomez as main_file
+        
+        #Obtenemos la instancia de la app que creaste con rx.App()
+        #Si aun no se ha creado, devuelve None en lugar de dar un error, gracias a getattr.
+        app_instance = getattr(main_file, "app", None)
 
+        #Guarda el identificador unico de la sesion. Si la pestaña se cierra, ese token desaparece(es un DNI)
+        token = self.router.session.client_token
         
-        
+        print(f"WATCHDOG INICIADO PARA: {token}", flush=True)
+
+        while True:
+            #Si por algun motivo la app no cargo a la primera lo reintentamos
+            if app_instance is None:
+                app_instance = getattr(main_file, "app", None)
+                print("Esperando instancia de la App...", flush=True)
+
+                #Si la aplicacion no esta lista, espera 2 segundos y vuelve a empezar el bucle.
+                await asyncio.sleep(2)
+                continue
+
+            #Verificamos si el token sigue en la lista de conexiones activas
+            #Si el token no esta en token_to_sid, la conexion se cerro
+            if token not in app_instance.event_namespace.token_to_sid:
+                print(f"DESCONEXIÓN DETECTADA: {token}", flush=True)
+                
+                #Como esta funcion corre en segundo plano, Reflex prohibe modificar variables directamente. 
+                #Este bloque "pide permiso" al estado para poder entrar y hacer cambios de forma segura.
+                async with self:
+                    self.borrar_datos_limpio()
+                
+                #Una vez que el usuario se ha ido, el guardian ya no es necesario.
+                break  
+            
+
+            #Espera 5 segundos entre cada comprobacion
+            await asyncio.sleep(5)

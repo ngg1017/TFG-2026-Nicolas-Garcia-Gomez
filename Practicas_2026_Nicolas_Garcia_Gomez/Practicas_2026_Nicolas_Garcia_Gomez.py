@@ -6,6 +6,7 @@ from Practicas_2026_Nicolas_Garcia_Gomez.views.pie import pie
 from Practicas_2026_Nicolas_Garcia_Gomez.views.instrucciones import instrucciones
 from Practicas_2026_Nicolas_Garcia_Gomez.views.vent_flotante import vent_flotante
 from Logica.Programa import Programa
+from Logica.State import State
 
 #Colocamos los elementos de la web
 def index() -> rx.Component:
@@ -34,7 +35,7 @@ app.add_page(
     #Le añadimos los componentes
     index,
     #Borra cualquier residuo que haya quedado de sesiones anteriores
-    on_load=Programa.borrar_datos,
+    on_load=State.loop_monitor_conexion,
     title = "Indicadores de calidad REA",
     description = "Explciar como subir todos los componentes"
 )
