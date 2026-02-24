@@ -24,6 +24,8 @@ def index() -> rx.Component:
         )
     )
 
+#Se ejecutal al inciar el servidor
+State.limpieza_inteligente_csv()
 #Establecemos los estilos
 app = rx.App(
     stylesheets = estilos.HOJAESTILO,
@@ -34,7 +36,7 @@ app = rx.App(
 app.add_page(
     #Le añadimos los componentes
     index,
-    #Borra cualquier residuo que haya quedado de sesiones anteriores
+    #Funcion de perrito guardian se carga al inicio
     on_load=State.loop_monitor_conexion,
     title = "Indicadores de calidad REA",
     description = "Explciar como subir todos los componentes"

@@ -3,6 +3,8 @@ import os
 import tempfile
 import time
 import asyncio
+import glob
+
 
 class State(rx.State):
     rutas_archivos: list[str]
@@ -76,12 +78,12 @@ class State(rx.State):
         self.barra = False
         yield rx.toast(f"Se cargaron: {self.cargados} archivos con éxito")
     
+    #Metodo que usa los botones con un rx.toast
     def borrar_datos(self):
         self.borrar_datos_limpio()
         return rx.toast("Todos los archivos han sido eliminador")
     
-    #Para llamarla desde el frontend
-    @rx.event
+    #Metodo para borrar los archivos de la sesion
     def borrar_datos_limpio(self):
             for ruta in self.rutas_archivos:
                 try:
@@ -98,7 +100,41 @@ class State(rx.State):
             self.nombres_archivos = []
             if len(self.nombres_archivos_eliminados) != 0:
                 print(f"Todos los archivos borrados: {[e for e in self.nombres_archivos_eliminados]}")
-            
+
+    #Le dice a Python que la funcion pertenece a la clase pero no necesita una "instancia" para ejecutarse.
+    @staticmethod
+    #Metodo que borra archivos con mas de 24 horas
+    def limpieza_inteligente_csv():
+        #Ruta de la carpeta temporal
+        ruta_temporal = tempfile.gettempdir()
+        
+        #Limite de tiempo (24 horas en segundos)
+        un_dia_en_segundos = 24 * 60 * 60
+        ahora = time.time()
+        
+        #Buscamos todos los archivos .csv
+        patron = os.path.join(ruta_temporal, "*.csv")
+        archivos_csv = glob.glob(patron)
+        
+        print(f"--- Iniciando limpieza inteligente en: {ruta_temporal} ---")
+        
+        for archivo in archivos_csv:
+            try:
+                #Obtenemos la fecha de la ultima modificacion del archivo
+                fecha_archivo = os.path.getmtime(archivo)
+                antiguedad = ahora - fecha_archivo
+                
+                #Solo borramos si el archivo tiene mas de 24 horas
+                if antiguedad > un_dia_en_segundos:
+                    os.remove(archivo)
+                    print(f"Eliminado (Antiguo): {os.path.basename(archivo)}")
+                else:
+                    # Opcional: imprimir qué archivos se conservan
+                    print(f"Conservado (Reciente): {os.path.basename(archivo)}")
+                    
+            except Exception as e:
+                print(f"No se pudo procesar {archivo}: {e}")
+                            
     #Definimos este metodo como evento de Reflex que se ejecuta en segundo plano
     @rx.event(background=True)
     #Definimos el metodo como asincrono permitiendo que el servidor haga otras tareas mientras tanto 
@@ -133,11 +169,12 @@ class State(rx.State):
                 #Como esta funcion corre en segundo plano, Reflex prohibe modificar variables directamente. 
                 #Este bloque "pide permiso" al estado para poder entrar y hacer cambios de forma segura.
                 async with self:
+                    #Borramos tanto los archivos del usuario como los residuos de mas de 24 horas
                     self.borrar_datos_limpio()
+                    self.limpieza_inteligente_csv()
                 
                 #Una vez que el usuario se ha ido, el guardian ya no es necesario.
                 break  
-            
 
             #Espera 5 segundos entre cada comprobacion
             await asyncio.sleep(5)

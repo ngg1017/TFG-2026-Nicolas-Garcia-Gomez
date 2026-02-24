@@ -1262,7 +1262,6 @@ class Programa(State):
         "la vía aérea en la UCI debido al riesgo de hipoxia, parada cardiorrespiratoria o trauma laríngeo", ocultar=ocultar)
 
     def tabla_resumen(self):
-
         #Limpiamos las variables y activamos el booleano    
         self.limpieza()
         self.ind_resumen = True
