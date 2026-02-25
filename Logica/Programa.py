@@ -388,11 +388,11 @@ class Programa(State):
                     raise ValueError(f"Falta la columna 'Dias VMI' en {nombre}")
             
                 #Logica de calculo
-                sedacion = df["VENTANA_DE_SEDACION"].fillna(False)
+                int_sedacion = pd.to_numeric(df["VENTANA_DE_SEDACION"], errors="coerce")
                 dias_vmi = pd.to_numeric(df["DIAS_VMI"], errors="coerce")
 
-                #Simplemente que tengan sedacion y dias de vmi necesito otro tipo de datos para hacerlo correctamente
-                total_sedacion = dias_vmi[(sedacion == True) & (dias_vmi > 0)].sum()
+                #Simplemente que tengan sedacion y dias de vmi
+                total_sedacion = int_sedacion[(int_sedacion > 0) & (dias_vmi > 0)].sum()
 
                 valor_final = (total_sedacion/dias_vmi.sum())*100 if dias_vmi.sum() != 0 else 0.0
                 resultado.append(float(valor_final))
@@ -405,7 +405,7 @@ class Programa(State):
                     "INDICE_SEDACION": [f"Total: {float(valor_final)}"]
                 }
                 self.csv_metodo(
-                    data_resumen, ["VENTANA_DE_SEDACION", "DIAS_VMI"], [sedacion, dias_vmi], 
+                    data_resumen, ["VENTANA_DE_SEDACION", "DIAS_VMI"], [int_sedacion, dias_vmi], 
                     f"indicador_sedacion_{self.encontrar_año(nombre)}.csv"
                 )
                 
@@ -486,9 +486,9 @@ class Programa(State):
                 glucemia = pd.to_numeric(df["GLUCEMIA"], errors="coerce")
                 insulina = df["TRATAMIENTO_INSULINA"].fillna(False)
 
-                #Aquellos que tengas insulina y glucemia > 150 a la vez
-                total = insulina[(glucemia >= 150) & (insulina == True)].sum()
-                total_glucemia = (glucemia >= 150).sum()
+                #Aquellos que tengas insulina y glucemia > 180 a la vez
+                total = insulina[(glucemia >= 180) & (insulina == True)].sum()
+                total_glucemia = (glucemia >= 180).sum()
 
                 valor_final = (total/total_glucemia)*100 if total_glucemia != 0 else 0.0
                 resultado.append(float(valor_final))
@@ -982,9 +982,9 @@ class Programa(State):
                 #Sedacion paralizado rass == -5 y 40 <= bis <= 60 o la bis sea nula que se acepta tambien como sedacion
                 sedacion_paralizado = (rass == -5) & (((bis >= 40) & (bis <= 60)) | bis.isna())
 
-                #Sedacion adecuada
+                #Sedacion adecuada 
                 sedacion_adecuada = ((sedacion_ligera|sedacion_profunda|sedacion_paralizado)&((rass==rass_objetivo)|(bis==bis_objetivo))).sum()
-                #Total sedacion
+                #Total sedacion 
                 sedacion = ((rass_objetivo.notna())|(bis_objetivo.notna())).sum()
 
                 valor_final = (sedacion_adecuada/sedacion)*100 if sedacion != 0 else 0.0

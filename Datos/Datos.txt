@@ -53,7 +53,7 @@ E. SEDACIÓN Y MONITORIZACIÓN NEUROLÓGICA
 30. BIS: Número entero (0 a 100).
 31. RASS objetivo: Número entero (-5 a +4) - Valor prescrito por el médico.
 32. BIS objetivo: Número entero (0 a 100) - Valor prescrito por el médico.
-33. Ventana de sedación: Booleano (True / False) - Interrupción diaria de sedación.
+33. Ventana de sedación: Número entero de días - Interrupción diaria de sedación.
 
 F. NUTRICIÓN Y RIESGOS GASTROINTESTINALES
 ------------------------------------------------------------
