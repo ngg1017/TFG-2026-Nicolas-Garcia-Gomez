@@ -23,7 +23,7 @@ B. VENTILACIÓN MECÁNICA Y RESPIRATORIO
 9. Días VMI: Número decimal o entero - Días totales de soporte.
 10. Barotrauma: Booleano (True / False).
 11. Grados Inclinación: Número entero (0 a 90).
-12. Episodios NAV: Número entero - Cantidad de neumonías asociadas a ventilación.
+12. Episodios NAV: Booleano (True / False).
 13. Registro Intubaciones: Texto - Fechas separadas por comas (Ej: "14/10/2025, 18/10/2025").
 14. Extubación Programada: Booleano (True / False).
 15. Extubación por Maniobras: Booleano (True / False) - Retirada accidental.
@@ -44,38 +44,39 @@ C. SEPSIS Y MONITORIZACIÓN HEMODINÁMICA
 
 D. INFECTOLOGÍA Y ANTIBIÓTICOS
 ------------------------------------------------------------
-27. Desescalada Antibiótica: Booleano (True / False).
-28. Resistencia antibióticos: Booleano (True / False).
+27. Tratamiento adecuado: Booleano (True / False).
+28. Cobertura empirica completa: Booleano (True / False).
+29. Resistencia antibióticos: Booleano (True / False).
 
 E. SEDACIÓN Y MONITORIZACIÓN NEUROLÓGICA
 ------------------------------------------------------------
-29. RASS: Número entero (-5 a +4).
-30. BIS: Número entero (0 a 100).
-31. RASS objetivo: Número entero (-5 a +4) - Valor prescrito por el médico.
-32. BIS objetivo: Número entero (0 a 100) - Valor prescrito por el médico.
-33. Ventana de sedación: Número entero de días - Interrupción diaria de sedación.
+30. RASS: Número entero (-5 a +4).
+31. BIS: Número entero (0 a 100).
+32. RASS objetivo: Número entero (-5 a +4) - Valor prescrito por el médico.
+33. BIS objetivo: Número entero (0 a 100) - Valor prescrito por el médico.
+34. Ventana de sedación: Número entero o decimal de días - Interrupción diaria de sedación.
 
 F. NUTRICIÓN Y RIESGOS GASTROINTESTINALES
 ------------------------------------------------------------
-34. Fecha Inicio NE: Fecha (dd/mm/aaaa) - Inicio de Nutrición Enteral.
-35. Omeprazol: Booleano (True / False) - Si recibe profilaxis gástrica.
-36. Tratamiento Corticoides: Booleano (True / False).
-37. Antecedentes Hemorragia GI: Booleano (True / False).
-38. Coagulopatía: Booleano (True / False).
-39. Insuficiencia Renal: Booleano (True / False).
-40. Insuficiencia Hepatica: Booleano (True / False).
+35. Fecha Inicio NE: Fecha (dd/mm/aaaa) - Inicio de Nutrición Enteral.
+36. Omeprazol: Booleano (True / False) - Si recibe profilaxis gástrica.
+37. Tratamiento Corticoides: Booleano (True / False).
+38. Antecedentes Hemorragia GI: Booleano (True / False).
+39. Coagulopatía: Booleano (True / False).
+40. Insuficiencia Renal: Booleano (True / False).
+41. Insuficiencia Hepatica: Booleano (True / False).
 
 G. SEGURIDAD Y OTROS CUIDADOS
 ------------------------------------------------------------
-41. UPP: Booleano (True / False) - Presencia de Úlceras por Presión.
-42. Profilaxis TVP: Booleano (True / False).
-43. TVP: Booleano (True / False) - Trombosis Venosa Profunda confirmada.
-44. Glucemia: Número decimal/entero (mg/dl).
-45. Tratamiento Insulina: Booleano (True / False).
-46. Traslado Intrahospitalario: Booleano (True / False).
-47. Listado de verificación: Booleano (True / False) - Check-list de seguridad en traslado.
-48. Eventos Adversos Traslado: Texto (Ej: "Extubación accidental", "Hipotensión", "Ninguno").
-49. Actos Transfusionales: Booleano (True / False).
-50. Sangrado Activo: Booleano (True / False).
-51. Cantidad Transfusion Dia: Número entero - Número de concentrados de hematíes.
+42. UPP: Booleano (True / False) - Presencia de Úlceras por Presión.
+43. Profilaxis TVP: Booleano (True / False).
+44. TVP: Booleano (True / False) - Trombosis Venosa Profunda confirmada.
+45. Glucemia: Número decimal/entero (mg/dl).
+46. Tratamiento Insulina: Booleano (True / False).
+47. Traslado Intrahospitalario: Booleano (True / False).
+48. Listado de verificación: Booleano (True / False) - Check-list de seguridad en traslado.
+49. Eventos Adversos Traslado: Booleano (True / False).
+50. Actos Transfusionales: Booleano (True / False).
+51. Sangrado Activo: Booleano (True / False).
+52. Cantidad Transfusion Dia: Número entero - Número de concentrados de hematíes.
 ============================================================

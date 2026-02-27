@@ -163,7 +163,7 @@ class Programa(State):
                 df["PROBABILIDAD_MORTALIDAD"] = apache.apply(self.codigo_apache)
                 suma_mortalidad = df.loc[fallecimiento == True, "PROBABILIDAD_MORTALIDAD"].sum()
                 
-                valor_final = (numero_fallecidos / suma_mortalidad)*100 if suma_mortalidad != 0 else 0.0
+                valor_final = (numero_fallecidos / suma_mortalidad) if suma_mortalidad != 0 else 0.0
                 resultado.append(float(valor_final))
 
                 #Csv que necesita la doctora con los datos filtrados
@@ -681,8 +681,11 @@ class Programa(State):
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
 
-                if "DESESCALADA_ANTIBIOTICA" not in df.columns:
-                    raise ValueError(f"Falta la columna 'Desescalada Antibiotica' en {nombre}")
+                if "TRATAMIENTO_ADECUADO" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Tratamiento Adecuado' en {nombre}")
+                
+                if "COBERTURA_EMPIRICA_COMPLETA" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Cobertura Empirica Completa' en {nombre}")
                 
                 if "RESISTENCIA_ANTIBIOTICOS" not in df.columns:
                     raise ValueError(f"Falta la columna 'Resistencia antibioticos' en {nombre}")
@@ -694,7 +697,8 @@ class Programa(State):
                     raise ValueError(f"Falta la columna 'Shock Septico' en {nombre}")
             
                 #Logica de calculo
-                desescalada = df["DESESCALADA_ANTIBIOTICA"].fillna(False)
+                adec = df["TRATAMIENTO_ADECUADO"].fillna(False)
+                completa = df["COBERTURA_EMPIRICA_COMPLETA"].fillna(False)
                 resistencia = df["RESISTENCIA_ANTIBIOTICOS"].fillna(False)
                 sepsis = df["SEPSIS"].fillna(False)
                 ss = df["SHOCK_SEPTICO"].fillna(False)
@@ -702,22 +706,23 @@ class Programa(State):
                 #Aquellos que tenga ss o sepsis
                 num_infeccion = (sepsis | ss).sum()
 
-                #Aquellos que hagan desescalada y no presenten resistencia
-                trat_adecuado = ((desescalada & ~resistencia) & (sepsis | ss)).sum()
+                #Aquellos que sea adecuado, no presenten resistencia y sea completa
+                trat_adecuado = ((adec & ~resistencia & completa) & (sepsis | ss)).sum()
                     
                 valor_final = (trat_adecuado/num_infeccion)*100 if num_infeccion != 0 else 0.0
                 resultado.append(float(valor_final))
 
                 data_resumen = {
-                    "TRATAMIENTO_ADECUADO": ["RESUMEN GLOBAL tratamiento empirico"],
+                    "IND_TRATAMIENTO_ADECUADO": ["RESUMEN GLOBAL tratamiento empirico"],
                     "SIN_RESISTENCIA": [f"Total: {(~resistencia & (ss|sepsis)).sum()}"],
-                    "DESESCALADA_ANTIBIOTICA": [f"Total: {(desescalada & (ss|sepsis)).sum()}"],
+                    "TRATAMIENTO_ADECUADO": [f"Total: {(adec & (ss|sepsis)).sum()}"],
+                    "COBERTURA_EMPIRICA_COMPLETA": [f"Total: {(completa & (ss|sepsis)).sum()}"],
                     "TOTAL_INFECCIONES": [f"Total: {num_infeccion}"],
                     "TOTAL_TRAT_ADECUADO": [f"Total: {trat_adecuado}"],
                     "INDICE_TRAT_ADECUADO": [f"Total: {float(valor_final)}"]
                 }
                 self.csv_metodo(
-                    data_resumen, ["SIN_RESISTENCIA", "DESESCALADA_ANTIBIOTICA"], [resistencia, desescalada], 
+                    data_resumen, ["SIN_RESISTENCIA", "TRATAMIENTO_ADECUADO", "COBERTURA_EMPIRICA_COMPLETA"], [resistencia, adec, completa], 
                     f"indicador_trat_adecuado_{self.encontrar_año(nombre)}.csv"
                 )
                 
@@ -746,7 +751,7 @@ class Programa(State):
                     raise ValueError(f"Falta la columna 'Dias VMI' en {nombre}")
             
                 #Logica de calculo
-                nav = pd.to_numeric(df["EPISODIOS_NAV"], errors="coerce")
+                nav = df["EPISODIOS_NAV"].fillna(False)
                 vmi = pd.to_numeric(df["DIAS_VMI"], errors="coerce")
 
                 #Simplemente hay que hacer el calculo
@@ -760,7 +765,7 @@ class Programa(State):
                     "INDICE_NAV": [f"Total: {float(valor_final)}"]
                 }
                 self.csv_metodo(
-                    data_resumen, ["EPISODIOS_NAV", "DIAS_VMI"], [nav, vmi], 
+                    data_resumen, ["TOTAL_NAV", "DIAS_VMI"], [nav, vmi], 
                     f"indicador_nav_{self.encontrar_año(nombre)}.csv"
                 )
                 
@@ -936,7 +941,7 @@ class Programa(State):
                 self.csv_metodo(
                     data_resumen, ["CORTICOIDES", "ANTECEDENTES_HEMORRAGIA_GI", "COAGULOPATIA", 
                                    "INSUFICIENCIA_RENAL", "INSUFICIENCIA_HEPATICA", "FECHA_INICIO_NE", "PROFILAXIS_HGI"], 
-                                  [corticoides, hemorragia, coagulopatia, renal, hepatica, ne, profilaxis], 
+                                  [corticoides, hemorragia, coagulopatia, renal, hepatica,  ne, profilaxis], 
                     f"indicador_profilaxis_ulceras_NE_{self.encontrar_año(nombre)}.csv"
                 )
                 
@@ -969,46 +974,42 @@ class Programa(State):
                 if "BIS_OBJETIVO" not in df.columns:
                     raise ValueError(f"Falta la columna 'BIS objetivo' en {nombre}")
                 
+                if "VMI" not in df.columns:
+                    raise ValueError(f"Falta la columna 'VMI' en {nombre}")
+                
                 #Logica de calculo
                 rass = pd.to_numeric(df["RASS"], errors="coerce")
                 bis = pd.to_numeric(df["BIS"], errors="coerce")
                 rass_objetivo = pd.to_numeric(df["RASS_OBJETIVO"], errors="coerce")
                 bis_objetivo = pd.to_numeric(df["BIS_OBJETIVO"], errors="coerce")
-
-                #Sedacion ligera -2 <= rass <= 0
-                sedacion_ligera = ((rass >= -2)&(rass <= 0))
-                #Sedacion profunda -5 < rass <= -4
-                sedacion_profunda = ((rass > -5) & (rass <= -4))
-                #Sedacion paralizado rass == -5 y 40 <= bis <= 60 o la bis sea nula que se acepta tambien como sedacion
-                sedacion_paralizado = (rass == -5) & (((bis >= 40) & (bis <= 60)) | bis.isna())
+                vmi = df["VMI"].fillna(False)
 
                 #Sedacion adecuada 
-                sedacion_adecuada = ((sedacion_ligera|sedacion_profunda|sedacion_paralizado)&((rass==rass_objetivo)|(bis==bis_objetivo))).sum()
+                rass_adecuada = ((rass <= rass_objetivo + 1) & (rass >= rass_objetivo - 1))
+                bis_adecuada = ((bis <= bis_objetivo + 5) & (bis >= bis_objetivo - 5))
+                sedacion_adecuada = (rass_adecuada | bis_adecuada).sum()
+                                     
                 #Total sedacion 
-                sedacion = ((rass_objetivo.notna())|(bis_objetivo.notna())).sum()
+                sedacion = (vmi).sum()
 
                 valor_final = (sedacion_adecuada/sedacion)*100 if sedacion != 0 else 0.0
                 resultado.append(float(valor_final))
 
                 data_resumen = {
                     "SEDACION_ADECUADA_INDICADOR": ["RESUMEN GLOBAL sedacion adecuada"],
-                    "RASS_LIGERA": [f"Total: {sedacion_ligera.sum()}"],
-                    "RASS_PROFUNDA": [f"Total: {sedacion_profunda.sum()}"],
-                    "RASS_PARALIZADO": [f"Total: {sedacion_paralizado.sum()}"],
-                    "BIS_PARALIZADO": [f"Total: {sedacion_paralizado.sum()}"],
                     "SEDACION_ADECUADA": [f"Total: {sedacion_adecuada}"],
                     "TOTAL_SEDACION": [f"Total: {sedacion}"],
                     "INDICADOR_FINAL": [f"Total: {float(valor_final)}"],
                     "RASS": [f"Total: {(rass.notna()).sum()}"],
-                    "BIS": [f"Total: {(bis.notna()).sum()}"],
                     "RASS_OBJETIVO": [f"Total: {(rass_objetivo.notna()).sum()}"],
+                    "RASS_ADECUADA": [f"Total: {rass_adecuada.sum()}"],
+                    "BIS": [f"Total: {(bis.notna()).sum()}"],
                     "BIS_OBJETIVO": [f"Total: {(bis_objetivo.notna()).sum()}"],
+                    "BIS_ADECUADA": [f"Total: {bis_adecuada.sum()}"],
                 }
                 self.csv_metodo(
-                    data_resumen, ["RASS", "BIS","RASS_OBJETIVO","BIS_OBJETIVO", "RASS_LIGERA",
-                                   "RASS_PROFUNDA","RASS_PARALIZADO","BIS_PARALIZADO"], 
-                    [rass,bis,rass_objetivo, bis_objetivo,rass[sedacion_ligera],rass[sedacion_profunda], 
-                     rass[sedacion_paralizado],bis[sedacion_paralizado]], 
+                    data_resumen, ["RASS","RASS_OBJETIVO","RASS_ADECUADA","BIS","BIS_OBJETIVO", "BIS_ADECUADA"], 
+                    [rass,rass_objetivo,rass[rass_adecuada],bis,bis_objetivo,bis[bis_adecuada]], 
                     f"indicador_sedacion_adecuada_{self.encontrar_año(nombre)}.csv"
                 )
                 
@@ -1079,14 +1080,12 @@ class Programa(State):
                 
                 #Logica de calculo
                 traslado = df["TRASLADO_INTRAHOSPITALARIO"].fillna(False)
-                adverso = df["EVENTOS_ADVERSOS_TRASLADO"].fillna("ninguno").str.lower()
-                excluir = ["ninguno", "nada", "no", ""]
-                
+                adverso = df["EVENTOS_ADVERSOS_TRASLADO"].fillna(False)                
 
                 #Total de traslados
                 total_traslado = traslado.sum()
                 #Total de eventos adversos
-                total_adversos = (traslado&~adverso.isin(excluir)).sum()
+                total_adversos = (traslado&adverso).sum()
 
 
                 valor_final = (total_adversos/total_traslado)*100 if total_traslado != 0 else 0.0
