@@ -24,6 +24,10 @@ class Programa(State):
     #Indicador para controlar los graficos que se visualizan
     ind_grafico: str
 
+    #Indicador para controlar la mezcla de indicadores
+    ind_mezcla: bool
+    lista_selecc: list[str]
+
     #Metodo que nos permite encontrar el año del documento
     def encontrar_año(self, nombre: str):
         return re.findall(r"\d{4}", nombre)[0] if re.findall(r"\d{4}", nombre) else "0000"
@@ -56,6 +60,7 @@ class Programa(State):
         self.mostrar_resultado = False
         self.ind_especi = False
         self.ind_resumen = False
+        self.ind_mezcla = False
         self.ind_grafico = ""
     
     #Metodo para abrir el drawer
@@ -69,6 +74,7 @@ class Programa(State):
         self.texto = ""
         self.csv_final = []
         resultado = []
+        self.lista_selecc = []
         return resultado
     
     #Metodo que hace el proceso final de todos los metodos.
@@ -1385,3 +1391,77 @@ class Programa(State):
         self.mostrar_resultado = True
         self.texto = "Tabla resumen: Permite ver de manera global los indicadores de cada año"
         return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
+    
+    #Metodo que incluye los indicadores seleccionados
+    @rx.event
+    def seleccion_ind(self, form_data: dict):
+        seleccionado = form_data["indicador"]
+
+        if  len(self.lista_selecc) < 3 and seleccionado not in self.lista_selecc:
+            self.lista_selecc.append(seleccionado)
+        else:
+            return rx.toast("Solo se pueden meter 3 indicadores sin repetir")
+        
+    def mezcla(self, ocultar = False):
+        #Limpiamos las variables y activamos el booleano    
+        self.limpieza()
+        self.ind_mezcla = True
+        datos = []
+            
+        # self.datos_final = [
+        #     {"name": self.encontrar_año(nombre), "valor": round(valor, 4) if self.ind_especi == False else valor} 
+        #     for nombre, valor in zip(self.nombres_archivos, resultado_final)
+        # ]
+        
+        #Recorre los resultados tras ejecutar cada indicador y añade el valor numerico obtenido a su sublista correspondiente en listas
+        def recuperar_datos(indicador: str):
+            for elem in range(len(self.datos_final)): 
+                datos.append({"name": self.datos_final[elem]["name"]})
+                datos[elem][indicador] = self.datos_final[elem]["valor"]
+        
+        #Ensambla todo al terminar:
+        #Ejecuta especialidad_ingreso para obtener datos especificos de especialidades
+        #Asigna a df_resumen nuevas columnas usando el año como nombre y los valores recolectados como datos
+        #Crea DataFrames adicionales para Especialidades y Valores
+        #axis=1: Une lateralmente el resumen de indicadores con el desglose de especialidades
+        # def parseo_final():
+        #     espe = []
+        #     valores = []
+
+        #     res = self.especialidad_ingreso(True)
+        #     if res is not None: return res
+
+        #     for elem in range(len(self.datos_final)):
+        #         df_resumen[listas[elem][0]] = listas[elem][1:len(listas[elem])]
+
+        #         for i in self.datos_final[elem]["valor"]:
+        #             espe.append(i["especialidad"])
+        #             valores.append(i["indicador"])
+
+        #     df_especialidades = pd.DataFrame({'Especialidades': espe})
+        #     df_valores = pd.DataFrame({"Valores": valores})
+        #     df_final = pd.concat([df_resumen, df_especialidades, df_valores], axis=1)
+        #     return df_final
+        
+        #Ejecutamos el metodo de calculo con True para el resumen(no dispara la interfaz individual)
+        #Si el calculo falla o devuelve algo inesperado, detiene el proceso
+        #Toma el resultado recien calculado y lo guarda en la estructura de listas
+        res = self.mortalidad_estandarizada(True)
+        if res is not None: return res
+        recuperar_datos("moret")
+        print(datos)
+
+        #Convierte los nombres de las columnas y las filas de datos del DataFrame a una lista de Python para que Reflex pueda leerlas
+        # csv_descargar = parseo_final()
+        # self.columnas = csv_descargar.columns.tolist()
+        # self.datos = csv_descargar.values.tolist()
+        # self.limpieza()
+
+        #Guardamos el resultado final, prepara el objeto para que el usuario pueda descargar el resumen como CSV
+        #Disparamos la ventana flotante y modificamos el texto saltandonos el metodo final
+        # self.datos_final.append({"name": "Resumen", "valor": csv_descargar})
+        # self.csv_final.append({"name": "Resumen.csv", "valor": csv_descargar})
+        self.mostrar_resultado = True
+        self.texto = "Mezcla de Indicadores: Puedes seleccionar un máximo de tres indicadores para que aparezca mezclados en los graficos."
+        return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")       
+    

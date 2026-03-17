@@ -1,5 +1,5 @@
 import reflex as rx
-from Practicas_2026_Nicolas_Garcia_Gomez.estilos.colores import Color, TextoColor
+from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import Color, TextoColor
 from Logica.Programa import Programa
 
 #Creamos el menu de seleccion
@@ -85,6 +85,7 @@ def seleccion(icon: str) -> rx.Component:
                             ),
                             rx.menu.item("Retirada accidental del tubo endotraqueal", on_click=Programa.retirada_accidental(ocultar = False)),
                             rx.menu.item("Tabla resumen", on_click=Programa.tabla_resumen),
+                            rx.menu.item("Mezcla de indicadores", on_click=Programa.mezcla(ocultar = False)),
 
                             #Aseguramos que el menu flote por encima de todo
                             z_index="500", 

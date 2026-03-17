@@ -1,5 +1,5 @@
 import reflex as rx
-from Practicas_2026_Nicolas_Garcia_Gomez.estilos.colores import Color
+from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import Color
 
 #Para crear graficos de area
 def graf_area(datos: list[dict], bool_esp: bool) -> rx.Component:

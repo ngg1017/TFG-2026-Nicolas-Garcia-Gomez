@@ -1,6 +1,6 @@
 import reflex as rx
 from Logica.State import State
-from Practicas_2026_Nicolas_Garcia_Gomez.estilos.colores import TextoColor, Color
+from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import TextoColor, Color
 
 #Para crear botones
 def boton_subida(icon: str) -> rx.Component:

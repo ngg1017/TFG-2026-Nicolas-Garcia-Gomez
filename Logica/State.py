@@ -140,7 +140,7 @@ class State(rx.State):
     #Definimos el metodo como asincrono permitiendo que el servidor haga otras tareas mientras tanto 
     async def loop_monitor_conexion(self):
         #Importacion local para evitar errores circulares
-        import Practicas_2026_Nicolas_Garcia_Gomez.Practicas_2026_Nicolas_Garcia_Gomez as main_file
+        import TFG_2026_Nicolas_Garcia_Gomez.TFG_2026_Nicolas_Garcia_Gomez as main_file
         
         #Obtenemos la instancia de la app que creaste con rx.App()
         #Si aun no se ha creado, devuelve None en lugar de dar un error, gracias a getattr.

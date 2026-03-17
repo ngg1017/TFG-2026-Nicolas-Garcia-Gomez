@@ -1,7 +1,7 @@
 import reflex as rx
-import Practicas_2026_Nicolas_Garcia_Gomez.estilos.estilos as estilos
-from Practicas_2026_Nicolas_Garcia_Gomez.estilos.estilos import Size, Color, TextoColor
-import Practicas_2026_Nicolas_Garcia_Gomez.constantes as constantes
+import TFG_2026_Nicolas_Garcia_Gomez.estilos.estilos as estilos
+from TFG_2026_Nicolas_Garcia_Gomez.estilos.estilos import Size, Color, TextoColor
+import TFG_2026_Nicolas_Garcia_Gomez.constantes as constantes
 
 def cabecera() -> rx.Component:
     return rx.vstack(

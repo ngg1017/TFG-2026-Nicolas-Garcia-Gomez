@@ -1,7 +1,7 @@
 import reflex as rx
-from Practicas_2026_Nicolas_Garcia_Gomez.estilos.estilos import Size, Color
-from Practicas_2026_Nicolas_Garcia_Gomez.componentes.link_icon import link_icon
-import Practicas_2026_Nicolas_Garcia_Gomez.constantes as constantes
+from TFG_2026_Nicolas_Garcia_Gomez.estilos.estilos import Size, Color
+from TFG_2026_Nicolas_Garcia_Gomez.componentes.link_icon import link_icon
+import TFG_2026_Nicolas_Garcia_Gomez.constantes as constantes
 
 #Creamos la barra lateral
 def navbar() -> rx.Component:

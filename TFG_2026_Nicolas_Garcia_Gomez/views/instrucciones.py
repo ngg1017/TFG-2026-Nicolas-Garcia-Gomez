@@ -1,9 +1,9 @@
 import reflex as rx
-import Practicas_2026_Nicolas_Garcia_Gomez.estilos.estilos as estilos
-from Practicas_2026_Nicolas_Garcia_Gomez.estilos.estilos import Size, Color, TextoColor
-from Practicas_2026_Nicolas_Garcia_Gomez.componentes.boton_subida import boton_subida
+import TFG_2026_Nicolas_Garcia_Gomez.estilos.estilos as estilos
+from TFG_2026_Nicolas_Garcia_Gomez.estilos.estilos import Size, Color, TextoColor
+from TFG_2026_Nicolas_Garcia_Gomez.componentes.boton_subida import boton_subida
 from Logica.State import State
-from Practicas_2026_Nicolas_Garcia_Gomez.componentes.seleccion import seleccion
+from TFG_2026_Nicolas_Garcia_Gomez.componentes.seleccion import seleccion
 
 def instrucciones() -> rx.Component:
     return rx.box(

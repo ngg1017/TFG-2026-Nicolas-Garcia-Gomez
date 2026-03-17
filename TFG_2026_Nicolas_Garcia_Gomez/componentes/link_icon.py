@@ -1,6 +1,6 @@
 import reflex as rx
-from Practicas_2026_Nicolas_Garcia_Gomez.estilos.colores import Color, TextoColor
-from Practicas_2026_Nicolas_Garcia_Gomez.estilos.estilos import ESTILO_BASE
+from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import Color, TextoColor
+from TFG_2026_Nicolas_Garcia_Gomez.estilos.estilos import ESTILO_BASE
 
 #Para crear botones
 def link_icon(icon: str, url: str) -> rx.Component:

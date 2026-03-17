@@ -1,10 +1,10 @@
 import reflex as rx
-import Practicas_2026_Nicolas_Garcia_Gomez.estilos.estilos as estilos
-from Practicas_2026_Nicolas_Garcia_Gomez.views.navbar import navbar
-from Practicas_2026_Nicolas_Garcia_Gomez.views.cabecera import cabecera
-from Practicas_2026_Nicolas_Garcia_Gomez.views.pie import pie
-from Practicas_2026_Nicolas_Garcia_Gomez.views.instrucciones import instrucciones
-from Practicas_2026_Nicolas_Garcia_Gomez.views.vent_flotante import vent_flotante
+import TFG_2026_Nicolas_Garcia_Gomez.estilos.estilos as estilos
+from TFG_2026_Nicolas_Garcia_Gomez.views.navbar import navbar
+from TFG_2026_Nicolas_Garcia_Gomez.views.cabecera import cabecera
+from TFG_2026_Nicolas_Garcia_Gomez.views.pie import pie
+from TFG_2026_Nicolas_Garcia_Gomez.views.instrucciones import instrucciones
+from TFG_2026_Nicolas_Garcia_Gomez.views.vent_flotante import vent_flotante
 from Logica.Programa import Programa
 from Logica.State import State
 
