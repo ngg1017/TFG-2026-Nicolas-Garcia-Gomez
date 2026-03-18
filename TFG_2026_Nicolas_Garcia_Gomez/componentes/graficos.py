@@ -478,3 +478,51 @@ def graf_funnel(datos: list[dict]) -> rx.Component:
         height=250, 
         )
     )
+
+#Grafico de area mezclando indicadores
+def graf_ar_mezcla(datos: list[dict], indicadores: list[str]) -> rx.Component:
+    #Colores para distinguir las areas
+    colores = ["#e40707", "#8884d8", "#82ca9d"]
+    colores_var = rx.Var.create(colores)
+    
+    #IDs unicos para conectar cada area con su eje
+    ejes_ids = ["eje_izq", "eje_der_1", "eje_der_2"]
+    ejes_var = rx.Var.create(ejes_ids)
+
+    #Colocacion de los ejes
+    colocacion = ["left", "right", "right"]
+    colocacion_var = rx.Var.create(colocacion)
+
+    return rx.recharts.area_chart(
+        #Generacion de areas
+        rx.foreach(
+            indicadores,
+            lambda item, i: rx.recharts.area(
+                data_key=item,
+                stroke=colores_var[i],
+                fill=colores_var[i],
+                #Transparencia para ver las de atras
+                fill_opacity=0.6*i,
+                #Conexion dinamica al eje 
+                y_axis_id=ejes_var[i], 
+            )
+        ),
+        #Configuracion de los ejes
+        rx.recharts.x_axis(data_key="name"),
+
+        rx.foreach(
+            indicadores,
+            lambda item, i: rx.recharts.y_axis(
+                y_axis_id=ejes_var[i], 
+                orientation=colocacion_var[i], 
+                stroke=colores_var[i],
+                dx = 10*i
+            )
+        ),
+        rx.recharts.graphing_tooltip(),
+        rx.recharts.legend(),
+        data=datos,
+        width="100%",
+        height=400, 
+        margin={"right": 60, "left": 10} 
+    )

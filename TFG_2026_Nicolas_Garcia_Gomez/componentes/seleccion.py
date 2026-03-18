@@ -85,7 +85,7 @@ def seleccion(icon: str) -> rx.Component:
                             ),
                             rx.menu.item("Retirada accidental del tubo endotraqueal", on_click=Programa.retirada_accidental(ocultar = False)),
                             rx.menu.item("Tabla resumen", on_click=Programa.tabla_resumen),
-                            rx.menu.item("Mezcla de indicadores", on_click=Programa.mezcla(ocultar = False)),
+                            rx.menu.item("Mezcla de indicadores", on_click=Programa.mezcla),
 
                             #Aseguramos que el menu flote por encima de todo
                             z_index="500", 
