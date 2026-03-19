@@ -1420,6 +1420,12 @@ class Programa(State):
                     self.datos_mezcla.append({"name": self.datos_final[elem]["name"]})
                 self.datos_mezcla[elem][indicador] = self.datos_final[elem]["valor"]
         
+        #Calcula el maximo real de un indicador en todos los años
+        def obtener_maximo_historico(nombre_indicador):
+            #Extraemos el valor de ese indicador para cada año(si existe)
+            valores = [d.get(nombre_indicador, 0) for d in self.datos_mezcla]
+            return max(valores) if valores else 0
+
         #Diccionario con todos los metodos
         claves = {"Mortalidad Estandarizada":self.mortalidad_estandarizada, "Reingresos no programados": self.reingresos_no_programados, 
                   "Incidencia de barotrauma": self.incidencia_de_barotrauma, "Posicion semiincorporada con VMI": self.posicion_semiincorporada_VMI, 
@@ -1445,7 +1451,12 @@ class Programa(State):
                 if res is not None:
                     self.cerrar_ventana()
                     return res
-                recuperar_datos(valor) 
+                recuperar_datos(valor)
+
+        #Ordenamos de MAYOR a MENOR maximo historico:
+        #El indicador "más grande" ira PRIMERO en la lista (se dibuja al fondo).
+        #El indicador "más pequeño" ira al FINAL de la lista (se dibuja delante).
+        self.lista_selecc = sorted(self.lista_selecc, key=obtener_maximo_historico, reverse=True)
 
         self.datos_final = self.datos_mezcla
         self.mostrar_resultado = True

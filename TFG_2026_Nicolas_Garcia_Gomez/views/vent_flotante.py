@@ -4,7 +4,7 @@ from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import TextoColor, Color
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.mezcla import mezcla
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.graficos import (graf_barras, graf_barras_vert, graf_area, graf_area_vert, 
                                                                       graf_lineas, graf_lineas_vert, graf_dispersion, graf_pie, graf_funnel,
-                                                                      graf_ar_mezcla)
+                                                                      graf_ar_mezcla, area_sync, composed, graf_pie_mezcla)
 
 #Devulve la ventana flotante
 def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
@@ -128,6 +128,10 @@ def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
                                         ),
                                         rx.menu.content(
                                             rx.menu.item("Gráfico de Area", on_click=Programa.cambiar_grafico("area")),
+                                            rx.menu.item("Gráfico Compuesto Separado", on_click=Programa.cambiar_grafico("compuesto_1")),
+                                            rx.menu.item("Gráfico Compuesto", on_click=Programa.cambiar_grafico("compuesto")),
+                                            rx.menu.item("Gráfico Tarta", on_click=Programa.cambiar_grafico("pie")),
+                                            rx.menu.item("", on_click=Programa.cambiar_grafico("compuesto")),
                                             z_index="500", 
                                             background_color=Color.ACENTO.value,
                                             color=TextoColor.SECUNDARIO.value,
@@ -140,6 +144,10 @@ def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
                             rx.match(
                                 Programa.ind_grafico,
                                 ("area", graf_ar_mezcla(datos, Programa.lista_selecc)),
+                                ("compuesto_1", area_sync(datos, Programa.lista_selecc)),
+                                ("compuesto", composed(datos, Programa.lista_selecc)),
+                                ("pie", graf_pie_mezcla(datos, Programa.lista_selecc)),
+                                ("", composed(datos, Programa.lista_selecc)),
                                 #Condicional que nos permite ajustar el mensaje ya sea para seleccionar graficos o indicadores
                                 rx.cond(
                                     Programa.lista_selecc.length() > 0,

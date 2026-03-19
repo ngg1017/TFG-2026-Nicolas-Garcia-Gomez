@@ -484,14 +484,6 @@ def graf_ar_mezcla(datos: list[dict], indicadores: list[str]) -> rx.Component:
     #Colores para distinguir las areas
     colores = ["#e40707", "#8884d8", "#82ca9d"]
     colores_var = rx.Var.create(colores)
-    
-    #IDs unicos para conectar cada area con su eje
-    ejes_ids = ["eje_izq", "eje_der_1", "eje_der_2"]
-    ejes_var = rx.Var.create(ejes_ids)
-
-    #Colocacion de los ejes
-    colocacion = ["left", "right", "right"]
-    colocacion_var = rx.Var.create(colocacion)
 
     return rx.recharts.area_chart(
         #Generacion de areas
@@ -502,27 +494,156 @@ def graf_ar_mezcla(datos: list[dict], indicadores: list[str]) -> rx.Component:
                 stroke=colores_var[i],
                 fill=colores_var[i],
                 #Transparencia para ver las de atras
-                fill_opacity=0.6*i,
-                #Conexion dinamica al eje 
-                y_axis_id=ejes_var[i], 
+                fill_opacity=0.2 + (0.2 * i), 
             )
         ),
         #Configuracion de los ejes
         rx.recharts.x_axis(data_key="name"),
-
-        rx.foreach(
-            indicadores,
-            lambda item, i: rx.recharts.y_axis(
-                y_axis_id=ejes_var[i], 
-                orientation=colocacion_var[i], 
-                stroke=colores_var[i],
-                dx = 10*i
-            )
-        ),
+        rx.recharts.y_axis(),
         rx.recharts.graphing_tooltip(),
         rx.recharts.legend(),
+        rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
         data=datos,
         width="100%",
-        height=400, 
-        margin={"right": 60, "left": 10} 
+        height=430, 
+        margin={"left": 10} 
+    )
+
+def area_sync(datos: list[dict], indicadores: list[str]) -> rx.Component:
+    #Colores para distinguir las areas
+    colores = ["#e40707", "#8884d8", "#82ca9d"]
+    colores_var = rx.Var.create(colores)
+
+    return rx.vstack(
+        rx.recharts.bar_chart(
+            rx.recharts.graphing_tooltip(),
+            rx.recharts.bar(data_key=indicadores[0], stroke=colores_var[0], fill=colores_var[0]),
+            rx.recharts.bar(data_key=indicadores[1],stroke=colores_var[1],fill=colores_var[1]),
+            rx.recharts.bar(data_key=indicadores[2],stroke=colores_var[2],fill=colores_var[2]),
+            rx.recharts.x_axis(data_key="name"),
+            rx.recharts.y_axis(),
+            rx.recharts.legend(),
+            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            data=datos,
+            sync_id="1",
+            width="100%",
+            height=200,
+        ),
+        rx.recharts.composed_chart(
+            rx.recharts.bar(data_key=indicadores[0], stroke=colores_var[0], fill=colores_var[0], bar_size=20),
+            rx.recharts.area(data_key=indicadores[1], stroke=colores_var[1], fill=colores_var[1]),
+            rx.recharts.line(data_key=indicadores[2], type_="monotone", stroke=colores_var[2]),
+            rx.recharts.x_axis(data_key="name"),
+            rx.recharts.y_axis(),
+            rx.recharts.graphing_tooltip(),
+            rx.recharts.brush(data_key="name", height=30, stroke="#8884d8"),
+            rx.recharts.legend(),
+            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+            data=datos,
+            sync_id="1",
+            width="100%",
+            height=250,
+        ),
+        width="100%",
+    )
+
+def composed(datos: list[dict], indicadores: list[str]) -> rx.Component:
+    #Colores para distinguir las areas
+    colores = ["#e40707", "#8884d8", "#82ca9d"]
+    colores_var = rx.Var.create(colores)
+
+    return rx.recharts.composed_chart(
+        rx.recharts.area(data_key=indicadores[0], stroke=colores_var[0], fill=colores_var[0]),
+        rx.recharts.bar(data_key=indicadores[1], bar_size=20, fill=colores_var[1]),
+        rx.recharts.line(data_key=indicadores[2], type_="monotone", stroke=colores_var[2]),
+        rx.recharts.x_axis(data_key="name"),
+        rx.recharts.y_axis(),
+        rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+        rx.recharts.graphing_tooltip(),
+        data=datos,
+        height=250,
+        width="100%",
+    )
+
+def graf_pie_mezcla(datos: list[dict], indicadores: list[str]) -> rx.Component:
+    colores = ["#e40707", "#8884d8", "#82ca9d"]
+    colores_var = rx.Var.create(colores)
+    
+    return rx.vstack(
+        #El grafico de tarta
+        rx.recharts.pie_chart(
+            #Por cada nombre de indicador en la lista, genera un objeto "Pie"
+            rx.foreach(
+                indicadores,
+                lambda item, i: rx.recharts.pie(
+                    #Entra en los datos de los años y aplica a cada "quesito" del anillo el mismo color del indicador actual
+                    rx.foreach(
+                        datos,
+                        lambda entry, j: rx.recharts.cell(fill=colores_var[i])
+                    ),
+                    data=datos,
+                    data_key=item,
+                    name=item,
+                    #Cada indicador empiece más afuera que el anterior y no se solapen con la siguiente capa.
+                    inner_radius=rx.Var.create(f"{(i * 20) + 10}%"),
+                    outer_radius=rx.Var.create(f"{(i + 1) * 20 + 5}%"),
+                    padding_angle=5,
+                    stroke="none",
+                )
+            ),
+            rx.recharts.graphing_tooltip(),
+            width=700,
+            height=500,
+        ),
+        
+        #Leyenda manual
+        rx.flex(
+            #Inicia un bucle para dibujar cada etiqueta de la leyenda (cuadrado + texto) basandose en los indicadores activos.
+            rx.foreach(
+                indicadores,
+                lambda item, i: rx.flex(
+                    #Cuadrado de color
+                    rx.box(
+                        width="14px",
+                        height="14px",
+                        background_color=colores_var[i],
+                        border_radius="3px",
+                        flex_shrink="0",
+                    ),
+                    #Texto de la leyenda
+                    rx.text(
+                        item, 
+                        size="2", 
+                        weight="medium",
+                        style={
+                            #Obligamos a que la linea mida lo mismo que el cuadro
+                            "line_height": "14px",
+                            #Quitamos cualquier margen automatico  
+                            "margin": "0",          
+                            "padding": "0",
+                            "display": "inline-block",
+                            #Alineacion clasica de texto
+                            "vertical_align": "middle", 
+                        }
+                    ),
+                    spacing="2",
+                    style={
+                        "display": "flex",
+                        #Centrado vertical real de Flex
+                        "align_items": "center",    
+                        "justify_content": "center",
+                        #Contenedor un poco mas alto para dar aire
+                        "height": "20px",           
+                    }
+                )
+            ),
+            spacing="5",
+            justify="center",
+            width="100%",
+            flex_wrap="wrap",
+            padding_top="1em",
+            padding_bottom="2em",
+        ),
+        width="100%",
+        align="center",
     )
