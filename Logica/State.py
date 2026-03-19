@@ -22,10 +22,10 @@ class State(rx.State):
         self.barra = True
         yield
 
-        #Controlar que el maximo de archivos es 3
-        if len(files) > 3:
+        #Controlar que el maximo de archivos es 10
+        if len(files) > 10:
             self.barra = False
-            yield rx.window_alert("El maximo de archivos para subir a la vez son 3 csv") 
+            yield rx.window_alert("El maximo de archivos para subir a la vez son 10 csv") 
             return
 
         #Controla que los archivos solo sean de tipo csv
@@ -43,8 +43,8 @@ class State(rx.State):
                     contenido = await file.read()
                     tmp.write(contenido)
 
-                    #Impide que se guarden mas de 3 y los borra fisicamente
-                    while len(self.rutas_archivos) >= 3:
+                    #Impide que se guarden mas de 10 y los borra fisicamente
+                    while len(self.rutas_archivos) >= 10:
                         #Extraemos las referencias del archivo mas antiguo
                         ruta_a_borrar = self.rutas_archivos[0]
                         nombre_a_borrar = self.nombres_archivos[0]
@@ -70,7 +70,7 @@ class State(rx.State):
                 yield rx.window_alert("Ocurrió un error inesperado al procesar el archivo.")  
 
         if len(self.nombres_archivos_eliminados) > 0:
-            yield rx.toast(f"El maximo son 3 por lo que se han borrado los siguientes archivos: {[e for e in self.nombres_archivos_eliminados]}")
+            yield rx.toast(f"El maximo son 10 por lo que se han borrado los siguientes archivos: {[e for e in self.nombres_archivos_eliminados]}")
         
         #Como ya no guardamos los archivos hacemos que tarde para que se vea la barra
         time.sleep(1.5)

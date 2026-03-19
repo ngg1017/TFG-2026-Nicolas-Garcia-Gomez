@@ -3,6 +3,7 @@ import TFG_2026_Nicolas_Garcia_Gomez.estilos.estilos as estilos
 from TFG_2026_Nicolas_Garcia_Gomez.estilos.estilos import Size, Color, TextoColor
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.boton_subida import boton_subida
 from Logica.State import State
+from Logica.Programa import Programa
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.seleccion import seleccion
 
 def instrucciones() -> rx.Component:
@@ -36,13 +37,13 @@ def instrucciones() -> rx.Component:
             ),
             
             rx.center(
-                rx.hstack(
+                rx.flex(
                     rx.text("Archivos cargados: "),
 
                     #Muestra todos los archivos cargados
                     rx.foreach(
-                        State.nombres_archivos,
-                        lambda nombre: rx.text(f"{nombre} ", color = TextoColor.ACENTO.value)
+                        Programa.nombres_archivos,
+                        lambda nombre:rx.text(f"{nombre} ", color = TextoColor.ACENTO.value, size="2"),
                     ),
 
                     #Condicional para cuando existan documentos aparezca el boton de borrar
@@ -57,8 +58,15 @@ def instrucciones() -> rx.Component:
                         ),
                         rx.spacer()
                     ),
-                    
-                    align="center", 
+                    #Permite que los elementos pasen a la siguiente fila
+                    flex_wrap="wrap", 
+                    #Alinea verticalmente el texto y el boton en cada fila         
+                    align_items="center",  
+                    #Mantiene todo el grupo centrado    
+                    justify_content="center",
+                    #Espacio uniforme entre elementos 
+                    spacing="2",               
+                    width="100%",
                 ),
                 width="100%",
                 margin_top=Size.MEDIANO.value
