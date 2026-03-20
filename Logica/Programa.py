@@ -3,6 +3,7 @@ import reflex as rx
 from .State import State
 import unicodedata
 import re
+from fpdf import FPDF
 
 #Hereda de mi clase State
 class Programa(State):
@@ -18,8 +19,7 @@ class Programa(State):
 
     #Indicadores para mostrar la table resumen
     ind_resumen: bool
-    columnas: list[str]
-    datos: list[list]
+    lista_unida: list[list[str], list[list]]
 
     #Indicador para controlar los graficos que se visualizan
     ind_grafico: str
@@ -109,19 +109,23 @@ class Programa(State):
     #Metodo que se dispara al presionar el boton de descarga y que basicamente hace lo que indica su nombre
     def descargar_archivo(self, indice: int):
         #Obtenemos el dataFrame y su nombre de la lista de diccionarios
-        df = self.csv_final[indice]["valor"]
+        datos = self.csv_final[indice]["valor"]
         nombre = self.csv_final[indice]["name"]
         
-        #Lo convertimos a STRING (formato CSV)
-        csv_string = df.to_csv( 
-            sep=",",         
-            index=False,
-            encoding="utf-8-sig"
-        )
-        
+        #Si es el informe logicamente no lo pasamos a CSV
+        if nombre == "Informe.pdf":
+            archivo = datos
+        else:
+            #Lo convertimos a STRING (formato CSV)
+            archivo = datos.to_csv( 
+                sep=",",         
+                index=False,
+                encoding="utf-8-sig"
+            )
+    
         #Disparamos la descarga con nombre y datos correctos
         return rx.download(
-            data=csv_string,
+            data=archivo,
             filename=f"{nombre}"
         )
     
@@ -1269,6 +1273,47 @@ class Programa(State):
         "la vía aérea en la UCI debido al riesgo de hipoxia, parada cardiorrespiratoria o trauma laríngeo", ocultar=ocultar)
 
     def tabla_resumen(self):
+
+        #Recorre los resultados tras ejecutar cada indicador y añade el valor numerico obtenido a su sublista correspondiente en listas
+        def recuperar_datos():
+            for elem in range(len(self.datos_final)): 
+                listas[elem].append(self.datos_final[elem]["valor"])
+        
+        #Ensambla todo al terminar:
+        #Ejecuta especialidad_ingreso para obtener datos especificos de especialidades
+        #Asigna a df_resumen nuevas columnas usando el año como nombre y los valores recolectados como datos
+        #El metodo .at[fila, columna] permite el acceso directo a una celda especifica. A diferencia del indexado, si la combinacion de fila o columna no existe, 
+        #Pandas expande el DataFrame automaticamente creandolas e insertando el valor sin lanzar errores.
+        def parseo_final():
+            lista_plana = [str(año[0]) for año in listas]
+            df_especialidades = pd.DataFrame(index=lista_plana)
+            df_especialidades.index.name = "Especialidad_Ingreso"
+
+            res = self.especialidad_ingreso(True)
+            if res is not None: return res
+
+            for elem in range(len(self.datos_final)):
+                nombre_columna = listas[elem][0]
+                df_resumen[nombre_columna] = listas[elem][1:len(listas[elem])]                
+
+                for i in self.datos_final[elem]["valor"]:
+                    especialidad = i["especialidad"].split("_")[0]
+                    valor_indicador = i["indicador"]
+                    df_especialidades.at[nombre_columna, especialidad] = valor_indicador
+            
+            #Al final, reseteamos el indice para que "Especialidad_Ingreso" vuelva a ser una columna
+            df_especialidades = df_especialidades.reset_index()
+            return df_resumen, df_especialidades
+        
+        #Metodo que crea el informe pdf
+        def generar_pdf():
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_font("helvetica", style="B", size=16)
+            pdf.cell(40, 10, "Hello World!")
+            pdf_bytes = bytes(pdf.output(dest='S')) 
+            return pdf_bytes
+
         #Limpiamos las variables y activamos el booleano    
         self.limpieza()
         self.ind_resumen = True
@@ -1282,117 +1327,59 @@ class Programa(State):
                         "Eventos adversos durante el traslado intrahospitalario", "Nutrición enteral precoz", 
                         "Sobretransfusión de concentrados de hematies","Retirada accidental del tubo endotraqueal"]
                         }
-        
         df_resumen = pd.DataFrame(data_resumen)
+        
         #Crea una lista de listas. Cada sublista comienza con el año, se usa para acumular los resultados de ese año especifico
         listas = [[self.encontrar_año(nombre)] for _, nombre in enumerate(self.nombres_archivos)]
         
-        #Recorre los resultados tras ejecutar cada indicador y añade el valor numerico obtenido a su sublista correspondiente en listas
-        def recuperar_datos():
-            for elem in range(len(self.datos_final)): 
-                listas[elem].append(self.datos_final[elem]["valor"])
-        
-        #Ensambla todo al terminar:
-        #Ejecuta especialidad_ingreso para obtener datos especificos de especialidades
-        #Asigna a df_resumen nuevas columnas usando el año como nombre y los valores recolectados como datos
-        #Crea DataFrames adicionales para Especialidades y Valores
-        #axis=1: Une lateralmente el resumen de indicadores con el desglose de especialidades
-        def parseo_final():
-            espe = []
-            valores = []
-
-            res = self.especialidad_ingreso(True)
-            if res is not None: return res
-
-            for elem in range(len(self.datos_final)):
-                df_resumen[listas[elem][0]] = listas[elem][1:len(listas[elem])]
-
-                for i in self.datos_final[elem]["valor"]:
-                    espe.append(i["especialidad"])
-                    valores.append(i["indicador"])
-
-            df_especialidades = pd.DataFrame({'Especialidades': espe})
-            df_valores = pd.DataFrame({"Valores": valores})
-            df_final = pd.concat([df_resumen, df_especialidades, df_valores], axis=1)
-            return df_final
+        claves = [self.mortalidad_estandarizada, self.reingresos_no_programados, self.incidencia_de_barotrauma, self.posicion_semiincorporada_VMI, 
+                  self.incidencia_ulceras_presion, self.valoracion_interrupcion_sedacion, self.prevencion_enfermedad_tromboembolica, self.mantenimiento_niveles_glucemia,
+                  self.resucitacion_precoz_sepsis, self.traslado_intrahospitalario, self.tratamiento_empirico_infeccion, self.neumonia_asociada_vmi,
+                  self.reintubacion, self.profilaxis_ulcera_enfermos_NE, self.sedacion_adecuada, self.ingresos_urgentes, self.adversos_traslado, self.ne_precoz, 
+                  self.sobretransfusion_hematies, self.retirada_accidental]
         
         #Ejecutamos el metodo de calculo con True para el resumen(no dispara la interfaz individual)
         #Si el calculo falla o devuelve algo inesperado, detiene el proceso
         #Toma el resultado recien calculado y lo guarda en la estructura de listas
-        res = self.mortalidad_estandarizada(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.reingresos_no_programados(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.incidencia_de_barotrauma(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.posicion_semiincorporada_VMI(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.incidencia_ulceras_presion(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.valoracion_interrupcion_sedacion(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.prevencion_enfermedad_tromboembolica(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.mantenimiento_niveles_glucemia(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.resucitacion_precoz_sepsis(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.traslado_intrahospitalario(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.tratamiento_empirico_infeccion(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.neumonia_asociada_vmi(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.reintubacion(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.profilaxis_ulcera_enfermos_NE(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.sedacion_adecuada(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.ingresos_urgentes(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.adversos_traslado(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.ne_precoz(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.sobretransfusion_hematies(True)
-        if res is not None: return res
-        recuperar_datos()
-        res = self.retirada_accidental(True)
-        if res is not None: return res
-        recuperar_datos()
+        for indi in range(len(claves)):
+            res = claves[indi](ocultar = True)
+            res
+            if res is not None:
+                self.cerrar_ventana()
+                return res
+            recuperar_datos()
+        
+        #Creamos los CSV y el PDF a descargar
+        csv_indi, csv_espe = parseo_final()
+        pdf_generado = generar_pdf()
 
         #Convierte los nombres de las columnas y las filas de datos del DataFrame a una lista de Python para que Reflex pueda leerlas
-        csv_descargar = parseo_final()
-        self.columnas = csv_descargar.columns.tolist()
-        self.datos = csv_descargar.values.tolist()
+        cols_indi = csv_indi.columns.tolist()
+        cols_espe = csv_espe.columns.tolist()
+        datos_indi = csv_indi.values.tolist()
+        datos_espe = csv_espe.values.tolist()
+
+        #Unimos por parejas: [[cols_indi, datos_indi], [cols_espe, datos_espe]]
+        self.lista_unida = [
+            [cols_indi, datos_indi],
+            [cols_espe, datos_espe]
+        ]
         self.limpieza()
 
-        #Guardamos el resultado final, prepara el objeto para que el usuario pueda descargar el resumen como CSV
+        #Guardamos los resultados finales, prepara el objeto para que el usuario pueda descargar el resumen y la especialidad como CSV
         #Disparamos la ventana flotante y modificamos el texto saltandonos el metodo final
-        self.datos_final.append({"name": "Resumen", "valor": csv_descargar})
-        self.csv_final.append({"name": "Resumen.csv", "valor": csv_descargar})
+        self.datos_final.append({"name": "Resumen", "valor": csv_indi})
+        self.datos_final.append({"name": "Especialidades", "valor": csv_espe})
+        self.datos_final.append({"name": "Informe", "valor": pdf_generado})
+        
+        self.csv_final.append({"name": "Resumen.csv", "valor": csv_indi})
+        self.csv_final.append({"name": "Especialidades.csv", "valor": csv_espe})
+        self.csv_final.append({"name": "Informe.pdf", "valor": pdf_generado})
+
         self.mostrar_resultado = True
         self.texto = "Tabla resumen: Permite ver de manera global los indicadores de cada año"
         return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
+
     
     #Metodo para borrar los datos añadidos
     @rx.event

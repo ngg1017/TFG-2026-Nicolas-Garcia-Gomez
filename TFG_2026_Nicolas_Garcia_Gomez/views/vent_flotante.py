@@ -2,6 +2,7 @@ import reflex as rx
 from Logica.Programa import Programa
 from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import TextoColor, Color
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.mezcla import mezcla
+from TFG_2026_Nicolas_Garcia_Gomez.componentes.tabla import tabla
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.graficos import (graf_barras, graf_barras_vert, graf_area, graf_area_vert, 
                                                                       graf_lineas, graf_lineas_vert, graf_dispersion, graf_pie, graf_funnel,
                                                                       graf_ar_mezcla, area_sync, composed, graf_pie_mezcla)
@@ -69,44 +70,11 @@ def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
                 #Llamamos a los graficos o la tabla resumen
                 rx.cond(
                     Programa.ind_resumen,
-
-                    #La base de la tabla   
-                    rx.table.root(
-                        #Define la seccion superior(donde van los nombres de las columnas)
-                        rx.table.header(
-                            #Creamos una unica fila
-                            rx.table.row(
-                                #Recorre la lista de nombres de columnas, por cada nombre, crea una "celda de cabecera"
-                                rx.foreach(
-                                    Programa.columnas, 
-                                    lambda col: rx.table.column_header_cell(col)
-                                ),
-                                border = "solid",
-                                border_color = Color.ACENTO.value
-                            )
-                        ),
-                        #Cuerpo de la tabla
-                        rx.table.body(
-                            #Recorre la lista principal de los datos cada elemento row representa una fila completa de datos
-                            rx.foreach(
-                                Programa.datos,
-
-                                #Por cada fila encontrada, crea un componente de fila fisica en la tabla
-                                lambda row: rx.table.row(
-
-                                    #Ahora que estamos dentro de una fila, recorremos cada valor individual que hay en esa fila
-                                    rx.foreach(row, lambda cell: rx.table.cell(cell))
-                                )
-                            ),
-                            border = "solid",
-                            border_color = Color.ACENTO.value
-                        ),
-                        #Le da un aspecto con fondo solido y bordes suaves
-                        variant="surface",
-                        size="1",         
-                        width="100%",
-                        margin_bottom="1em",
-                        overflow="hidden"
+                    rx.vstack(
+                        rx.foreach(
+                            Programa.lista_unida,
+                            lambda lista: tabla(lista[0].to(list), lista[1].to(list))
+                        )
                     ),
                     #Condicional anidado para separar los indicadores del metodo que permite mezclar
                     rx.cond(
