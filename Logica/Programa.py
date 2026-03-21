@@ -3,6 +3,7 @@ import reflex as rx
 from .State import State
 import unicodedata
 import re
+from Logica.PDF import PDF
 from fpdf import FPDF
 
 #Hereda de mi clase State
@@ -88,7 +89,9 @@ class Programa(State):
             return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
         
         #Si ocultar=True(tabla resumen) solo muestra la tabla resumen
-        else: self.parsear_datos(datos)
+        else: 
+            self.texto = texto
+            self.parsear_datos(datos)
         
     #Metodo que crea el csv que se va a descargar con las columnas y sus transformaciones correspondientes de cada indicador
     def csv_metodo(self,resumen: dict, nombres: list[str], datos: list[pd.DataFrame], nombre_archivo: str):
@@ -1276,8 +1279,11 @@ class Programa(State):
 
         #Recorre los resultados tras ejecutar cada indicador y añade el valor numerico obtenido a su sublista correspondiente en listas
         def recuperar_datos():
+            nonlocal capitulos
             for elem in range(len(self.datos_final)): 
-                listas[elem].append(self.datos_final[elem]["valor"])
+                lista_valores[elem].append(round(self.datos_final[elem]["valor"], 3))
+            pdf.imp_capitulo(capitulos, self.texto.split(":")[0], self.texto.split(":")[1], self.datos_final)
+            capitulos+=1
         
         #Ensambla todo al terminar:
         #Ejecuta especialidad_ingreso para obtener datos especificos de especialidades
@@ -1285,7 +1291,7 @@ class Programa(State):
         #El metodo .at[fila, columna] permite el acceso directo a una celda especifica. A diferencia del indexado, si la combinacion de fila o columna no existe, 
         #Pandas expande el DataFrame automaticamente creandolas e insertando el valor sin lanzar errores.
         def parseo_final():
-            lista_plana = [str(año[0]) for año in listas]
+            lista_plana = [str(año[0]) for año in lista_valores]
             df_especialidades = pd.DataFrame(index=lista_plana)
             df_especialidades.index.name = "Especialidad_Ingreso"
 
@@ -1293,8 +1299,8 @@ class Programa(State):
             if res is not None: return res
 
             for elem in range(len(self.datos_final)):
-                nombre_columna = listas[elem][0]
-                df_resumen[nombre_columna] = listas[elem][1:len(listas[elem])]                
+                nombre_columna = lista_valores[elem][0]
+                df_resumen[nombre_columna] = lista_valores[elem][1:len(lista_valores[elem])]                
 
                 for i in self.datos_final[elem]["valor"]:
                     especialidad = i["especialidad"].split("_")[0]
@@ -1304,19 +1310,15 @@ class Programa(State):
             #Al final, reseteamos el indice para que "Especialidad_Ingreso" vuelva a ser una columna
             df_especialidades = df_especialidades.reset_index()
             return df_resumen, df_especialidades
-        
-        #Metodo que crea el informe pdf
-        def generar_pdf():
-            pdf = FPDF()
-            pdf.add_page()
-            pdf.set_font("helvetica", style="B", size=16)
-            pdf.cell(40, 10, "Hello World!")
-            pdf_bytes = bytes(pdf.output(dest='S')) 
-            return pdf_bytes
 
         #Limpiamos las variables y activamos el booleano    
         self.limpieza()
         self.ind_resumen = True
+
+        #Creamos el informe y definimos su titulo y autor
+        pdf = PDF()
+        pdf.set_title("Indicadores REA")
+        pdf.set_author("Nicolas García Gómez")
 
         #Definimos la columna de indicadores
         data_resumen = {"RESUMEN_INDICADORES": ["Mortalidad Estandarizada", "Reingresos no programados", "Incidencia de barotrauma",
@@ -1330,7 +1332,10 @@ class Programa(State):
         df_resumen = pd.DataFrame(data_resumen)
         
         #Crea una lista de listas. Cada sublista comienza con el año, se usa para acumular los resultados de ese año especifico
-        listas = [[self.encontrar_año(nombre)] for _, nombre in enumerate(self.nombres_archivos)]
+        lista_valores = [[self.encontrar_año(nombre)] for nombre in self.nombres_archivos]
+
+        #Contados para los capitulos del informe
+        capitulos = 1
         
         claves = [self.mortalidad_estandarizada, self.reingresos_no_programados, self.incidencia_de_barotrauma, self.posicion_semiincorporada_VMI, 
                   self.incidencia_ulceras_presion, self.valoracion_interrupcion_sedacion, self.prevencion_enfermedad_tromboembolica, self.mantenimiento_niveles_glucemia,
@@ -1349,9 +1354,13 @@ class Programa(State):
                 return res
             recuperar_datos()
         
-        #Creamos los CSV y el PDF a descargar
+        #Creamos los CSV
         csv_indi, csv_espe = parseo_final()
-        pdf_generado = generar_pdf()
+
+        #Metemos en el informe las tablas y lo exportamos en la memoria
+        pdf.incluir_tabla(csv_indi)
+        pdf.incluir_tabla(csv_espe)
+        pdf_bytes = bytes(pdf.output(dest='S'))
 
         #Convierte los nombres de las columnas y las filas de datos del DataFrame a una lista de Python para que Reflex pueda leerlas
         cols_indi = csv_indi.columns.tolist()
@@ -1370,11 +1379,11 @@ class Programa(State):
         #Disparamos la ventana flotante y modificamos el texto saltandonos el metodo final
         self.datos_final.append({"name": "Resumen", "valor": csv_indi})
         self.datos_final.append({"name": "Especialidades", "valor": csv_espe})
-        self.datos_final.append({"name": "Informe", "valor": pdf_generado})
+        self.datos_final.append({"name": "Informe", "valor": pdf_bytes})
         
         self.csv_final.append({"name": "Resumen.csv", "valor": csv_indi})
         self.csv_final.append({"name": "Especialidades.csv", "valor": csv_espe})
-        self.csv_final.append({"name": "Informe.pdf", "valor": pdf_generado})
+        self.csv_final.append({"name": "Informe.pdf", "valor": pdf_bytes})
 
         self.mostrar_resultado = True
         self.texto = "Tabla resumen: Permite ver de manera global los indicadores de cada año"
