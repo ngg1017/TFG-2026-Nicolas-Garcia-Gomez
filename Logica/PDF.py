@@ -1,5 +1,5 @@
 from fpdf import FPDF
-from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import Color
+from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import Color, TextoColor
 from fpdf.fonts import FontFace
 from fpdf.enums import TableCellFillMode
 import pandas as pd
@@ -56,7 +56,7 @@ class PDF(FPDF):
         self.ln(4)
 
     #Texto del capitulo
-    def cuerpo_capitulo(self, titulo, descripcion,  datos):
+    def cuerpo_capitulo(self, titulo, descripcion, datos):
         self.set_font("Times", size=12)
         self.multi_cell(0, 5, descripcion)
         self.ln(2)
@@ -64,28 +64,54 @@ class PDF(FPDF):
             #Reseteamos X manualmente por seguridad 
             self.set_x(10) 
             self.multi_cell(0, 10, f"En el año {docu["name"]} tuvimos un@ {titulo} de {docu["valor"]}%", align="C")
+        
+    
+    def añadir_grafico(self, imagen, ancho=120):
+        #Calculamos la posición X para centrar (A4 = 210mm)
+        pos_x = (210 - ancho) / 2
+
+        #Guardamos la posicion Y actual para poner la imagen
+        pos_y = self.get_y() + 5
+        
+        self.image(imagen, x=pos_x, y=pos_y, w=ancho)
 
     #Impresion del capitulo
-    def imp_capitulo(self, num, titulo, descripcion, datos):
+    def imp_capitulo(self, num, titulo, descripcion, datos, imagen):
         self.add_page()
         self.titulo_capitulo(num, titulo)
         self.cuerpo_capitulo(titulo, descripcion, datos)
+        self.añadir_grafico(imagen)
     
+    #Metodo para incluir tablas
     def incluir_tabla(self, csv: pd.DataFrame):
         self.add_page()
-        self.set_draw_color(255, 0, 0)
+        #Color de las lineas
+        self.set_draw_color(TextoColor.PRIMARIO.value)
         self.set_line_width(0.3)
-        headings_style = FontFace(emphasis="BOLD", color=255, fill_color=(255, 100, 0))
+        headings_style = FontFace(emphasis="BOLD", color=TextoColor.PRIMARIO.value, fill_color=Color.OSCURO.value, size_pt=10)
         with self.table(
-            borders_layout="NO_HORIZONTAL_LINES",
-            cell_fill_color=(224, 235, 255),
+            cell_fill_color=Color.ACENTO.value,
             cell_fill_mode=TableCellFillMode.ROWS,
             headings_style=headings_style,
             line_height=6,
         ) as table:
+            #La primera fila de los titulos
             table.row(csv.columns.tolist())
             for fila in csv.values.tolist():
                 row = table.row()
-                for celda in fila:
+                for i, celda in enumerate(fila):
                     texto_celda = str(celda) if celda is not None else ""
-                    row.cell(texto_celda)
+                    
+                    #Si es la primera columna alineamos a la izquierda y le damos otro color
+                    if i == 0:
+                        #Si tiene muchas columnas reduce el tamaño de la letra
+                        if len(csv.columns.tolist()) > 8:
+                            tamaño = 7
+                        else:
+                            tamaño=12
+                        aliacion="L"
+                        estilo = FontFace(color=TextoColor.PRIMARIO.value, fill_color=Color.OSCURO.value, size_pt=tamaño)
+                    else:
+                        aliacion="C"
+                        estilo = FontFace(color=TextoColor.SECUNDARIO.value)
+                    row.cell(texto_celda, align=aliacion, style=estilo)

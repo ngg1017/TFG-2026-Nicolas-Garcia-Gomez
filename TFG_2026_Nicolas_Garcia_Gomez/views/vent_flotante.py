@@ -115,7 +115,7 @@ def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
                                 ("compuesto_1", area_sync(datos, Programa.lista_selecc)),
                                 ("compuesto", composed(datos, Programa.lista_selecc)),
                                 ("pie", graf_pie_mezcla(datos, Programa.lista_selecc)),
-                                ("", composed(datos, Programa.lista_selecc)),
+                                (" ", composed(datos, Programa.lista_selecc)),
                                 #Condicional que nos permite ajustar el mensaje ya sea para seleccionar graficos o indicadores
                                 rx.cond(
                                     Programa.lista_selecc.length() > 0,

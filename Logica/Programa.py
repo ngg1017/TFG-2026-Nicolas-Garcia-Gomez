@@ -4,7 +4,8 @@ from .State import State
 import unicodedata
 import re
 from Logica.PDF import PDF
-from fpdf import FPDF
+import matplotlib.pyplot as plt
+import io
 
 #Hereda de mi clase State
 class Programa(State):
@@ -1275,14 +1276,37 @@ class Programa(State):
         "tubo endotraqueal (TET) en pacientes sometidos a ventilación mecánica. Se considera una de las complicaciones más graves de " \
         "la vía aérea en la UCI debido al riesgo de hipoxia, parada cardiorrespiratoria o trauma laríngeo", ocultar=ocultar)
 
-    def tabla_resumen(self):
+    def grafico_tendencia(self, datos, texto):
+        #Creamos el objeto io
+        grafico_bytes = io.BytesIO()
+        x = []
+        y = []
+        for docu in datos:
+            x.append(docu["name"]) 
+            y.append(docu["valor"])
 
+        #Grafico de barras
+        fig, ax = plt.subplots(figsize=(5,4))
+        ax.bar(x = x, height = y)
+        ax.set_xlabel("Años")
+        ax.set_ylabel(texto.split(":")[0])
+        #Ajusta automaticamente los subgrafico
+        plt.tight_layout()
+        #Guardamos el archivo en formato png con alta resolucion
+        plt.savefig(grafico_bytes, format="png", dpi=300)
+        plt.close(fig)
+        return grafico_bytes
+
+    def tabla_resumen(self):
         #Recorre los resultados tras ejecutar cada indicador y añade el valor numerico obtenido a su sublista correspondiente en listas
         def recuperar_datos():
             nonlocal capitulos
             for elem in range(len(self.datos_final)): 
                 lista_valores[elem].append(round(self.datos_final[elem]["valor"], 3))
-            pdf.imp_capitulo(capitulos, self.texto.split(":")[0], self.texto.split(":")[1], self.datos_final)
+
+            #Generamos los graficos y se lo pasamo al pdf
+            grafico = self.grafico_tendencia(self.datos_final, self.texto)
+            pdf.imp_capitulo(capitulos, self.texto.split(":")[0], self.texto.split(":")[1], self.datos_final, grafico)
             capitulos+=1
         
         #Ensambla todo al terminar:
@@ -1395,6 +1419,7 @@ class Programa(State):
     def borrar_seleccion(self):
         self.lista_selecc = []
         self.datos_mezcla = []
+        self.ind_grafico = ""
 
     #Metodo que incluye los indicadores seleccionados
     @rx.event
