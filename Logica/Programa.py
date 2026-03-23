@@ -1,10 +1,13 @@
-import pandas as pd
-import reflex as rx
-from .State import State
-import unicodedata
-import re
-from Logica.PDF import PDF
+from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import Color
+from sklearn.metrics import r2_score
 import matplotlib.pyplot as plt
+from Logica.PDF import PDF
+from .State import State
+import reflex as rx
+import pandas as pd
+import unicodedata
+import numpy as np
+import re
 import io
 
 #Hereda de mi clase State
@@ -1276,37 +1279,81 @@ class Programa(State):
         "tubo endotraqueal (TET) en pacientes sometidos a ventilación mecánica. Se considera una de las complicaciones más graves de " \
         "la vía aérea en la UCI debido al riesgo de hipoxia, parada cardiorrespiratoria o trauma laríngeo", ocultar=ocultar)
 
-    def grafico_tendencia(self, datos, texto):
+    def grafico_tendencia(self, eje_x, eje_y, texto):
         #Creamos el objeto io
         grafico_bytes = io.BytesIO()
-        x = []
-        y = []
-        for docu in datos:
-            x.append(docu["name"]) 
-            y.append(docu["valor"])
+
+        #Calculamos la media y  la desviacion
+        media = np.mean(eje_y)
+        desviacion = np.std(eje_y)
+
+        #Error tipico
+        error_tipico = desviacion / np.sqrt(len(eje_y))
+
+        #Regla de las 2 Sigmas para dar color a las columnas
+        colores = []
+        for valor in eje_y:
+            if valor > media + 2 * desviacion: colores.append('red') 
+            elif valor < media - 2 * desviacion: colores.append('green') 
+            else: colores.append(Color.ACENTO.value) 
+
+        x_numerico = np.array(range(1,len(eje_x)+1))
+        #Calculamos la pendiente y punto de corte, con deg=1 permite obtener una recta
+        tend=np.polyfit(x_numerico, eje_y, deg=1)
+
+        #Si la variacion entre el año mas alto y el mas bajo es minima
+        if max(eje_y) - min(eje_y) < 1.0:
+            r2 = 0.0
+            #Forzamos la linea a ser totalmente plana en la media
+            y_tendencia = [media] * len(eje_x)
+        else:
+            #Calculamos la recta con su formula
+            y_tendencia = tend[0] * x_numerico + tend[1]
+            #Calculamos la r2
+            r2 = r2_score(eje_y, y_tendencia)
 
         #Grafico de barras
         fig, ax = plt.subplots(figsize=(5,4))
-        ax.bar(x = x, height = y)
+        ax.bar(x = eje_x, height = eje_y, color = colores, yerr = error_tipico, ecolor = "r", capsize=5)
+
         ax.set_xlabel("Años")
         ax.set_ylabel(texto.split(":")[0])
+        #Ponemos el titulo con la tendencia y la R2
+        ax.set_title(f"{texto.split(":")[0]}\n(Tendencia: {tend[0]:.4f}, R²: {r2:.4f})")
+
+        #Añadimos un colchon arriba y abajo para que no se apelmazen los graficos
+        ax.set_ylim(min(eje_y)*0.9, max(eje_y)*1.1)
+
+        #Dibujamos la pendiente en el grafico
+        ax.plot(eje_x, y_tendencia, "m", label="Tendencia")
+
+        #Dibujamos la media
+        ax.axhline(media, color='green', linestyle=':', label='Media Histórica')
+        #Dubujamos el area normal
+        ax.axhspan(media - desviacion, media + desviacion, alpha=0.1, color='green')
+
         #Ajusta automaticamente los subgrafico
         plt.tight_layout()
         #Guardamos el archivo en formato png con alta resolucion
         plt.savefig(grafico_bytes, format="png", dpi=300)
         plt.close(fig)
-        return grafico_bytes
+        return grafico_bytes, tend[0], r2
 
     def tabla_resumen(self):
         #Recorre los resultados tras ejecutar cada indicador y añade el valor numerico obtenido a su sublista correspondiente en listas
         def recuperar_datos():
+            #Listas para pasar al metodo de graficos
+            x = []
+            y = []
             nonlocal capitulos
             for elem in range(len(self.datos_final)): 
-                lista_valores[elem].append(round(self.datos_final[elem]["valor"], 3))
+                lista_valores[elem].append(round(self.datos_final[elem]["valor"], 4))
+                x.append(self.datos_final[elem]["name"]) 
+                y.append(self.datos_final[elem]["valor"])
 
             #Generamos los graficos y se lo pasamo al pdf
-            grafico = self.grafico_tendencia(self.datos_final, self.texto)
-            pdf.imp_capitulo(capitulos, self.texto.split(":")[0], self.texto.split(":")[1], self.datos_final, grafico)
+            grafico, tendencia, r2 = self.grafico_tendencia(x, y, self.texto)
+            pdf.imp_capitulo(capitulos, self.texto.split(":")[0], self.texto.split(":")[1], self.datos_final, grafico, tendencia, r2)
             capitulos+=1
         
         #Ensambla todo al terminar:
@@ -1343,6 +1390,9 @@ class Programa(State):
         pdf = PDF()
         pdf.set_title("Indicadores REA")
         pdf.set_author("Nicolas García Gómez")
+        pdf.primara_pagina()
+        #Contados para los capitulos del informe
+        capitulos = 1
 
         #Definimos la columna de indicadores
         data_resumen = {"RESUMEN_INDICADORES": ["Mortalidad Estandarizada", "Reingresos no programados", "Incidencia de barotrauma",
@@ -1357,9 +1407,6 @@ class Programa(State):
         
         #Crea una lista de listas. Cada sublista comienza con el año, se usa para acumular los resultados de ese año especifico
         lista_valores = [[self.encontrar_año(nombre)] for nombre in self.nombres_archivos]
-
-        #Contados para los capitulos del informe
-        capitulos = 1
         
         claves = [self.mortalidad_estandarizada, self.reingresos_no_programados, self.incidencia_de_barotrauma, self.posicion_semiincorporada_VMI, 
                   self.incidencia_ulceras_presion, self.valoracion_interrupcion_sedacion, self.prevencion_enfermedad_tromboembolica, self.mantenimiento_niveles_glucemia,
@@ -1413,7 +1460,6 @@ class Programa(State):
         self.texto = "Tabla resumen: Permite ver de manera global los indicadores de cada año"
         return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
 
-    
     #Metodo para borrar los datos añadidos
     @rx.event
     def borrar_seleccion(self):
