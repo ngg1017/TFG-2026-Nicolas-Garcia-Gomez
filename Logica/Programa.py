@@ -1412,7 +1412,7 @@ class Programa(State):
         
         #Si es para dibujar graficos devolvemos lo necesario
         else:
-            return media, desviacion, error_tipico, tend, y_tendencia, r2
+            return media, desviacion, error_tipico, tend[0], y_tendencia, r2
     
     #Funcion para realizar los graficos con matplotlib
     def grafico(self, eje_x, eje_y, texto, media, desviacion, error_tipico, tend, y_tendencia, r2):
@@ -1433,7 +1433,7 @@ class Programa(State):
         ax.set_xlabel("Años")
         ax.set_ylabel(texto)
         #Ponemos el titulo con la tendencia y la R2
-        ax.set_title(f"{texto}\n(Tendencia: {tend[0]:.4f}, R²: {r2:.4f})")
+        ax.set_title(f"{texto}\n(Tendencia: {tend:.4f}, R²: {r2:.4f})")
 
         #Añadimos un colchon arriba y abajo para que no se apelmazen los graficos
         ax.set_ylim(min(eje_y)*0.9, max(eje_y)*1.1)
@@ -1467,11 +1467,11 @@ class Programa(State):
                 y.append(self.datos_final[elem]["valor"])
 
             #Hecemos los calculos y generamos los graficos
-            media, desviacion, error_tipico, tend, y_tendencia, r2 = self.calculos_estadisticos(x, y)
-            grafico = self.grafico(x, y, self.texto.split(":")[0], media, desviacion, error_tipico, tend, y_tendencia, r2)
+            media, desviacion, error_tipico, pend_tendencia, y_tendencia, r2 = self.calculos_estadisticos(x, y)
+            grafico = self.grafico(x, y, self.texto.split(":")[0], media, desviacion, error_tipico, pend_tendencia, y_tendencia, r2)
 
             #Pasamos todos los datos necesarios al PDF
-            pdf.imp_capitulo(capitulos, self.texto.split(":")[0], self.texto.split(":")[1], self.datos_final, grafico, tend[0], r2)
+            pdf.imp_capitulo(capitulos, self.texto.split(":")[0], self.texto.split(":")[1], self.datos_final, grafico, pend_tendencia, r2)
             capitulos+=1
         
         #Ensambla todo al terminar:
@@ -1495,10 +1495,10 @@ class Programa(State):
             for especialidad, valores_historicos in diccionario_datos.items():
 
                 #Llamamos a la funcion del calculo para cada especialidad concreta
-                media, desviacion, error_tipico, tend, y_tendencia, r2 = self.calculos_estadisticos(lista_años, valores_historicos)
-                grafico = self.grafico(lista_años, valores_historicos, especialidad, media, desviacion, error_tipico, tend, y_tendencia, r2)
+                media, desviacion, error_tipico, pend_tendencia, y_tendencia, r2 = self.calculos_estadisticos(lista_años, valores_historicos)
+                grafico = self.grafico(lista_años, valores_historicos, especialidad, media, desviacion, error_tipico, pend_tendencia, y_tendencia, r2)
                 #Pasamos todo lo necesario al pdf
-                pdf.imp_capitulo(capitulos, f"Especialidad de ingreso: {especialidad}", self.texto.split(":")[1], zip(lista_años,valores_historicos), grafico, tend[0], r2, ind_especialidades=True)
+                pdf.imp_capitulo(capitulos, f"Especialidad de ingreso: {especialidad}", self.texto.split(":")[1], zip(lista_años,valores_historicos), grafico, pend_tendencia, r2, ind_especialidades=True)
                 capitulos+=1
 
             #Ensamblamos el df_resumen
@@ -1525,7 +1525,7 @@ class Programa(State):
         pdf.set_title("Indicadores REA")
         pdf.set_author("Nicolas García Gómez")
         pdf.primera_pagina()
-        #Contados para los capitulos del informe
+        #Contador para los capitulos del informe
         capitulos = 1
 
         #Definimos la columna de indicadores
