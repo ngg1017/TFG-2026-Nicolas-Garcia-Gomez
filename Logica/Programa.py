@@ -34,30 +34,128 @@ class Programa(State):
     lista_selecc: list[str]
     datos_mezcla: list[dict]
 
+    #Datos que guardamos solamente para el grafico de tarda de las especialidades
+    datos_tarta: list[dict]
+
+    #Lista que guardamos para generar un grafico por especialidad
+    nombres_especialidades: list[str]
+
+    #Texto que guardamos para mostrar en los graficos
+    texto_tendencia: list[str]
+    texto_r2: list[str]
+    texto_error: list[str]
+
     #Metodo que nos permite encontrar el año del documento
     def encontrar_año(self, nombre: str):
         return re.findall(r"\d{4}", nombre)[0] if re.findall(r"\d{4}", nombre) else "0000"
-     
-    #Metodo para normalizar las columnas de los dataframes
-    def normalizar_frame(self, columna: str):
-        #Quita los caracteres extraños y las tildes
-        columna_unicode = unicodedata.normalize("NFD", columna.strip()).encode("ascii", "ignore").decode("utf-8")
-        
-        #Cualquier cosa que no sea letra (A-Z) o numero (0-9) se vuelve "_"
-        col_limpia = re.sub(r"[^A-Z0-9]", "_", columna_unicode.upper())
-        
-        #Colapsa multiples guiones bajos en uno solo y quita guiones bajos que hayan quedado al final
-        columnas_final = re.sub(r"_+", "_", col_limpia).strip("_")
-        return columnas_final
     
+    #Metodo para normalizar las columnas de los dataframes
+    def normalizar_frame(self, columna: str, esp_ingreso = False):
+        #Colapsa multiples espacios internos en uno solo y borra los de los extremos
+        texto_espaciado = " ".join(columna.split())
+        #Limpiamos tildes y espacios laterales para ambos casos
+        texto_limpio = unicodedata.normalize("NFD", texto_espaciado).encode("ascii", "ignore").decode("utf-8")
+
+        if esp_ingreso:
+            #Devuelve formato de especialidades
+            return texto_limpio.title()
+
+        #Devuelve formato columnas
+        #Un "+" en regex colapsa multiples simbolos raros en un solo "_" a la primera
+        return re.sub(r"[^A-Z0-9]+", "_", texto_limpio.upper()).strip("_")
+    
+    #Metodo para parsear los datos del indicador de ingresoso por especialidad
+    def parseo_especialidad(self, datos, resumen = False):
+        #Creamos una lista con cada especialidad para crear el esqueleto del diccionario
+        lista_especialidades = set()
+
+        #Si los datos vienen del metodo individual se reciben sin el nombre
+        for año in datos:
+            for especialidad in año["valor"] if resumen == True else año:
+                lista_especialidades.add(especialidad["especialidad"].split("_")[0])
+                            
+        #La guardamos para usarla en los graficos
+        self.nombres_especialidades = list(lista_especialidades)
+
+        #Creamos el diccionario con la lista creado anteriormente y lo rellenamos con sus valores
+        diccionario_datos = {especialidad: [0.0] * len(datos) for especialidad in lista_especialidades}
+        for i, año in enumerate(datos):
+            for especialidad in año["valor"] if resumen == True else año:
+                diccionario_datos[especialidad["especialidad"].split("_")[0]][i] = especialidad["indicador"]
+
+        #Devolvemos el diccionario relleno
+        return diccionario_datos
+
     #Metodo para parsear los datos aptos para la ventana flotante y los graficos(ordenandolos)
-    def parsear_datos(self, resultado_final: list[float]):
-        #Creamos el diccionatio dentro de datos_final que se usa en el grafico ordenado por años
-        #Ordenamos la lista de diccionarios csv_final por años para que se muestren y descarguen por orden 
-        self.datos_final = [
-            {"name": self.encontrar_año(nombre), "valor": round(valor, 4) if self.ind_especi == False else valor} 
-            for nombre, valor in zip(self.nombres_archivos, resultado_final)
-        ]
+    def parsear_datos(self, resultado_final: list[float], ocultar = False):        
+        #Si no estamos en la tabla resumen y son los ingresos por especialidad
+        if self.ind_especi == True and ocultar == False:
+            
+            #Llamamos a la funcion que se encarga de parseas los datos del indicador
+            diccionario_datos = self.parseo_especialidad(resultado_final)
+
+            #Creamos el esqueleto de datos_final con los años
+            self.datos_final = [{"name": self.encontrar_año(nombre)} for nombre in self.nombres_archivos]
+
+            #Recorremos el diccionario para obtener los datos para cada especialidad
+            for especialidad, valores_historicos in diccionario_datos.items():
+
+                #Llamamos a la funcion del calculo para cada especialidad concreta
+                y_tendencia, error_tipico, pendiente_tendencia, r2 = self.calculos_estadisticos(self.nombres_archivos, valores_historicos, individual=True)
+
+                #Obtenemos los textos explicativos segun la pendente, la r2 y los guardamos
+                texto_tendencia, texto_r2, texto_error = PDF.texto_tendencia_r2(pendiente_tendencia, r2)
+                self.texto_tendencia.append(texto_tendencia)
+                self.texto_r2.append(texto_r2)
+                self.texto_error.append(texto_error)
+
+                #Repartimos los calculos año a año a datos_final
+                for i in range(len(self.nombres_archivos)):
+                    self.datos_final[i][f"{especialidad}_valor"] = round(valores_historicos[i], 4)
+                    self.datos_final[i][f"{especialidad}_tendencia"] = round(y_tendencia[i], 4)
+                    self.datos_final[i][f"{especialidad}_error"] = round(error_tipico, 4)
+                    #Solo para el grafico de area
+                    self.datos_final[i][f"{especialidad}_base_invisible"] = round((y_tendencia[i] - error_tipico), 4)
+                    self.datos_final[i][f"{especialidad}_grosor_banda"] = round((error_tipico*2), 4)
+                        
+            #Guardamos los datos especificos para el grafico de tarta
+            self.datos_tarta = [
+                {"name": self.encontrar_año(nombre), "valor": round(valor, 4) if self.ind_especi == False else valor} 
+                for nombre, valor in zip(self.nombres_archivos, resultado_final)
+            ]
+
+        #Si no estamos en la tabla resumen y es un indicador normal
+        elif ocultar == False:
+            #Llamamos a la funcion de calculos para obtener la tendencia, el error, la pendiente y r2
+            y_tendencia, error_tipico, pendiente_tendencia, r2 = self.calculos_estadisticos(self.nombres_archivos, resultado_final, individual=True)
+            
+            #Obtenemos los textos explicativos segun la pendente, la r2 y los guardamos
+            texto_tendencia, texto_r2, texto_error = PDF.texto_tendencia_r2(pendiente_tendencia, r2)
+            self.texto_tendencia = [texto_tendencia]
+            self.texto_r2 = [texto_r2]
+            self.texto_error = [texto_error]
+
+            self.datos_final = [
+                {
+                    "name": self.encontrar_año(nombre), 
+                    "valor": round(valor, 4), 
+                    "tendencia": round(tend,4), 
+                    "error": round(error_tipico,4),
+                    #Solo para el grafico de area
+                    "base_invisible": round((tend - error_tipico),4),
+                    "grosor_banda": round((error_tipico * 2),4)
+                } 
+                for nombre, valor, tend in zip(self.nombres_archivos, resultado_final, y_tendencia)
+            ]
+
+        #En el resumen no necesito la tendencia y la r2 ya que hacemos los graficos en matplotlib directamente
+        else:
+            self.datos_final = [
+                {"name": self.encontrar_año(nombre), "valor": round(valor, 4) if self.ind_especi == False else valor} 
+                for nombre, valor in zip(self.nombres_archivos, resultado_final)
+            ]
+        
+        #Ordenamos la lista de diccionarios csv_final por años para que se muestren y descarguen por orden
         self.datos_final.sort(key= lambda x: x["name"])
         self.csv_final.sort(key= lambda x: x["name"])
 
@@ -70,6 +168,7 @@ class Programa(State):
         self.ind_grafico = ""
         self.lista_selecc = []
         self.datos_mezcla = []
+        self.datos_tarta = []
     
     #Metodo para abrir el drawer
     def manejo_drawer(self, bandera: bool):
@@ -81,6 +180,10 @@ class Programa(State):
         self.datos_final = []
         self.texto = ""
         self.csv_final = []
+        self.nombres_especialidades = []
+        self.texto_tendencia = []
+        self.texto_r2 = []
+        self.texto_error = []
         resultado = []
         return resultado
     
@@ -95,7 +198,7 @@ class Programa(State):
         #Si ocultar=True(tabla resumen) solo muestra la tabla resumen
         else: 
             self.texto = texto
-            self.parsear_datos(datos)
+            self.parsear_datos(datos, ocultar)
         
     #Metodo que crea el csv que se va a descargar con las columnas y sus transformaciones correspondientes de cada indicador
     def csv_metodo(self,resumen: dict, nombres: list[str], datos: list[pd.DataFrame], nombre_archivo: str):
@@ -863,7 +966,7 @@ class Programa(State):
                 lista_dic = []
                 for (nomb,valor) in zip (valores.index, valores.values):
                     #Creamos un diccionario con la especialidad y su valor
-                    diccionario = {"especialidad": f"{nomb}_{self.encontrar_año(nombre)}", "indicador": round(float(valor * 100), 4)}
+                    diccionario = {"especialidad": f"{self.normalizar_frame(nomb, esp_ingreso=True)}_{self.encontrar_año(nombre)}", "indicador": round(float(valor * 100), 4)}
                     lista_dic.append(diccionario)
                 #Introducimos la lista de diccionarios al resultado esto nos permite que cada año reciba una lista con sus indicadores
                 resultado.append(lista_dic)
@@ -1279,23 +1382,14 @@ class Programa(State):
         "tubo endotraqueal (TET) en pacientes sometidos a ventilación mecánica. Se considera una de las complicaciones más graves de " \
         "la vía aérea en la UCI debido al riesgo de hipoxia, parada cardiorrespiratoria o trauma laríngeo", ocultar=ocultar)
 
-    def grafico_tendencia(self, eje_x, eje_y, texto):
-        #Creamos el objeto io
-        grafico_bytes = io.BytesIO()
-
+    #Funcion que hace los calculos
+    def calculos_estadisticos(self, eje_x, eje_y, individual = False):
         #Calculamos la media y  la desviacion
         media = np.mean(eje_y)
         desviacion = np.std(eje_y)
 
         #Error tipico
         error_tipico = desviacion / np.sqrt(len(eje_y))
-
-        #Regla de las 2 Sigmas para dar color a las columnas
-        colores = []
-        for valor in eje_y:
-            if valor > media + 2 * desviacion: colores.append('red') 
-            elif valor < media - 2 * desviacion: colores.append('green') 
-            else: colores.append(Color.ACENTO.value) 
 
         x_numerico = np.array(range(1,len(eje_x)+1))
         #Calculamos la pendiente y punto de corte, con deg=1 permite obtener una recta
@@ -1312,14 +1406,34 @@ class Programa(State):
             #Calculamos la r2
             r2 = r2_score(eje_y, y_tendencia)
 
+        #Si llamamos a la funcion desde los indicadores individuales devolvemos los puntos de la tendencia, el error, la pendiente y la r2
+        if individual == True:
+            return y_tendencia, error_tipico, tend[0], r2
+        
+        #Si es para dibujar graficos devolvemos lo necesario
+        else:
+            return media, desviacion, error_tipico, tend, y_tendencia, r2
+    
+    #Funcion para realizar los graficos con matplotlib
+    def grafico(self, eje_x, eje_y, texto, media, desviacion, error_tipico, tend, y_tendencia, r2):
+        #Creamos el objeto io
+        grafico_bytes = io.BytesIO()
+        
+        #Regla de las 2 Sigmas para dar color a las columnas
+        colores = []
+        for valor in eje_y:
+            if valor > media + 2 * desviacion: colores.append("red") 
+            elif valor < media - 2 * desviacion: colores.append("green") 
+            else: colores.append(Color.ACENTO.value) 
+
         #Grafico de barras
         fig, ax = plt.subplots(figsize=(5,4))
-        ax.bar(x = eje_x, height = eje_y, color = colores, yerr = error_tipico, ecolor = "r", capsize=5)
+        ax.bar(x = eje_x, height = eje_y, color = colores, yerr = error_tipico, ecolor = "y", capsize=5)
 
         ax.set_xlabel("Años")
-        ax.set_ylabel(texto.split(":")[0])
+        ax.set_ylabel(texto)
         #Ponemos el titulo con la tendencia y la R2
-        ax.set_title(f"{texto.split(":")[0]}\n(Tendencia: {tend[0]:.4f}, R²: {r2:.4f})")
+        ax.set_title(f"{texto}\n(Tendencia: {tend[0]:.4f}, R²: {r2:.4f})")
 
         #Añadimos un colchon arriba y abajo para que no se apelmazen los graficos
         ax.set_ylim(min(eje_y)*0.9, max(eje_y)*1.1)
@@ -1328,18 +1442,19 @@ class Programa(State):
         ax.plot(eje_x, y_tendencia, "m", label="Tendencia")
 
         #Dibujamos la media
-        ax.axhline(media, color='green', linestyle=':', label='Media Histórica')
+        ax.axhline(media, color="green", linestyle=":", label="Media Histórica")
         #Dubujamos el area normal
-        ax.axhspan(media - desviacion, media + desviacion, alpha=0.1, color='green')
+        ax.axhspan(media - desviacion, media + desviacion, alpha=0.1, color="green")
 
         #Ajusta automaticamente los subgrafico
         plt.tight_layout()
         #Guardamos el archivo en formato png con alta resolucion
         plt.savefig(grafico_bytes, format="png", dpi=300)
         plt.close(fig)
-        return grafico_bytes, tend[0], r2
+        return grafico_bytes
 
     def tabla_resumen(self):
+
         #Recorre los resultados tras ejecutar cada indicador y añade el valor numerico obtenido a su sublista correspondiente en listas
         def recuperar_datos():
             #Listas para pasar al metodo de graficos
@@ -1351,9 +1466,12 @@ class Programa(State):
                 x.append(self.datos_final[elem]["name"]) 
                 y.append(self.datos_final[elem]["valor"])
 
-            #Generamos los graficos y se lo pasamo al pdf
-            grafico, tendencia, r2 = self.grafico_tendencia(x, y, self.texto)
-            pdf.imp_capitulo(capitulos, self.texto.split(":")[0], self.texto.split(":")[1], self.datos_final, grafico, tendencia, r2)
+            #Hecemos los calculos y generamos los graficos
+            media, desviacion, error_tipico, tend, y_tendencia, r2 = self.calculos_estadisticos(x, y)
+            grafico = self.grafico(x, y, self.texto.split(":")[0], media, desviacion, error_tipico, tend, y_tendencia, r2)
+
+            #Pasamos todos los datos necesarios al PDF
+            pdf.imp_capitulo(capitulos, self.texto.split(":")[0], self.texto.split(":")[1], self.datos_final, grafico, tend[0], r2)
             capitulos+=1
         
         #Ensambla todo al terminar:
@@ -1362,17 +1480,33 @@ class Programa(State):
         #El metodo .at[fila, columna] permite el acceso directo a una celda especifica. A diferencia del indexado, si la combinacion de fila o columna no existe, 
         #Pandas expande el DataFrame automaticamente creandolas e insertando el valor sin lanzar errores.
         def parseo_final():
-            lista_plana = [str(año[0]) for año in lista_valores]
-            df_especialidades = pd.DataFrame(index=lista_plana)
+            lista_años = [str(año[0]) for año in lista_valores]
+            df_especialidades = pd.DataFrame(index=lista_años)
             df_especialidades.index.name = "Especialidad_Ingreso"
+            nonlocal capitulos
 
             res = self.especialidad_ingreso(True)
             if res is not None: return res
 
+            #Generamos el diccionario plano de las especialidades de ingreso
+            diccionario_datos = self.parseo_especialidad(self.datos_final, resumen=True)
+            
+            #Recorremos el diccionario para obtener los valores necesarios para graficar
+            for especialidad, valores_historicos in diccionario_datos.items():
+
+                #Llamamos a la funcion del calculo para cada especialidad concreta
+                media, desviacion, error_tipico, tend, y_tendencia, r2 = self.calculos_estadisticos(lista_años, valores_historicos)
+                grafico = self.grafico(lista_años, valores_historicos, especialidad, media, desviacion, error_tipico, tend, y_tendencia, r2)
+                #Pasamos todo lo necesario al pdf
+                pdf.imp_capitulo(capitulos, f"Especialidad de ingreso: {especialidad}", self.texto.split(":")[1], zip(lista_años,valores_historicos), grafico, tend[0], r2, ind_especialidades=True)
+                capitulos+=1
+
+            #Ensamblamos el df_resumen
             for elem in range(len(self.datos_final)):
                 nombre_columna = lista_valores[elem][0]
                 df_resumen[nombre_columna] = lista_valores[elem][1:len(lista_valores[elem])]                
 
+                #Ensamblamos el df_especialidades
                 for i in self.datos_final[elem]["valor"]:
                     especialidad = i["especialidad"].split("_")[0]
                     valor_indicador = i["indicador"]
@@ -1390,7 +1524,7 @@ class Programa(State):
         pdf = PDF()
         pdf.set_title("Indicadores REA")
         pdf.set_author("Nicolas García Gómez")
-        pdf.primara_pagina()
+        pdf.primera_pagina()
         #Contados para los capitulos del informe
         capitulos = 1
 
@@ -1431,7 +1565,7 @@ class Programa(State):
         #Metemos en el informe las tablas y lo exportamos en la memoria
         pdf.incluir_tabla(csv_indi)
         pdf.incluir_tabla(csv_espe)
-        pdf_bytes = bytes(pdf.output(dest='S'))
+        pdf_bytes = bytes(pdf.output(dest="S"))
 
         #Convierte los nombres de las columnas y las filas de datos del DataFrame a una lista de Python para que Reflex pueda leerlas
         cols_indi = csv_indi.columns.tolist()

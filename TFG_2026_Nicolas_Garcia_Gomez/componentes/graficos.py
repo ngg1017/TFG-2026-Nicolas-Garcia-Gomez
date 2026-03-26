@@ -1,127 +1,164 @@
 import reflex as rx
+from Logica.Programa import Programa
 from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import Color
 
 #Para crear graficos de area
 def graf_area(datos: list[dict], bool_esp: bool) -> rx.Component:
-    #Condicional que nos permite dibujar un grafico basandose en las especialidades cuando se selecciona el ind por especialidades
+    #Condicional que nos permite dibujar un grafico por especialidad cuando se selecciona el ind por especialidades
     return rx.cond(
         bool_esp,  
-        #Creo un grafico por archivo en vertical
+        #Creo un grafico por cada especialidad
         rx.foreach(
-        datos,
-        lambda item: rx.recharts.area_chart(
-            #Definimos el area
-            rx.recharts.area(
-                #Los datos para rellenar el area
-                data_key="indicador",
-                stroke=Color.SECUNDARIO.value,
-                fill=Color.ACENTO.value,
-                #Difinimos cuando empieza, cuanto dura y como va a ser la animacion
+        Programa.nombres_especialidades,
+        lambda item, i: rx.vstack(
+            #El titulo
+            rx.text(
+                item,
+                size="5"
+            ),
+            #Introducimos los textos de las tendencias y la r2 y por cada indicador
+            rx.text(
+                f"{Programa.texto_tendencia[i]}\n\n{Programa.texto_r2[i]}",
+                white_space="pre-wrap"
+            ),
+            rx.recharts.composed_chart(
+                #Pilar Invisible (Fondo)
+                rx.recharts.area(
+                    data_key=item+"_base_invisible",
+                    #Activamos el apilado
+                    stack_id=item,            
+                    stroke="none",
+                    #100% transparente
+                    fill="transparent",      
+                    fill_opacity=0,
+                    #Quitamos que se puedan seleccionar los puntos con el raton
+                    active_dot=False,
+                    type_="linear",
+                    #Elimina esta seccion del tooltype
+                    custom_attrs={"tooltipType": "none"}          
+                ),
+                
+                #Banda de error(Apoyada exactamente sobre la base)
+                rx.recharts.area(
+                    data_key=item+"_grosor_banda",
+                    name="Amplitud de Variabilidad",
+                    #Se apoya en el ID 1
+                    stack_id=item,            
+                    stroke="none",
+                    fill="red",
+                    fill_opacity=0.2,
+                    type_="linear"           
+                ),
+
+                #El contenido lo ponemos como linea
+                rx.recharts.line(
+                    data_key=item+"_valor",
+                    name="Valor Indicador",
+                    fill=Color.ACENTO.value,
+                    stroke_width=3,
+                    #Quita los puntitos de cada año para que quede limpia 
+                    dot=False 
+                ),
+
+                rx.recharts.line(
+                    data_key=item+"_tendencia",
+                    name="Tendencia",     
+                    stroke="white",  
+                    dot=False                 
+                ),
+                #Eje x
+                rx.recharts.x_axis(data_key="name"),
+                #Eje y
+                #Para darle un poco de aire al grafico por arriba
+                rx.recharts.y_axis(domain=[0, "auto"]),
+                rx.recharts.graphing_tooltip(),
                 animation_begin=200,
                 animation_duration=1500,
                 animation_easing="ease-out",
-            ),
-            #Eje x
-            rx.recharts.x_axis(
-                data_key="especialidad", 
-                interval=0,
-                #Rota las letras 5 grados hacia abajo
-                angle=-5,
-                #Alinea la mitad del texto con la marca del eje        
-                text_anchor="middle",    
-                height=50,
-            ),
-            #Eje y
-            rx.recharts.y_axis(),
-            #Indica los valores al pasar el raton
-            rx.recharts.graphing_tooltip(),
-            #Barra que nos permite seleccionar rango de especialidades
-            rx.recharts.brush(data_key="especialidad", height=30, stroke=Color.ACENTO.value),
-            data=item["valor"],
-            #Marguenes del grafico
-            margin={"top": 20, "right": 100, "left": 60, "bottom": 20},
-            width=1000,
-            height=250,  
+                data=datos,
+                width=1000,
+                height=250,  
+                ),
+                #Introducimos una sola vez el texto del error
+                rx.cond(
+                    i+1 == Programa.nombres_especialidades.length(),
+                    rx.text(
+                        Programa.texto_error[i]
+                    )
+                ),
+                align="center",
+                margin_bottom="3em",
             )
         ),
     
-        #Creamos el grafico de area
-        rx.recharts.area_chart(
-            #El contenido del area
-            rx.recharts.area(
-                data_key="valor",
-                stroke=Color.SECUNDARIO.value,
-                fill=Color.ACENTO.value,
+        #Creamos el grafico compuesto
+        rx.vstack(
+            #Introducimos los textos de las tendencias, la r2 y el error
+            rx.text(
+                f"{Programa.texto_tendencia[0]}\n\n{Programa.texto_r2[0]}\n\n{Programa.texto_error[0]}",
+                white_space="pre-wrap"
+            ),
+            rx.recharts.composed_chart(
+                #Pilar Invisible (Fondo)
+                rx.recharts.area(
+                    data_key="base_invisible",
+                    #Activamos el apilado
+                    stack_id="1",            
+                    stroke="none",
+                    #100% transparente
+                    fill="transparent",      
+                    fill_opacity=0,
+                    #Quitamos que se puedan seleccionar los puntos con el raton
+                    active_dot=False,
+                    type_="linear",
+                    #Elimina esta seccion del tooltype
+                    custom_attrs={"tooltipType": "none"}          
+                ),
+                
+                #Banda de error(Apoyada exactamente sobre la base)
+                rx.recharts.area(
+                    data_key="grosor_banda",
+                    name="Amplitud de Variabilidad",
+                    #Se apoya en el ID 1
+                    stack_id="1",            
+                    stroke="none",
+                    fill="red",
+                    fill_opacity=0.2,
+                    type_="linear"           
+                ),
+
+                #El contenido lo ponemos como linea
+                rx.recharts.line(
+                    data_key="valor",
+                    name="Valor Indicador",
+                    fill=Color.ACENTO.value,
+                    stroke_width=3,
+                    #Quita los puntitos de cada año para que quede limpia 
+                    dot=False 
+                ),
+
+                rx.recharts.line(
+                    data_key="tendencia",
+                    name="Tendencia",     
+                    stroke="white",  
+                    dot=False                 
+                ),
+                #Eje x
+                rx.recharts.x_axis(data_key="name"),
+                #Eje y
+                #Para darle un poco de aire al grafico por arriba
+                rx.recharts.y_axis(domain=[0, "auto"]),
+                rx.recharts.graphing_tooltip(),
                 animation_begin=200,
                 animation_duration=1500,
                 animation_easing="ease-out",
+                data=datos,
+                width=1000,
+                height=250,    
             ),
-            #Eje x
-            rx.recharts.x_axis(data_key="name"),
-            #Eje y
-            rx.recharts.y_axis(),
-            rx.recharts.graphing_tooltip(),
-            data=datos,
-            width=550,
-            height=250,
-                
-        )
-    )
-
-#Exactamente igual que antes invirtiendo los ejes
-def graf_area_vert(datos: list[dict], bool_esp: bool) -> rx.Component:
-    return rx.cond(
-        bool_esp,
-        rx.foreach(
-        datos,
-        lambda item: rx.recharts.area_chart(
-            rx.recharts.area(
-                data_key="indicador",
-                stroke=Color.SECUNDARIO.value,
-                fill=Color.ACENTO.value,
-                animation_begin=200,
-                animation_duration=1500,
-                animation_easing="ease-out"
-            ),
-            #En el eje x van los numeros
-            rx.recharts.x_axis(type_="number"),
-            #En el eje y estan las especialidades
-            rx.recharts.y_axis(
-                data_key="especialidad",
-                type_="category", 
-                interval=0,
-                angle=-10,
-                text_anchor="end",    
-                height=50,
-            ),
-            rx.recharts.graphing_tooltip(),
-            rx.recharts.brush(data_key="especialidad", height=30, stroke=Color.ACENTO.value),
-            data=item["valor"],
-            margin={"top": 20, "right": 20, "left": 130, "bottom": 20},
-            #Permite ponerlo en vertical
-            layout="vertical",
-            width=1000,
-            height=250,  
-            )
-        ),    
-        rx.recharts.area_chart(
-            rx.recharts.area(
-                data_key="valor",
-                stroke=Color.SECUNDARIO.value,
-                fill=Color.ACENTO.value,
-                animation_begin=200,
-                animation_duration=1500,
-                animation_easing="ease-out"
-            ),
-            rx.recharts.x_axis(type_="number"),
-            rx.recharts.y_axis(data_key = "name", type_="category"),
-            rx.recharts.graphing_tooltip(),
-            data=datos,
-            layout="vertical",
-            margin={"top": 20, "right": 20, "left": 20, "bottom": 20},
-            width=550,
-            height=250,
-                
+            align="center",
+            margin_bottom="3em",
+            margin_top="3em"
         )
     )
 
@@ -129,298 +166,109 @@ def graf_area_vert(datos: list[dict], bool_esp: bool) -> rx.Component:
 def graf_barras(datos: list[dict], bool_esp: bool) -> rx.Component:
     return rx.cond(
         bool_esp,
-        
-        #Creo un grafico por archivo en vertical
+        #Creo un grafico por cada especialidad
         rx.foreach(
-        datos,
-        lambda item: rx.recharts.bar_chart(
-            #El contenido del grafico las barras
-            rx.recharts.bar(
-                data_key="indicador",
-                stroke=Color.SECUNDARIO.value,
-                fill=Color.ACENTO.value,
+        Programa.nombres_especialidades,
+        lambda item, i: rx.vstack(
+            rx.text(
+                #El titulo
+                item,
+                size="5"
+            ),
+            #Introducimos los textos de las tendencias y la r2 y por cada indicador
+            rx.text(
+                f"{Programa.texto_tendencia[i]}\n\n{Programa.texto_r2[i]}",
+                white_space="pre-wrap"
+            ),
+            rx.recharts.composed_chart(
+                #El contenido del grafico las barras
+                rx.recharts.bar(
+                    #Metemos el ErrorBar 
+                    rx.recharts.error_bar(
+                        data_key=item+"_error", 
+                        name = "Amplitud de Variabilidad",
+                        stroke="red"   
+                    ),
+                    name="Valor Indicador",
+                    data_key=item+"_valor",
+                    fill=Color.ACENTO.value,
+                ),
+                rx.recharts.line(
+                    data_key=item+"_tendencia", 
+                    name="Tendencia",    
+                    stroke="white",
+                    #Quita los puntitos de cada año para que quede limpia             
+                    dot=False                 
+                ),
+                rx.recharts.x_axis(data_key="name"),
+                #Para darle un poco de aire al grafico por arriba
+                rx.recharts.y_axis(domain=[0, "auto"]),
+                rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+                rx.recharts.graphing_tooltip(),
+                #Animaciones
                 animation_begin=200,
                 animation_duration=1500,
-                animation_easing="ease-out"
-            ),
-            #Eje x
-            rx.recharts.x_axis(
-                data_key="especialidad", 
-                interval=0,
-                angle=-10,
-                text_anchor="end",    
-                height=50,
-            ),
-            #Eje y
-            rx.recharts.y_axis(),
-            rx.recharts.graphing_tooltip(),
-            data=item["valor"],
-            width=1000,
-            height=250,  
+                animation_easing="ease-out",
+                data=datos,
+                width=1000,
+                height=250,  
+                ),
+                #Introducimos una sola vez el texto del error
+                rx.cond(
+                    i+1 == Programa.nombres_especialidades.length(),
+                    rx.text(
+                        Programa.texto_error[i]
+                    )
+                ),
+                align="center",
+                margin_bottom="3em"
             )
         ),
     
-        #Creamos el grafico de barras
-        rx.recharts.bar_chart(
-            #El contenido del grafico
-            rx.recharts.bar(
-                data_key="valor",
-                stroke=Color.SECUNDARIO.value,
-                fill=Color.ACENTO.value,
-                animation_begin=200,
-                animation_duration=1500,
-                animation_easing="ease-out"
+        #Creamos el grafico de barras compuesto
+        rx.vstack(
+            #Introducimos los textos de las tendencias, la r2 y el error
+            rx.text(
+                f"{Programa.texto_tendencia[0]}\n\n{Programa.texto_r2[0]}\n\n{Programa.texto_error[0]}",
+                white_space="pre-wrap"
             ),
-            #Eje x
-            rx.recharts.x_axis(data_key="name"),
-            #Eje y
-            rx.recharts.y_axis(),
-            rx.recharts.graphing_tooltip(),
-            data=datos,
-            width=550,
-            height=250,
-                
-        )
-    )
+            rx.recharts.composed_chart(
+                rx.recharts.bar(
+                    #Metemos el ErrorBar 
+                    rx.recharts.error_bar(
+                        data_key="error", 
+                        name = "Amplitud de Variabilidad",
+                        stroke="red"   
+                    ),
+                    name="Valor Indicador",
+                    data_key="valor",
+                    fill=Color.ACENTO.value,
+                ),
 
-#Para crear graficos de barras igual que el anterior pero invirtiendo ejes
-def graf_barras_vert(datos: list[dict], bool_esp: bool) -> rx.Component:
-    return rx.cond(
-        bool_esp,
-        rx.foreach(
-        datos,
-        lambda item: rx.recharts.bar_chart(
-            rx.recharts.bar(
-                data_key="indicador",
-                stroke=Color.SECUNDARIO.value,
-                fill=Color.ACENTO.value,
-                animation_begin=200,
-                animation_duration=1500,
-                animation_easing="ease-out"
-            ),
-            #En el eje x van los valores numericos
-            rx.recharts.x_axis(type_="number"),
-            #En el eje y las especialidades
-            rx.recharts.y_axis(
-                data_key="especialidad", 
-                type_="category",
-                interval=0,
-                angle=-10,
-                text_anchor="end",    
-                height=50,
-            ),
-            rx.recharts.graphing_tooltip(),
-            layout="vertical",
-            margin={"top": 20, "right": 20, "left": 100, "bottom": 20},
-            data=item["valor"],
-            width=1000,
-            height=250,  
-            )
-        ),
-        rx.recharts.bar_chart(
-            rx.recharts.bar(
-                data_key="valor",
-                stroke=Color.SECUNDARIO.value,
-                fill=Color.ACENTO.value,
-                animation_begin=200,
-                animation_duration=1500,
-                animation_easing="ease-out"
-            ),
-            #En el eje x van los valores numericos
-            rx.recharts.x_axis(type_="number"),
-            #En el eje y van los años
-            rx.recharts.y_axis(data_key="name", type_="category"),
-            rx.recharts.graphing_tooltip(),
-            layout="vertical",
-            data=datos,
-            width=550,
-            height=250,
-                
-        )
-    )
-
-#Para crear graficos de lineas
-def graf_lineas(datos: list[dict], bool_esp: bool) -> rx.Component:
-    return rx.cond(
-        bool_esp,
-        #Creo un grafico por archivo en vertical
-        rx.foreach(
-        datos,
-        lambda item: rx.recharts.line_chart(
-            #El contenido del grafico las lineas
-            rx.recharts.line(
-                data_key="indicador",
-                stroke=Color.SECUNDARIO.value,
+                rx.recharts.line(
+                    data_key="tendencia", 
+                    name="Tendencia",    
+                    stroke="white",
+                    #Quita los puntitos de cada año para que quede limpia             
+                    dot=False                 
+                ),
+                rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
+                #Eje x
+                rx.recharts.x_axis(data_key="name"),
+                #Para darle un poco de aire al grafico por arriba
+                rx.recharts.y_axis(domain=[0, "auto"]),
+                rx.recharts.graphing_tooltip(),
+                #Animaciones
                 animation_begin=200,
                 animation_duration=1500,
                 animation_easing="ease-out",
+                data=datos,
+                width=1000,
+                height=250,
             ),
-            #Eje x
-            rx.recharts.x_axis(
-                data_key="especialidad", 
-                interval=0,
-                angle=-10,
-                text_anchor="end",    
-                height=50,
-            ),
-            #Eje y
-            rx.recharts.y_axis(),
-            rx.recharts.graphing_tooltip(),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-            rx.recharts.brush(data_key="especialidad", height=30, stroke=Color.ACENTO.value),
-            data=item["valor"],
-            margin={"top": 20, "right": 20, "left": 100, "bottom": 20},
-            width=1000,
-            height=250,  
-            )
-        ),
-    
-        #Creamos el grafico de lineas
-        rx.recharts.line_chart(
-            #El contenido del grafico las lineas
-            rx.recharts.line(
-                data_key="valor",
-                stroke=Color.SECUNDARIO.value,
-                animation_begin=200,
-                animation_duration=1500,
-                animation_easing="ease-out",
-            ),
-            #Eje x
-            rx.recharts.x_axis(data_key="name"),
-            #Eje y
-            rx.recharts.y_axis(),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-            rx.recharts.graphing_tooltip(),
-            data=datos,
-            width=550,
-            height=250,
-                
-        )
-    )
-
-#Exactamente igual pero invirtiendo los ejes
-def graf_lineas_vert(datos: list[dict], bool_esp: bool) -> rx.Component:
-    return rx.cond(
-        bool_esp,        
-        rx.foreach(
-        datos,
-        lambda item: rx.recharts.line_chart(
-            rx.recharts.line(
-                data_key="indicador",
-                stroke=Color.SECUNDARIO.value,
-                animation_begin=200,
-                animation_duration=1500,
-                animation_easing="ease-out",
-            ),
-            #En el eje x van los valores numericos
-            rx.recharts.x_axis(type_="number"),
-            #En el eje y las especialidades
-            rx.recharts.y_axis(
-                data_key="especialidad", 
-                type_="category",
-                interval=0,
-                angle=-10,
-                text_anchor="end",    
-                height=50,
-            ),
-            rx.recharts.graphing_tooltip(),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-            rx.recharts.brush(data_key="especialidad", height=30, stroke=Color.ACENTO.value),
-            #Pone el grafico vertical
-            layout="vertical",
-            margin={"top": 20, "right": 20, "left": 100, "bottom": 20},
-            data=item["valor"],
-            width=1000,
-            height=250,  
-            )
-        ),    
-        rx.recharts.line_chart(
-            rx.recharts.line(
-                data_key="valor",
-                stroke=Color.SECUNDARIO.value,
-                animation_begin=200,
-                animation_duration=1500,
-                animation_easing="ease-out",
-            ),
-            #En el eje x van los valores numericos
-            rx.recharts.x_axis(type_="number"),
-            #En el eje y van los años
-            rx.recharts.y_axis(data_key="name", type_="category"),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-            rx.recharts.graphing_tooltip(),
-            #Pone el grafico en vertical
-            layout="vertical",
-            margin={"top": 20, "right": 20, "left": 20, "bottom": 20},
-            data=datos,
-            width=550,
-            height=250,
-                
-        )
-    )
-
-#Para crear graficos de dispersion
-def graf_dispersion(datos: list[dict], bool_esp: bool) -> rx.Component:
-    return rx.cond(
-        bool_esp,
-        rx.foreach(
-        datos,
-        lambda item: rx.recharts.scatter_chart(
-            #El contenido del grafico los puntos
-            rx.recharts.scatter(
-                data=item["valor"], 
-                fill=Color.SECUNDARIO.value,
-                animation_begin=200,
-                animation_duration=1500,
-                animation_easing="ease-out"
-            ),
-            #Eje x
-            rx.recharts.x_axis(
-                data_key="especialidad", 
-                type_="category",
-                #Ponemos un dominio de 100 años
-                domain=[2000, 2100],
-                #Si algun dato pasa del dominio no apareceera
-                allow_data_out_of_boundary=True,
-                interval=0,
-                angle=-10,
-                text_anchor="end",    
-                height=50,
-            ),
-            #Eje y
-            rx.recharts.y_axis(data_key="indicador", type_="number"),
-            rx.recharts.graphing_tooltip(),
-            #Cuadricula del fondo 
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-            margin={"top": 20, "right": 20, "left": 60, "bottom": 20},
-            width=1000,
-            height=250,  
-            )
-        ),
-    
-        rx.recharts.scatter_chart(
-            #El contenido del grafico
-            rx.recharts.scatter(
-                data=datos, 
-                fill=Color.SECUNDARIO.value,
-                animation_begin=200,
-                animation_duration=1500,
-                animation_easing="ease-out"
-            ),
-            #Eje x
-            rx.recharts.x_axis(
-                data_key="name", 
-                type_="number", 
-                domain=[2000, 2100],
-                allow_data_out_of_boundary=True,
-            ),
-            #Eje y
-            rx.recharts.y_axis(data_key="valor", type_="number"),
-            rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
-            rx.recharts.graphing_tooltip(),
-            data=datos,
-            width=550,
-            height=250,
-                
+            align="center",
+            margin_bottom="3em",
+            margin_top="3em"
         )
     )
 
@@ -440,10 +288,10 @@ def graf_pie(datos: list[dict]) -> rx.Component:
                     Color.OSCURO.value, 
                     Color.ACENTO.value
                 ),
-                #El anillo interior (i=0) empieza en 0% y llega a 30%
-                inner_radius=f"{i * 25}%", 
-                #El siguiente se va expandiendo hacia afuera
-                outer_radius=f"{(i + 1) * 20}%",
+                #Multiplicamos por "i" para saber donde empieza el anillo
+                inner_radius=f"{i * (100 / datos.length())}%", 
+                #Le restamos 2 al final para dejar siempre el margen transparente de separacion
+                outer_radius=f"{((i + 1) * (100 / datos.length())) - 2}%",
                 padding_angle=5,
                 animation_begin=200,
                 animation_duration=1500,
@@ -453,30 +301,6 @@ def graf_pie(datos: list[dict]) -> rx.Component:
         rx.recharts.graphing_tooltip(),
         width=750,
         height=750,
-    )
-
-#Para crear graficos de funnel
-def graf_funnel(datos: list[dict]) -> rx.Component:
-    #Creo un grafico por archivo en vertical
-    return rx.foreach(
-    datos,
-    lambda item: rx.recharts.funnel_chart(
-        #El contenido del grafico los niveles
-        rx.recharts.funnel(
-            #Definimos los nombres para las etiquetas
-            name_key="especialidad",
-            data_key="indicador",
-            data=item["valor"],
-            animation_begin=200,
-            animation_duration=1500,
-            animation_easing="ease-out",
-            stroke=Color.OSCURO.value
-        ),
-        rx.recharts.graphing_tooltip(),
-        margin={"top": 20, "right": 20, "left": 20, "bottom": 20},
-        width=800,
-        height=250, 
-        )
     )
 
 #Grafico de area mezclando indicadores

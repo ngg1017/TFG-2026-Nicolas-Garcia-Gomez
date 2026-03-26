@@ -28,60 +28,130 @@ class PDF(FPDF):
             align="L",
             fill=True,
         )
-        self.ln(4)
+        self.ln(2)
 
     #Texto del capitulo
-    def cuerpo_capitulo(self, descripcion, datos):
-        self.set_font("Times", size=12)
+    def cuerpo_capitulo(self, descripcion, datos, titulo, ind_especialidades=False):
+        self.set_font("Times", size=11)
         self.multi_cell(0, 5, descripcion)
-        self.ln(2)
-        for docu in datos:
-            #Reseteamos X manualmente por seguridad 
-            self.set_x(10) 
-            self.multi_cell(0, 10, f"En el año {docu["name"]} tuvimos un {docu["valor"]}%", align="L")
+        self.ln(5)
+        
+        #Convertimos los datos a lista por si vienen como objeto 'zip'
+        datos_lista = list(datos) 
+        
+        #Altura de la fila
+        altura_fila = 10
+        
+        if ind_especialidades == True:
+            #Para especialidades (textos largos): 2 columnas de 95mm de ancho
+            ancho_col = 95 
+            #Extraemos la especialidad
+            especialidad = titulo.split(":")[1].strip()
+            
+            for i, (año, valor) in enumerate(datos_lista):
+                #Texto a añadir
+                texto = f"Año {año} en {especialidad}: {valor}% de ingresos"
+                #Creamos la celda con su texto, ancho y altura
+                self.cell(ancho_col, altura_fila, texto, align="C")
+                
+                #Si estamos en la segunda columna (indice impar), hacemos salto de linea
+                if (i + 1) % 2 == 0:
+                    self.ln(altura_fila)
+            
+            #Si el numero total de datos es impar, forzamos el salto de linea final
+            if len(datos_lista) % 2 != 0:
+                self.ln(altura_fila)
+
+        else:
+            #Para datos generales (textos cortos): 3 columnas de 63mm de ancho
+            ancho_col = 63 
+            
+            for i, docu in enumerate(datos_lista):
+                #Texto a añadir
+                texto = f"Año {docu["name"]}: {docu["valor"]}%"
+                #Creamos la celda con su texto, ancho y altura
+                self.cell(ancho_col, altura_fila, texto, align="C")
+                
+                #Si estamos en la tercera columna, hacemos salto de linea
+                if (i + 1) % 3 == 0:
+                    self.ln(altura_fila)
+                    
+            #Si no completamos la ultima fila de 3, forzamos el salto
+            if len(datos_lista) % 3 != 0:
+                self.ln(altura_fila)
     
     #Añadimos el grafico calculado con matplotlib
     def añadir_grafico(self, imagen, ancho=140):
         #Calculamos la posición X para centrar (A4 = 210mm)
         pos_x = (210 - ancho) / 2
-        #Guardamos la posicion Y actual para poner la imagen
-        pos_y = self.get_y() + 25
-        self.image(imagen, x=pos_x, y=pos_y, w=ancho)
+
+        #Al no pasar Y, FPDF coloca la imagen en la Y actual 
+        self.image(imagen, x=pos_x, w=ancho)
+        
+        #Reseteamos la X al margen izquierdo (10mm)
+        self.set_x(10)
+    
+    @staticmethod
+    #Funcion que evalua la pendiente y la r2 para usarlo tanto en el informe como en reflex
+    def texto_tendencia_r2(pendiente_tend, r2):
+        texto_tendencia =""
+        texto_r2 =""
+        texto_error =""
+
+        #Analisis de la tendencia(Rango de estabilidad ajustado a -0.1 y 0.1)
+        if pendiente_tend > 0.1:
+            texto_tendencia = f"El indicador muestra una tendencia ascendente, con una variación media de +{pendiente_tend:.4f} puntos anuales."
+        elif pendiente_tend < -0.1:
+            #Usamos abs() para quitar el signo negativo al leer la frase
+            texto_tendencia = f"El indicador presenta una tendencia descendente, reduciéndose a un ritmo de {abs(pendiente_tend):.4f} puntos por año."
+        else:
+            texto_tendencia = f"El indicador se mantiene estable a lo largo del periodo, con una variación interanual mínima ({pendiente_tend:.4f})."
+        
+        #Analisis del r2
+        if r2 == 0:
+            texto_r2 = ("Dado que la amplitud histórica es mínima, el modelo asume una estabilidad estructural. "
+                        "El protocolo estadístico descarta forzar una tendencia matemática que carece de significancia clínica, "
+                        "definiendo el indicador globalmente como 'Estable'.")
+        elif r2 >= 0.7:
+            texto_r2 = f"Con un coeficiente de determinación (R²) de {r2:.4f}, la tendencia es sólida y consistente. "\
+                       "Los cambios anuales siguen un patrón claro, lo que otorga gran fiabilidad descriptiva al modelo histórico."
+        elif r2 >= 0.4:
+            texto_r2 = f"Con un R² de {r2:.4f}, existe una tendencia visible, pero la serie presenta moderada variabilidad. "\
+                       "Factores puntuales de ciertos años generan 'ruido' estadístico alrededor de la línea principal."
+        elif r2 > 0:
+            texto_r2 = f"El R² de {r2:.4f} revela una alta dispersión. Los datos fluctúan significativamente, por lo que "\
+                       "no se puede confirmar un patrón de evolución lineal claro; la variabilidad obedece principalmente a factores estacionales o aleatorios."
+        else:
+            texto_r2 = f"El indicador (R²: {r2:.4f}) no presenta un comportamiento lineal descriptible por este modelo matemático."
+        
+        #Analisis de la variabilidad y el Error Tipico
+        texto_error = ("Nota metodológica: Las marcas de variabilidad representadas en el gráfico no indican la desviación estándar "
+                       "interna de cada año (por tratarse de datos consolidados anualmente), sino el Error Típico del modelo. "
+                       "Establecen un 'pasillo de normalidad' histórico. Si el valor real de un año excede estas marcas, "
+                       "señala una alteración estadísticamente significativa frente a la evolución general del servicio.")
+        
+        return texto_tendencia, texto_r2, texto_error
     
     #Texto que introducimos en funcion de la tendencia y del r2
-    def analisis_final(self, tendencia, r2):
-        self.set_font("Times", size=12)
-        self.ln(2)
-        #Analisis de la tendencia
-        if tendencia > 0.5:
-            texto_tendencia = f"El indicador tiene una tendencia ascendente, creciendo una media de {tendencia:.4f} unidades por año"
-        elif tendencia < -0.1:
-            texto_tendencia = f"El indicador muestra una tendencia favorable a la baja, reduciéndose un {tendencia:.4f} anual"
-        else:
-            texto_tendencia = f"El indicador se mantiene estable a lo largo del periodo analizado con una variacion anual de {tendencia:.4f}"
+    def analisis_final(self, texto_tendencia, texto_r2, texto_error):
+        self.set_font("Times", size=11)
+        self.ln(5)
         
+        self.set_x(10)
         self.multi_cell(0, 5, texto_tendencia)
         self.ln(2)
-
-        #Analisis del r2
-        if r2 > 0.7:
-            texto_r2 = f"Una R² de {r2:.4f} indica que el indicador sigue una tendencia muy clara. Los cambios año tras año son constantes "\
-            "y el modelo es muy robusto para hacer predicciones."
-        elif 0.4 < r2 < 0.7:
-            texto_r2 = f"Una R² de {r2:.4f} indica que hay una tendencia, pero los datos tienen cierta variabilidad o 'ruido' (un año hubo un pico inesperado, por ejemplo)."   
-        elif 0 < r2 < 0.4:
-            texto_r2 = f"Una R² de {r2:.4f} indica que el indicador fluctúa mucho. No se puede decir que haya una tendencia lineal clara; los cambios "\
-            "anuales son probablemente debidos a factores aleatorios o puntuales."
-        elif r2 == 0:
-            texto_r2 = "Cuando la desviación estándar clínica es insignificante (menos del 1%), el modelo de regresión lineal pierde validez explicativa. " \
-            "En estos casos, el protocolo estadístico indica considerar el indicador como 'Estable' en lugar de forzar una tendencia matemática que carece de significancia clínica." 
-        else:
-            texto_r2 = f"Una R² negativa de {r2:.4f} significa que el indicador no presenta un comportamiento lineal predecible"            
-
+        
+        self.set_x(10)
         self.multi_cell(0, 5, texto_r2)
+        self.ln(2)
+        
+        self.set_font("Times", style="I", size=11)        
+        self.set_x(10)
+        self.multi_cell(0, 5, texto_error)
+        self.set_font("Times", size=11)
     
     #Añadimos una primera pagina explicando que contiene el documento
-    def primara_pagina(self):
+    def primera_pagina(self):
         self.add_page()
         #Titulo principal
         self.set_font("Times", style="B", size=15)
@@ -125,13 +195,15 @@ class PDF(FPDF):
         
         #Seccion 3: Barras de Error
         self.set_font("Times", style="B", size=13)
-        self.cell(0, 8, "3. Barras de Error (Variabilidad Interna)", ln=True)
+        self.cell(0, 8, "3. Barras de Error (Error Típico)", ln=True)
         self.set_font("Times", size=12)
         self.multi_cell(0, 6, (
-            "Las 'antenas' sobre las columnas representan la Desviación Estándar:\n"
-            "- Barras Cortas: Indican datos homogéneos (pacientes con comportamiento similar).\n"
-            "- Barras Largas: Indican datos heterogéneos (alta variabilidad entre pacientes, lo "
-            "que sugiere que el promedio anual está influenciado por casos extremos)."
+            "Las líneas verticales o 'antenas' sobre las columnas representan el Error Típico (o Error Estándar) "
+            "de los datos para ese período. Esta métrica indica la fiabilidad y precisión del promedio mostrado:\n"
+            "- Barras Cortas: Indican una alta precisión en el cálculo del promedio (datos muy consistentes o "
+            "tamaño de muestra grande).\n"
+            "- Barras Largas: Indican menor precisión estadística en ese período, generalmente debido a una "
+            "mayor dispersión interna de los casos o a un menor número de pacientes registrados."
         ))
         self.ln(5)
 
@@ -140,21 +212,26 @@ class PDF(FPDF):
         self.cell(0, 8, "4. Identificación de Eventos Centinela (Regla 2-Sigma)", ln=True)
         self.set_font("Times", size=12)
         self.multi_cell(0, 6, (
-            "Para evitar alarmas injustificadas por fluctuaciones menores, se aplica la regla de las dos "
-            "desviaciones estándar (2-Sigma). Solo se marcan como eventos significativos aquellos años que "
-            "superan este umbral crítico (donde solo se sitúa el 5% de los casos más extremos):\n"
-            "- Barra Roja: Alerta por empeoramiento significativo que requiere revisión de protocolos.\n"
-            "- Barra Verde: Éxito clínico excepcional que debe ser analizado como 'buena práctica'.\n"
-            "- Barra Azul: Comportamiento dentro de la variabilidad habitual del servicio."
+            "Para evitar falsas alarmas provocadas por fluctuaciones estadísticas normales, el sistema evalúa "
+            "cada período usando la regla de las dos Desviaciones Estándar (2-Sigma). Las columnas cambiarán "
+            "de color solo si superan este umbral crítico:\n"
+            "- Color Rojo: Alerta por resultado aumentado. Señala una desviación significativa que "
+            "requiere la revisión de los procesos.\n"
+            "- Color Verde: Alerta por disminucion del resultado. Señala una desviación significativa que "
+            "requiere la revisión de los procesos.\n"
+            "- Color Azul: Comportamiento estable y dentro de la normalidad esperada "
+            "del servicio."
         ))
+        self.ln(5)
 
     #Impresion del capitulo
-    def imp_capitulo(self, num, titulo, descripcion, datos, imagen, tendencia, r2):
+    def imp_capitulo(self, num, titulo, descripcion, datos, imagen, pendiente_tend, r2, ind_especialidades = False):
         self.add_page()
         self.titulo_capitulo(num, titulo)
-        self.cuerpo_capitulo(descripcion, datos)
+        self.cuerpo_capitulo(descripcion, datos, titulo, ind_especialidades) 
         self.añadir_grafico(imagen)
-        self.analisis_final(tendencia, r2)
+        texto_tendencia, texto_r2, texto_error = self.texto_tendencia_r2(pendiente_tend, r2)
+        self.analisis_final(texto_tendencia, texto_r2, texto_error)
     
     #Metodo para incluir tablas
     def incluir_tabla(self, csv: pd.DataFrame):

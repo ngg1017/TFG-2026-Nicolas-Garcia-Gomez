@@ -16,7 +16,7 @@ def index() -> rx.Component:
             rx.vstack(
                 cabecera(),
                 instrucciones(),
-                vent_flotante(Programa.texto, Programa.datos_final),
+                vent_flotante(Programa.texto, Programa.datos_final, Programa.datos_tarta),
                 pie(),
                 width = "100%",
                 spacing = "9"

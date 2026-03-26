@@ -3,12 +3,10 @@ from Logica.Programa import Programa
 from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import TextoColor, Color
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.mezcla import mezcla
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.tabla import tabla
-from TFG_2026_Nicolas_Garcia_Gomez.componentes.graficos import (graf_barras, graf_barras_vert, graf_area, graf_area_vert, 
-                                                                      graf_lineas, graf_lineas_vert, graf_dispersion, graf_pie, graf_funnel,
-                                                                      graf_ar_mezcla, area_sync, composed, graf_pie_mezcla)
+from TFG_2026_Nicolas_Garcia_Gomez.componentes.graficos import (graf_barras, graf_area, graf_pie, graf_ar_mezcla, area_sync, composed, graf_pie_mezcla)
 
 #Devulve la ventana flotante
-def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
+def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.Component:
 
     #Ventana flotante
     return rx.dialog.root(
@@ -140,17 +138,11 @@ def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
                                     #Menu desplegable, sus opciones ejcutan el metodo cambiar_grafico con su grafico correspondiente
                                     rx.menu.content(
                                         rx.menu.item("Gráfico de Barras", on_click=Programa.cambiar_grafico("barras")),
-                                        rx.menu.item("Gráfico de Barras Vertical", on_click=Programa.cambiar_grafico("barras_vert")),
                                         rx.menu.item("Gráfico de Area", on_click=Programa.cambiar_grafico("area")),
-                                        rx.menu.item("Gráfico de Area Vertical", on_click=Programa.cambiar_grafico("vertical")),
-                                        rx.menu.item("Gráfico de Lineas", on_click=Programa.cambiar_grafico("lineas")),
-                                        rx.menu.item("Gráfico de Lineas Vertical", on_click=Programa.cambiar_grafico("lin_vert")),
-                                        rx.menu.item("Gráfico de Dispersión", on_click=Programa.cambiar_grafico("dispersion")),
                                         #Condicional para mostrar graficos nuevos en el ind por especialidades
                                         rx.cond(
                                             Programa.ind_especi,
-                                            [rx.menu.item("Gráfico Pie Chart", on_click=Programa.cambiar_grafico("pie")),
-                                            rx.menu.item("Gráfico Funnel", on_click=Programa.cambiar_grafico("funnel"))],
+                                            rx.menu.item("Gráfico Pie Chart", on_click=Programa.cambiar_grafico("pie")),
                                             rx.spacer()
                                         ),
                                         z_index="500", 
@@ -166,14 +158,8 @@ def vent_flotante(texto: str, datos: list[dict]) -> rx.Component:
                                 #Sigue/lee la variabre ind_grafico que cambia el metodo cambiar_grafico ejecutado antes
                                 Programa.ind_grafico,
                                 ("barras", graf_barras(datos, Programa.ind_especi)),
-                                ("barras_vert", graf_barras_vert(datos, Programa.ind_especi)),
                                 ("area", graf_area(datos, Programa.ind_especi)),
-                                ("vertical", graf_area_vert(datos, Programa.ind_especi)),
-                                ("lineas", graf_lineas(datos, Programa.ind_especi)),
-                                ("lin_vert", graf_lineas_vert(datos, Programa.ind_especi)),
-                                ("dispersion", graf_dispersion(datos, Programa.ind_especi)),
-                                ("pie", graf_pie(datos)),
-                                ("funnel", graf_funnel(datos)),
+                                ("pie", graf_pie(datos_tarta)),
 
                                 #Texto cuando no se da ningun match
                                 rx.text("Selecciona un gráfico para que se muestren"),
