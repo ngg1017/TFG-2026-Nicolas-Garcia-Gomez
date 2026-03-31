@@ -10,29 +10,61 @@ def instrucciones() -> rx.Component:
     return rx.box(
         rx.vstack(
             rx.text(
-                "¿Como funciona esta herramienta?",
+                "¿Cómo funciona esta herramienta?",
                 class_name="title",
                 color = TextoColor.ACENTO.value
             ),
 
             rx.text(
-                "* Lo primero de todo tienes que tener unos datos aninizadas aunque como esta herramienta es local no habría ningun problema en que no lo esten",
-                as_="span"
-            ),
-
-            rx.text(
-                    "* Tienes que presionar el boton que dice 'Carga de archivos' y cerciorarte de que los datos estan en ",
-                    rx.text(
+                "* Es necesaria la subida de archivos en formato ",
+                rx.text(
                         "formato CSV ",
                         color = Color.ACENTO.value,
                         as_="span"
                     ),
-                    "esto es muy importanto por lo que tienes que tener mucho cuidado.",
+                "a través del botón/zona de arrastre ",
+                rx.text(
+                        "'Carga de archivos'",
+                        color = Color.ACENTO.value,
+                        as_="span"
+                    ),
+                ", tras lo cual aparecerá una barra de carga. Luego de su finalización estarán listos para ser procesados.",
+                as_="span"
+            ),
+
+            rx.text(
+                    "* Posteriormente es necesario presionar el botón ",
+                    rx.text(
+                        "'Selección de Indicadores'",
+                        color = Color.ACENTO.value,
+                        as_="span"
+                    ),
+                    ". Este nos permitirá seleccionar el indicador que se desee o inclusive procesar el resumen de todos ellos a través de ",
+                    rx.text(
+                        "'Resumen Indicadores'",
+                        color = Color.ACENTO.value,
+                        as_="span"
+                    ),
+                    ".",
                     as_="span"
             ),
 
             rx.text(
-                "* No te preocupes si salta algun error el 99% de ellos es debido a una columna mal nombrada, esta aplicacion te devuelve el nombre de la columna que espera y en que calculo se recibe",
+                "* Una vez seleccionado el indicador se podrá visualizar un gráfico de barras o de área, ambos representan la evolución temporal y la " \
+                "tendencia histórica de los indicadores clínicos, evaluando visualmente su estabilidad mediante márgenes de variabilidad interanual. " \
+                "Además, existe la posibilidad de descargar los cálculos relizados cada año gracias al botón de ",
+                rx.text(
+                        "'Descargar'",
+                        color = Color.ACENTO.value,
+                        as_="span"
+                    ),
+                ". En caso del resumen se permitirá descargar el informe final por medio del pulsador ",
+                rx.text(
+                        "'Descargar Informe'",
+                        color = Color.ACENTO.value,
+                        as_="span"
+                    ),
+                ".",
                 as_="samp"
             ),
             
@@ -96,7 +128,7 @@ def instrucciones() -> rx.Component:
             rx.cond(
                 State.rutas_archivos.length() > 0,
                 rx.center(
-                seleccion("Seleccion de indicadores"),
+                seleccion("Selección de Indicadores"),
                 width="100%",
                 margin_top=Size.PEQUEÑO.value,
                 margin_bottom=Size.GRANDE.value

@@ -45,7 +45,7 @@ def seleccion(icon: str) -> rx.Component:
                             rx.menu.item("Mortalidad Estandarizada", on_click=Programa.mortalidad_estandarizada(ocultar = False)),
                             rx.menu.item("Reingresos no programados", on_click=Programa.reingresos_no_programados(ocultar = False)),
                             rx.menu.item("Incidencia de barotrauma", on_click=Programa.incidencia_de_barotrauma(ocultar = False)),
-                            rx.menu.item("Posicion semiincorporada con VMI", on_click=Programa.posicion_semiincorporada_VMI(ocultar = False)),
+                            rx.menu.item("Posición semiincorporada con VMI", on_click=Programa.posicion_semiincorporada_VMI(ocultar = False)),
                             rx.menu.item("Incidencias úlcera por presión", on_click=Programa.incidencia_ulceras_presion(ocultar = False)),
                             rx.menu.item(
                                 "Valoración diaria de la interrupción de la sedación", 
@@ -65,11 +65,11 @@ def seleccion(icon: str) -> rx.Component:
                                 "Tratamiento empírico adecuado en infección", 
                                 on_click=Programa.tratamiento_empirico_infeccion(ocultar = False)
                             ),
-                            rx.menu.item("Neumonia asociada a ventilacion mecanica", on_click=Programa.neumonia_asociada_vmi(ocultar = False)),
+                            rx.menu.item("Neumonía asociada a ventilacion mecánica", on_click=Programa.neumonia_asociada_vmi(ocultar = False)),
                             rx.menu.item("Reintubación", on_click=Programa.reintubacion(ocultar = False)),
                             rx.menu.item("Especialidad con mayor ingreso", on_click=Programa.especialidad_ingreso(ocultar = False)),
                             rx.menu.item(
-                                "Profilaxis de la ulcera por estrés en enfermos con NE", 
+                                "Profilaxis de la úlcera por estrés en enfermos con NE", 
                                 on_click=Programa.profilaxis_ulcera_enfermos_NE(ocultar = False)
                             ),
                             rx.menu.item("Sedación adecuada", on_click=Programa.sedacion_adecuada(ocultar = False)),
@@ -80,12 +80,12 @@ def seleccion(icon: str) -> rx.Component:
                             ),
                             rx.menu.item("Nutrición enteral precoz", on_click=Programa.ne_precoz(ocultar = False)),
                             rx.menu.item(
-                                "Sobretransfusión de concentrados de hematies", 
+                                "Sobretransfusión de concentrados de hematíes", 
                                 on_click=Programa.sobretransfusion_hematies(ocultar = False)
                             ),
                             rx.menu.item("Retirada accidental del tubo endotraqueal", on_click=Programa.retirada_accidental(ocultar = False)),
-                            rx.menu.item("Tabla resumen", on_click=Programa.tabla_resumen),
                             rx.menu.item("Mezcla de indicadores", on_click=Programa.mezcla),
+                            rx.menu.item("Resumen Indicadores", on_click=Programa.tabla_resumen),
 
                             #Aseguramos que el menu flote por encima de todo
                             z_index="500", 

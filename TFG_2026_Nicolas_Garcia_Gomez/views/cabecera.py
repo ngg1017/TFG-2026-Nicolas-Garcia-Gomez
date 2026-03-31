@@ -34,7 +34,7 @@ def cabecera() -> rx.Component:
                     rx.text("¡Bienvenido a esta herramienta!",
                             size = "6"
                     ),
-                    rx.text("Vamos a desgranar como funciona y que ventajas vamos a tener con ella",
+                    rx.text("Vamos a desgranar cómo funciona y qué ventajas proporciona al usuario.",
                             size = "6"
                     ),
                     class_name = "container-fluid border border-red rounded"
@@ -42,7 +42,7 @@ def cabecera() -> rx.Component:
 
                 #Hay que ponerles as_ para que no fuerzen un salto de línea
                 rx.text(
-                    "Esta herramienta va a utilizarse para la creacion de ",
+                    "Esta herramienta va a utilizarse para la creación de ",
 
                     #Subtexto en color rojo
                     rx.text(
@@ -50,30 +50,42 @@ def cabecera() -> rx.Component:
                         color = Color.ACENTO.value,
                         as_="span"
                     ),
-                    ". Gracias a unos datos que vamos a obtener desde la dirección y vamos a procesar pero de momento no te procupes en como subirlos.",
-                    as_="span"
-                ),
-                rx.text(
-                    "Esta aplicación es muy sencilla por lo que no te sientas ",
-                    rx.text(
-                        "abrumad@",
-                        color = Color.ACENTO.value,
-                        as_="span"
+                    ". Gracias a los archivo en formato ",
+                    rx.link(
+                        "CSV", 
+                        href = constantes.CSV, 
+                        is_external = True, 
+                        color = TextoColor.ACENTO.value
                     ),
                     ".",
                     as_="span"
                 ),
                 rx.text(
-                    "Solo tienes que seguir las indicaciones del apartado de debajo y todo será muy fácil por lo que ¡Manos a la obra!.",
+                    "Como se ha comentado esta herramienta se nutre de archivos CSV. Ante cualquier complicación que puediera surgir con el " \
+                    "tratamiento de dichos archivos, se dejan una serie de enlaces para dominar su uso.",
                     as_="span"
                 ),
-                rx.link(
-                    "UbU",
-                    href = constantes.UBU,
-                    is_external = True,
-                    color = TextoColor.TERCIARIO.value,
-                    padding_top = Size.GRANDE.value,
-                    font_size = Size.DEFECTO.value
+                rx.text(
+                    "Para la recolección de los datos es aconsejable utilizar un archivo .xlsx o archivo Excel. Posteriormente es necesaria su conversión " \
+                    "al formato correspondiente. Se deja un enlace externo para facilitar el proceso: ",
+                    rx.link(
+                        "Excel a CSV", 
+                        href = constantes.EXCEL_A_CSV, 
+                        is_external = True, 
+                        color = TextoColor.ACENTO.value
+                    ),
+                    as_="span"
+                ),
+                rx.text(
+                    "Si se dispone de un archivo CSV y el objetivo es editarlo, lo más común es usar Excel." \
+                    " Para poder visualizar correctamente un archivo CSV en Excel: ",
+                    rx.link(
+                        "CSV a EXCEL", 
+                        href = constantes.CSV_A_EXCEL, 
+                        is_external = True, 
+                        color = TextoColor.ACENTO.value
+                    ),
+                    as_="span"
                 )
             ),
             #Establece direcciones en diferentes tamaños de pantalla

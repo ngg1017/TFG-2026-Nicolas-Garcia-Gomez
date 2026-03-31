@@ -1,3 +1,6 @@
 REA_URL = "https://www.saludcastillayleon.es/CABurgos/es/cartera-servicios-2e311/reanimacion-u-r-p"
 UBU = "https://www.ubu.es/"
 ING_SALUD = "https://www.ubu.es/grado-en-ingenieria-de-la-salud"
+CSV = "https://es.wikipedia.org/wiki/Valores_separados_por_comas"
+EXCEL_A_CSV = "https://www.youtube.com/watch?v=D9WsHqEOiqc"
+CSV_A_EXCEL = "https://www.youtube.com/watch?v=IT7bC9Ngzy8"
