@@ -242,6 +242,19 @@ class Programa(State):
     #Metodo para cambiar la variable del grafico
     def cambiar_grafico(self, grafico: str):
         self.ind_grafico = grafico
+    
+    #Metodo que sirve para leer los archivos csv independientemente de su separador
+    def lectura_archivos(self, ruta):
+        #Leemos solo la primera linea del archivo para inspeccionarlo
+        with open(ruta, "r", encoding="utf-8") as f:
+            primera_linea = f.readline()
+
+        #Que separador se usa en esa primera linea
+        separador_detectado = ";" if primera_linea.count(";") > primera_linea.count(",") else ","
+
+        #Leemos el CSV usando el separador exacto
+        df = pd.read_csv(ruta, sep=separador_detectado)
+        return df
 
     #Metodo para la conversion del codigo apache
     def codigo_apache(self, apache: int):
@@ -261,9 +274,9 @@ class Programa(State):
         try:
             #Iteramos sobre las RUTAS temporales
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                
-                #Pandas lee el archivo temporal unico
-                df = pd.read_csv(ruta)
+                #Leemos el CSV en funcion de sus separadores
+                df = self.lectura_archivos(ruta)
+
                 #Normalizamos sus columnas
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
@@ -315,7 +328,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -367,7 +380,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -412,7 +425,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -457,7 +470,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -498,7 +511,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -547,7 +560,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -593,7 +606,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -639,7 +652,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -753,7 +766,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -798,7 +811,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -861,7 +874,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -903,7 +916,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -949,7 +962,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1001,7 +1014,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1079,7 +1092,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1146,7 +1159,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1189,7 +1202,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1236,7 +1249,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1287,7 +1300,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1341,7 +1354,7 @@ class Programa(State):
 
         try:
             for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = pd.read_csv(ruta)
+                df = self.lectura_archivos(ruta)
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1454,7 +1467,6 @@ class Programa(State):
         return grafico_bytes
 
     def tabla_resumen(self):
-
         #Recorre los resultados tras ejecutar cada indicador y añade el valor numerico obtenido a su sublista correspondiente en listas
         def recuperar_datos():
             #Listas para pasar al metodo de graficos
