@@ -3,7 +3,7 @@ from Logica.Programa import Programa
 from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import TextoColor, Color
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.mezcla import mezcla
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.tabla import tabla
-from TFG_2026_Nicolas_Garcia_Gomez.componentes.graficos import (graf_barras, graf_area, graf_pie, graf_ar_mezcla, area_sync, composed, graf_pie_mezcla)
+from TFG_2026_Nicolas_Garcia_Gomez.componentes.graficos import (graf_barras, graf_lineal, graf_pie, graf_ar_mezcla, area_sync, composed, graf_pie_mezcla)
 
 #Devulve la ventana flotante
 def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.Component:
@@ -138,7 +138,7 @@ def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.
                                     #Menu desplegable, sus opciones ejcutan el metodo cambiar_grafico con su grafico correspondiente
                                     rx.menu.content(
                                         rx.menu.item("Gráfico de Barras", on_click=Programa.cambiar_grafico("barras")),
-                                        rx.menu.item("Gráfico de Area", on_click=Programa.cambiar_grafico("area")),
+                                        rx.menu.item("Gráfico Lineal", on_click=Programa.cambiar_grafico("lineal")),
                                         #Condicional para mostrar graficos nuevos en el ind por especialidades
                                         rx.cond(
                                             Programa.ind_especi,
@@ -158,7 +158,7 @@ def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.
                                 #Sigue/lee la variabre ind_grafico que cambia el metodo cambiar_grafico ejecutado antes
                                 Programa.ind_grafico,
                                 ("barras", graf_barras(datos, Programa.ind_especi)),
-                                ("area", graf_area(datos, Programa.ind_especi)),
+                                ("lineal", graf_lineal(datos, Programa.ind_especi)),
                                 ("pie", graf_pie(datos_tarta)),
 
                                 #Texto cuando no se da ningun match
@@ -181,13 +181,49 @@ def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.
                     #Creamos un boton por cada archivo para descargar
                     rx.foreach(
                         datos,
-                        lambda item, i: rx.button(
-                            f"Descargar {item["name"]}",
-                            on_click=Programa.descargar_archivo(i)
-                        )
+                        lambda item, i: rx.cond(
+                            #Condicional que permite al boton de descarga de informe seleccionar el grafico deseado
+                            Programa.ind_resumen & i == 2,
+                            #Menu seleccion graficos a incluir
+                            rx.vstack(
+                                rx.menu.root(
+                                    #Boton para abrir el desplebagle
+                                    rx.menu.trigger(
+                                        rx.button(
+                                            "Seleccionar Gráfico a Incluir",
+                                            variant="surface",
+                                            width="100%",
+                                        )
+                                    ),
+                                    #Menu desplegable, sus opciones ejcutan el metodo cambiar_grafico a su grafico correspondiente
+                                    rx.menu.content(
+                                        rx.menu.item("Gráfico de Barras", on_click=Programa.cambiar_grafico("barras")),
+                                        rx.menu.item("Gráfico Lineal", on_click=Programa.cambiar_grafico("lineal")),
+                                        z_index="500", 
+                                        background_color=Color.ACENTO.value,
+                                        color=TextoColor.SECUNDARIO.value,
+                                    )
+                                ),
+                                #Este match nos permite incluir el grafico seleccionado en el informe y descargarlo
+                                rx.match(
+                                    Programa.ind_grafico,
+                                    #Devolvemos un boton que por dentro tiene la accion
+                                    ("barras", rx.button("Descargar Informe (Barras)", on_click=Programa.generar_pdf_final)),
+                                    ("lineal", rx.button("Descargar Informe (Lineal)", on_click=Programa.generar_pdf_final))
+                                ),
+                                padding_bottom = "10px",
+                                padding_top = "9px"
+                            ),
+                            #Boton de descarga normal
+                            rx.button(
+                                f"Descargar {item["name"]}",
+                                on_click=Programa.descargar_archivo(i)
+                            )
+                        )   
                     )  
                 ),
                 justify = "center",
+                align="center",
                 flex_wrap="wrap",
                 spacing="2"
             ),

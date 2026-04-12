@@ -125,9 +125,8 @@ class PDF(FPDF):
             texto_r2 = f"El indicador (R²: {r2:.4f}) no presenta un comportamiento lineal descriptible por este modelo matemático."
         
         #Analisis de la variabilidad y el Error Tipico
-        texto_error = ("Nota metodológica: Las marcas de variabilidad representadas en el gráfico no indican la desviación estándar "
-                       "interna de cada año (por tratarse de datos consolidados anualmente), sino el Error Típico del modelo. "
-                       "Establecen un 'pasillo de normalidad' histórico. Si el valor real de un año excede estas marcas, "
+        texto_error = ("Nota metodológica: Las líneas paralelas que envuelven la tendencia "
+                       "establecen un 'pasillo de normalidad' histórico. Si el valor real de un año excede estas marcas, "
                        "señala una alteración estadísticamente significativa frente a la evolución general del servicio.")
         
         return texto_tendencia, texto_r2, texto_error
@@ -185,25 +184,24 @@ class PDF(FPDF):
         self.cell(0, 8, "2. Estabilidad y Media Histórica", ln=True)
         self.set_font("Times", size=12)
         self.multi_cell(0, 6, (
-            "- Línea Verde Punteada: Representa la Media Histórica del periodo analizado. Sirve "
+            "- Línea Horizontal Verde Punteada: Representa la Media Histórica del periodo analizado. Sirve "
             "como referencia para identificar si el año actual se sitúa por encima o por debajo "
-            "de lo habitual en la unidad.\n"
-            "- Franja Sombreada: Marca el área de variabilidad normal. Los valores fuera de esta "
-            "franja se consideran anomalías estadísticas o eventos reseñables."
+            "de lo habitual en la unidad."
         ))
         self.ln(5)
         
-        #Seccion 3: Barras de Error
+        # Seccion 3: Pasillo de Confianza
         self.set_font("Times", style="B", size=13)
-        self.cell(0, 8, "3. Barras de Error (Error Típico)", ln=True)
+        self.cell(0, 8, "3. Pasillo de Confianza (Error Típico Interanual)", ln=True)
         self.set_font("Times", size=12)
         self.multi_cell(0, 6, (
-            "Las líneas verticales o 'antenas' sobre las columnas representan el Error Típico (o Error Estándar) "
-            "de los datos para ese período. Esta métrica indica la fiabilidad y precisión del promedio mostrado:\n"
-            "- Barras Cortas: Indican una alta precisión en el cálculo del promedio (datos muy consistentes o "
-            "tamaño de muestra grande).\n"
-            "- Barras Largas: Indican menor precisión estadística en ese período, generalmente debido a una "
-            "mayor dispersión interna de los casos o a un menor número de pacientes registrados."
+            "La franja rosa sombreada que envuelve a la línea de tendencia representa el Error Típico Interanual del modelo. "
+            "Esta banda visual conforma un 'pasillo de normalidad' que evalúa la estabilidad histórica del indicador:\n"
+            "- Franja Estrecha: Indica una evolución muy estable y predecible. Las variaciones entre los distintos años "
+            "son mínimas y se mantienen muy cercanas a la tendencia central.\n"
+            "- Franja Ancha: Refleja una mayor variabilidad o 'ruido' estadístico a lo largo del periodo analizado.\n"
+            "Si la columna de un año específico sobresale de los límites de este pasillo, señala una desviación "
+            "estadísticamente significativa respecto a la evolución general esperada para el servicio."
         ))
         self.ln(5)
 
@@ -213,7 +211,7 @@ class PDF(FPDF):
         self.set_font("Times", size=12)
         self.multi_cell(0, 6, (
             "Para evitar falsas alarmas provocadas por fluctuaciones estadísticas normales, el sistema evalúa "
-            "cada período usando la regla de las dos Desviaciones Estándar (2-Sigma). Las columnas cambiarán "
+            "cada período usando la regla de las dos Desviaciones Estándar (2-Sigma). Las columnas o puntos del gráfico (incluyendo una línea vertical) cambiarán "
             "de color solo si superan este umbral crítico:\n"
             "- Color Rojo: Alerta por resultado aumentado. Señala una desviación significativa que "
             "requiere la revisión de los procesos.\n"

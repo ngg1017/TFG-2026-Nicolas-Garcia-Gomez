@@ -22,7 +22,7 @@ def navbar() -> rx.Component:
             rx.spacer(),   
             #Creamos el boton en la navbar                               
             link_icon(                                    
-                "Pagina web REA", 
+                "Página web REA", 
                 constantes.REA_URL
             ),
             #Tamaño de la barra(ocupa la totalidad)

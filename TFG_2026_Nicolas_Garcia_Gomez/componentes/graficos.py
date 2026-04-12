@@ -2,8 +2,8 @@ import reflex as rx
 from Logica.Programa import Programa
 from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import Color
 
-#Para crear graficos de area
-def graf_area(datos: list[dict], bool_esp: bool) -> rx.Component:
+#Para crear graficos lineal
+def graf_lineal(datos: list[dict], bool_esp: bool) -> rx.Component:
     #Condicional que nos permite dibujar un grafico por especialidad cuando se selecciona el ind por especialidades
     return rx.cond(
         bool_esp,  
@@ -35,7 +35,7 @@ def graf_area(datos: list[dict], bool_esp: bool) -> rx.Component:
                     active_dot=False,
                     type_="linear",
                     #Elimina esta seccion del tooltype
-                    custom_attrs={"tooltipType": "none"}          
+                    custom_attrs={"tooltipType": "none"},     
                 ),
                 
                 #Banda de error(Apoyada exactamente sobre la base)
@@ -47,7 +47,16 @@ def graf_area(datos: list[dict], bool_esp: bool) -> rx.Component:
                     stroke="none",
                     fill="red",
                     fill_opacity=0.2,
-                    type_="linear"           
+                    type_="linear",
+                    active_dot=False           
+                ),
+
+                rx.recharts.line(
+                    data_key=item+"_tendencia",
+                    name="Tendencia",     
+                    stroke="white",  
+                    active_dot=False,
+                    dot=False                
                 ),
 
                 #El contenido lo ponemos como linea
@@ -57,20 +66,15 @@ def graf_area(datos: list[dict], bool_esp: bool) -> rx.Component:
                     fill=Color.ACENTO.value,
                     stroke_width=3,
                     #Quita los puntitos de cada año para que quede limpia 
+                    active_dot=False,
                     dot=False 
                 ),
 
-                rx.recharts.line(
-                    data_key=item+"_tendencia",
-                    name="Tendencia",     
-                    stroke="white",  
-                    dot=False                 
-                ),
                 #Eje x
                 rx.recharts.x_axis(data_key="name"),
                 #Eje y
                 #Para darle un poco de aire al grafico por arriba
-                rx.recharts.y_axis(domain=[0, "auto"]),
+                rx.recharts.y_axis(domain=["auto", "auto"]),
                 rx.recharts.graphing_tooltip(),
                 animation_begin=200,
                 animation_duration=1500,
@@ -124,7 +128,16 @@ def graf_area(datos: list[dict], bool_esp: bool) -> rx.Component:
                     stroke="none",
                     fill="red",
                     fill_opacity=0.2,
-                    type_="linear"           
+                    type_="linear",
+                    active_dot=False
+                ),
+
+                rx.recharts.line(
+                    data_key="tendencia",
+                    name="Tendencia",     
+                    stroke="white",  
+                    active_dot=False,
+                    dot=False                  
                 ),
 
                 #El contenido lo ponemos como linea
@@ -134,20 +147,15 @@ def graf_area(datos: list[dict], bool_esp: bool) -> rx.Component:
                     fill=Color.ACENTO.value,
                     stroke_width=3,
                     #Quita los puntitos de cada año para que quede limpia 
-                    dot=False 
+                    active_dot=False,
+                    dot=False  
                 ),
 
-                rx.recharts.line(
-                    data_key="tendencia",
-                    name="Tendencia",     
-                    stroke="white",  
-                    dot=False                 
-                ),
                 #Eje x
                 rx.recharts.x_axis(data_key="name"),
                 #Eje y
                 #Para darle un poco de aire al grafico por arriba
-                rx.recharts.y_axis(domain=[0, "auto"]),
+                rx.recharts.y_axis(domain=["auto", "auto"]),
                 rx.recharts.graphing_tooltip(),
                 animation_begin=200,
                 animation_duration=1500,
@@ -181,28 +189,56 @@ def graf_barras(datos: list[dict], bool_esp: bool) -> rx.Component:
                 white_space="pre-wrap"
             ),
             rx.recharts.composed_chart(
-                #El contenido del grafico las barras
-                rx.recharts.bar(
-                    #Metemos el ErrorBar 
-                    rx.recharts.error_bar(
-                        data_key=item+"_error", 
-                        name = "Amplitud de Variabilidad",
-                        stroke="red"   
-                    ),
-                    name="Valor Indicador",
-                    data_key=item+"_valor",
-                    fill=Color.ACENTO.value,
+                #Pilar Invisible (Fondo)
+                rx.recharts.area(
+                    data_key=item+"_base_invisible",
+                    #Activamos el apilado
+                    stack_id=item,            
+                    stroke="none",
+                    #100% transparente
+                    fill="transparent",      
+                    fill_opacity=0,
+                    #Quitamos que se puedan seleccionar los puntos con el raton
+                    active_dot=False,
+                    type_="linear",
+                    #Elimina esta seccion del tooltype
+                    custom_attrs={"tooltipType": "none"}          
                 ),
+                
+                #Banda de error(Apoyada exactamente sobre la base)
+                rx.recharts.area(
+                    data_key=item+"_grosor_banda",
+                    name="Amplitud de Variabilidad",
+                    #Se apoya en el ID 1
+                    stack_id=item,            
+                    stroke="none",
+                    fill="red",
+                    fill_opacity=0.2,
+                    type_="linear",
+                    active_dot=False            
+                ),
+
                 rx.recharts.line(
                     data_key=item+"_tendencia", 
                     name="Tendencia",    
                     stroke="white",
                     #Quita los puntitos de cada año para que quede limpia             
-                    dot=False                 
+                    active_dot=False,
+                    dot=False                  
                 ),
+
+                #El contenido del grafico las barras
+                rx.recharts.bar(
+                    name="Valor Indicador",
+                    data_key=item+"_valor",
+                    fill=Color.ACENTO.value,
+                    active_dot=False,
+                    dot=False 
+                ),
+
                 rx.recharts.x_axis(data_key="name"),
                 #Para darle un poco de aire al grafico por arriba
-                rx.recharts.y_axis(domain=[0, "auto"]),
+                rx.recharts.y_axis(domain=["auto", "auto"]),
                 rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
                 rx.recharts.graphing_tooltip(),
                 #Animaciones
@@ -233,30 +269,58 @@ def graf_barras(datos: list[dict], bool_esp: bool) -> rx.Component:
                 white_space="pre-wrap"
             ),
             rx.recharts.composed_chart(
-                rx.recharts.bar(
-                    #Metemos el ErrorBar 
-                    rx.recharts.error_bar(
-                        data_key="error", 
-                        name = "Amplitud de Variabilidad",
-                        stroke="red"   
-                    ),
-                    name="Valor Indicador",
-                    data_key="valor",
-                    fill=Color.ACENTO.value,
+                #Pilar Invisible (Fondo)
+                rx.recharts.area(
+                    data_key="base_invisible",
+                    #Activamos el apilado
+                    stack_id="1",            
+                    stroke="none",
+                    #100% transparente
+                    fill="transparent",      
+                    fill_opacity=0,
+                    #Quitamos que se puedan seleccionar los puntos con el raton
+                    active_dot=False,
+                    type_="linear",
+                    #Elimina esta seccion del tooltype
+                    custom_attrs={"tooltipType": "none"}          
+                ),
+                
+                #Banda de error(Apoyada exactamente sobre la base)
+                rx.recharts.area(
+                    data_key="grosor_banda",
+                    name="Amplitud de Variabilidad",
+                    #Se apoya en el ID 1
+                    stack_id="1",            
+                    stroke="none",
+                    fill="red",
+                    fill_opacity=0.2,
+                    type_="linear",
+                    active_dot=False            
                 ),
 
+                #La tendencia
                 rx.recharts.line(
                     data_key="tendencia", 
                     name="Tendencia",    
                     stroke="white",
                     #Quita los puntitos de cada año para que quede limpia             
-                    dot=False                 
+                    active_dot=False,
+                    dot=False                  
+                ),
+
+                #Los valores en forma de barras
+                rx.recharts.bar(
+                    name="Valor Indicador",
+                    data_key="valor",
+                    fill=Color.ACENTO.value,
+                    active_dot=False,
+                    dot=False  
                 ),
                 rx.recharts.cartesian_grid(stroke_dasharray="3 3"),
                 #Eje x
                 rx.recharts.x_axis(data_key="name"),
                 #Para darle un poco de aire al grafico por arriba
-                rx.recharts.y_axis(domain=[0, "auto"]),
+                rx.recharts.y_axis(domain=["auto", "auto"]),
                 rx.recharts.graphing_tooltip(),
                 #Animaciones
                 animation_begin=200,

@@ -22,7 +22,7 @@ class Programa(State):
     drawer_abierto: bool
     ind_especi: bool
 
-    #Indicadores para mostrar la table resumen
+    #Indicadores para mostrar la tabla resumen
     ind_resumen: bool
     lista_unida: list[list[str], list[list]]
 
@@ -44,6 +44,9 @@ class Programa(State):
     texto_tendencia: list[str]
     texto_r2: list[str]
     texto_error: list[str]
+
+    #Variable donde guardaremos todos los datos estadisticos de los indicadores
+    memoria_informe: list[dict]
 
     #Metodo que nos permite encontrar el año del documento
     def encontrar_año(self, nombre: str):
@@ -113,8 +116,6 @@ class Programa(State):
                 for i in range(len(self.nombres_archivos)):
                     self.datos_final[i][f"{especialidad}_valor"] = round(valores_historicos[i], 4)
                     self.datos_final[i][f"{especialidad}_tendencia"] = round(y_tendencia[i], 4)
-                    self.datos_final[i][f"{especialidad}_error"] = round(error_tipico, 4)
-                    #Solo para el grafico de area
                     self.datos_final[i][f"{especialidad}_base_invisible"] = round((y_tendencia[i] - error_tipico), 4)
                     self.datos_final[i][f"{especialidad}_grosor_banda"] = round((error_tipico*2), 4)
                         
@@ -140,8 +141,6 @@ class Programa(State):
                     "name": self.encontrar_año(nombre), 
                     "valor": round(valor, 4), 
                     "tendencia": round(tend,4), 
-                    "error": round(error_tipico,4),
-                    #Solo para el grafico de area
                     "base_invisible": round((tend - error_tipico),4),
                     "grosor_banda": round((error_tipico * 2),4)
                 } 
@@ -221,17 +220,13 @@ class Programa(State):
         #Obtenemos el dataFrame y su nombre de la lista de diccionarios
         datos = self.csv_final[indice]["valor"]
         nombre = self.csv_final[indice]["name"]
-        
-        #Si es el informe logicamente no lo pasamos a CSV
-        if nombre == "Informe.pdf":
-            archivo = datos
-        else:
-            #Lo convertimos a STRING (formato CSV)
-            archivo = datos.to_csv( 
-                sep=",",         
-                index=False,
-                encoding="utf-8-sig"
-            )
+
+        #Lo convertimos a STRING (formato CSV)
+        archivo = datos.to_csv( 
+            sep=",",         
+            index=False,
+            encoding="utf-8-sig"
+        )
     
         #Disparamos la descarga con nombre y datos correctos
         return rx.download(
@@ -1439,9 +1434,25 @@ class Programa(State):
             elif valor < media - 2 * desviacion: colores.append("green") 
             else: colores.append(Color.ACENTO.value) 
 
-        #Grafico de barras
+        #Creacion del grafico
         fig, ax = plt.subplots(figsize=(5,4))
-        ax.bar(x = eje_x, height = eje_y, color = colores, yerr = error_tipico, ecolor = "y", capsize=5)
+
+        #Si se ha seleccionado el de barras o el de lineas
+        if self.ind_grafico == "barras":
+            #zorder=2 para que los datos se pinten por delante del pasillo
+            ax.bar(x=eje_x, height=eje_y, color=colores, zorder=2)
+        else:
+            #Dibujamos las lineas
+            ax.plot(eje_x, eje_y, color=Color.ACENTO.value, zorder=2)
+
+            #Buscamos los eventos centinela
+            for i, color_año in enumerate(colores):
+                #Si el color no es el color normal, significa que hay alerta
+                if color_año != Color.ACENTO.value: 
+                    #Pintamos una linea vertical discontinua en ese año concreto
+                    ax.axvline(x=eje_x[i], color=color_año, linestyle="--", alpha=0.6, zorder=1) 
+                    #Pintamos el punto de ese año un poco mas grande
+                    ax.scatter(eje_x[i], eje_y[i], color=color_año, s=60, zorder=3)
 
         ax.set_xlabel("Años")
         ax.set_ylabel(texto)
@@ -1451,13 +1462,29 @@ class Programa(State):
         #Añadimos un colchon arriba y abajo para que no se apelmazen los graficos
         ax.set_ylim(min(eje_y)*0.9, max(eje_y)*1.1)
 
+        #Convertimos y_tendencia a un array de numpy para poder sumarle/restarle el error facilmente
+        y_tend_np = np.array(y_tendencia)
+
+        #Pasillo de confianza
+        ax.fill_between(
+            eje_x,
+            #Limite inferior del pasillo
+            y_tend_np - error_tipico,
+            #Limite superior del pasillo 
+            y_tend_np + error_tipico, 
+            color="m",
+            #Transparencia para que sea sutil
+            alpha=0.15,    
+            label="Pasillo de Confianza",
+            #zorder=1 lo manda al fondo de la grafica
+            zorder=1       
+        )
+
         #Dibujamos la pendiente en el grafico
-        ax.plot(eje_x, y_tendencia, "m", label="Tendencia")
+        ax.plot(eje_x, y_tendencia, "m", label="Tendencia", zorder=3)
 
         #Dibujamos la media
-        ax.axhline(media, color="green", linestyle=":", label="Media Histórica")
-        #Dubujamos el area normal
-        ax.axhspan(media - desviacion, media + desviacion, alpha=0.1, color="green")
+        ax.axhline(media, color="green", linestyle=":", label="Media Histórica", zorder=3)
 
         #Ajusta automaticamente los subgrafico
         plt.tight_layout()
@@ -1467,24 +1494,37 @@ class Programa(State):
         return grafico_bytes
 
     def tabla_resumen(self):
-        #Recorre los resultados tras ejecutar cada indicador y añade el valor numerico obtenido a su sublista correspondiente en listas
+        #Limpiamos la memoria de calculos anteriores
+        self.memoria_informe = []
+
+        #Recorre los resultados tras ejecutar cada indicador y añadiendo el valor numerico obtenido
         def recuperar_datos():
-            #Listas para pasar al metodo de graficos
             x = []
             y = []
-            nonlocal capitulos
             for elem in range(len(self.datos_final)): 
                 lista_valores[elem].append(round(self.datos_final[elem]["valor"], 4))
                 x.append(self.datos_final[elem]["name"]) 
                 y.append(self.datos_final[elem]["valor"])
 
-            #Hecemos los calculos y generamos los graficos
+            #Hacemos los calculos
             media, desviacion, error_tipico, pend_tendencia, y_tendencia, r2 = self.calculos_estadisticos(x, y)
-            grafico = self.grafico(x, y, self.texto.split(":")[0], media, desviacion, error_tipico, pend_tendencia, y_tendencia, r2)
-
-            #Pasamos todos los datos necesarios al PDF
-            pdf.imp_capitulo(capitulos, self.texto.split(":")[0], self.texto.split(":")[1], self.datos_final, grafico, pend_tendencia, r2)
-            capitulos+=1
+            
+            #Guardamos la informacion en memoria
+            self.memoria_informe.append({
+                "x": x,
+                "y": y,
+                "titulo": self.texto.split(":")[0],
+                "subtitulo": self.texto.split(":")[1],
+                "media": media,
+                "desviacion": desviacion,
+                "error_tipico": error_tipico,
+                "pend_tendencia": pend_tendencia,
+                "y_tendencia": y_tendencia,
+                "r2": r2,
+                #Hacemos una copia de la tabla
+                "datos_tabla": list(self.datos_final), 
+                "es_especialidad": False
+            })
         
         #Ensambla todo al terminar:
         #Ejecuta especialidad_ingreso para obtener datos especificos de especialidades
@@ -1495,7 +1535,6 @@ class Programa(State):
             lista_años = [str(año[0]) for año in lista_valores]
             df_especialidades = pd.DataFrame(index=lista_años)
             df_especialidades.index.name = "Especialidad_Ingreso"
-            nonlocal capitulos
 
             res = self.especialidad_ingreso(True)
             if res is not None: return res
@@ -1508,10 +1547,22 @@ class Programa(State):
 
                 #Llamamos a la funcion del calculo para cada especialidad concreta
                 media, desviacion, error_tipico, pend_tendencia, y_tendencia, r2 = self.calculos_estadisticos(lista_años, valores_historicos)
-                grafico = self.grafico(lista_años, valores_historicos, especialidad, media, desviacion, error_tipico, pend_tendencia, y_tendencia, r2)
-                #Pasamos todo lo necesario al pdf
-                pdf.imp_capitulo(capitulos, f"Especialidad de ingreso: {especialidad}", self.texto.split(":")[1], zip(lista_años,valores_historicos), grafico, pend_tendencia, r2, ind_especialidades=True)
-                capitulos+=1
+
+                #Añadimos los valores de cada especialidad
+                self.memoria_informe.append({
+                    "x": lista_años,            
+                    "y": valores_historicos,
+                    "titulo": f"Especialidad de ingreso: {especialidad}",
+                    "subtitulo": self.texto.split(":")[1],
+                    "media": media,
+                    "desviacion": desviacion,
+                    "error_tipico": error_tipico,
+                    "pend_tendencia": pend_tendencia,
+                    "y_tendencia": y_tendencia,
+                    "r2": r2,
+                    "datos_tabla": list(zip(lista_años, valores_historicos)), 
+                    "es_especialidad": True
+                })
 
             #Ensamblamos el df_resumen
             for elem in range(len(self.datos_final)):
@@ -1531,14 +1582,6 @@ class Programa(State):
         #Limpiamos las variables y activamos el booleano    
         self.limpieza()
         self.ind_resumen = True
-
-        #Creamos el informe y definimos su titulo y autor
-        pdf = PDF()
-        pdf.set_title("Indicadores REA")
-        pdf.set_author("Nicolas García Gómez")
-        pdf.primera_pagina()
-        #Contador para los capitulos del informe
-        capitulos = 1
 
         #Definimos la columna de indicadores
         data_resumen = {"RESUMEN_INDICADORES": ["Mortalidad Estandarizada", "Reingresos no programados", "Incidencia de barotrauma",
@@ -1574,11 +1617,6 @@ class Programa(State):
         #Creamos los CSV
         csv_indi, csv_espe = parseo_final()
 
-        #Metemos en el informe las tablas y lo exportamos en la memoria
-        pdf.incluir_tabla(csv_indi)
-        pdf.incluir_tabla(csv_espe)
-        pdf_bytes = bytes(pdf.output(dest="S"))
-
         #Convierte los nombres de las columnas y las filas de datos del DataFrame a una lista de Python para que Reflex pueda leerlas
         cols_indi = csv_indi.columns.tolist()
         cols_espe = csv_espe.columns.tolist()
@@ -1596,15 +1634,64 @@ class Programa(State):
         #Disparamos la ventana flotante y modificamos el texto saltandonos el metodo final
         self.datos_final.append({"name": "Resumen", "valor": csv_indi})
         self.datos_final.append({"name": "Especialidades", "valor": csv_espe})
-        self.datos_final.append({"name": "Informe", "valor": pdf_bytes})
+
+        #Meto una cadena vacia para que se genere un tercer boton de descarga(el de los informes)
+        self.datos_final.append("")
         
         self.csv_final.append({"name": "Resumen.csv", "valor": csv_indi})
         self.csv_final.append({"name": "Especialidades.csv", "valor": csv_espe})
-        self.csv_final.append({"name": "Informe.pdf", "valor": pdf_bytes})
 
         self.mostrar_resultado = True
         self.texto = "Tabla resumen: Permite ver de manera global los indicadores de cada año"
         return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
+
+    def generar_pdf_final(self):
+        #Preparamos el PDF vacio
+        pdf = PDF()
+        pdf.set_title("Indicadores REA")
+        pdf.set_author("Nicolas García Gómez")
+        pdf.primera_pagina()
+        capitulos = 1
+
+        #Recorremos los calculos almacenados
+        for indicador in self.memoria_informe:
+            
+            #Llamamos al metodo grafico desempaquetando las listas
+            grafico_bytes = self.grafico(
+                list(indicador["x"]),           
+                list(indicador["y"]),           
+                indicador["titulo"], 
+                indicador["media"], 
+                indicador["desviacion"], 
+                indicador["error_tipico"], 
+                indicador["pend_tendencia"], 
+                list(indicador["y_tendencia"]), 
+                indicador["r2"]
+            )
+
+            #Inyectamos en el PDF todos los datos
+            pdf.imp_capitulo(
+                capitulos, indicador["titulo"], indicador["subtitulo"], 
+                indicador["datos_tabla"], grafico_bytes, 
+                indicador["pend_tendencia"], indicador["r2"], 
+                ind_especialidades=indicador["es_especialidad"]
+            )
+            capitulos += 1
+
+        #Añadimos las tablas finales al PDF y descargamos
+        pdf.incluir_tabla(self.csv_final[0]["valor"])
+        pdf.incluir_tabla(self.csv_final[1]["valor"])
+        
+        pdf_bytes = bytes(pdf.output(dest="S"))
+        
+        #Reseteamos el indicador de grafico para que una vez se descargue el informe desaparezca el boton
+        self.ind_grafico = ""
+        
+        #Le enviamos el archivo al navegador del usuario
+        return rx.download(
+            data=pdf_bytes,
+            filename="Informe_Indicadores_REA.pdf"
+        )
 
     #Metodo para borrar los datos añadidos
     @rx.event
