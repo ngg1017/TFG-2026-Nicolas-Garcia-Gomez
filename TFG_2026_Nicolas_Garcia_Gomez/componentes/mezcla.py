@@ -20,15 +20,15 @@ def mezcla() -> rx.Component:
                 rx.flex(
                     #La barra de seleccion
                     rx.select(
-                        ["Mortalidad Estandarizada", "Reingresos no programados", "Incidencia de barotrauma", "Posicion semiincorporada con VMI", "Incidencias úlcera por presión",
-                         "Valoración diaria de la interrupción de la sedación", "Prevención de la enfermedad tromboembólica", "Mantenimiento de niveles de glucemia",
-                         "Resucitación precoz de la sepsis", "Traslado intrahospitalario", "Tratamiento empírico adecuado en infección", "Neumonia asociada a ventilacion mecanica",
-                         "Reintubación", "Profilaxis de la úlcera por estrés en enfermos con NE", "Sedación adecuada", "Ingresos urgentes",
-                         "Eventos adversos durante el traslado intrahospitalario", "Nutrición enteral precoz", "Sobretransfusión de concentrados de hematies",
-                         "Retirada accidental del tubo endotraqueal"],
+                        ["Mortalidad Estandarizada", "Reingresos no Programados", "Incidencia de Barotrauma", "Posición Semiincorporada con VMI", 
+                         "Incidencias Úlcera por Presión UPP", "Interrupción Diaria de la Sedación", "Prevención Enfermedad Tromboembólica", 
+                         "Mantenimiento de Niveles de Glucemia", "Resucitación Precoz de la Sepsis", "Traslado Intrahospitalario", "Tratamiento Empírico Adecuado", 
+                         "Neumonia Asociada a VMI", "Reintubación", "Profilaxis de Úlcera por Estrés con NE", "Sedación Adecuada", "Ingresos Urgentes",
+                         "Eventos Adversos Durante el Traslado", "Nutrición Enteral Precoz", "Sobretransfusión de Hematíes",
+                         "TET por Maniobras"],
                         name="indicador",
                         #Aparece antes de seleccionar nada
-                        placeholder="Selecciona un indicador",
+                        placeholder="Seleccione un indicador",
                         required=True,
                     ),
                     #Botones de control
@@ -73,7 +73,3 @@ def mezcla() -> rx.Component:
         width="100%",
         style={"border": f"2px solid {Color.ACENTO.value}"}
     )
-
-    
-
- 

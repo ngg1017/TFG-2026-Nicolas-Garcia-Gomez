@@ -192,7 +192,7 @@ class Programa(State):
             self.parsear_datos(datos)
             self.texto = texto
             self.mostrar_resultado = True
-            return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
+            return rx.toast(f"Análisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Análisis del documente completado")
         
         #Si ocultar=True(tabla resumen) solo muestra la tabla resumen
         else: 
@@ -314,7 +314,7 @@ class Programa(State):
         
         #Metodo que hace todas las operaciones finales para ahorrarnos algo de codigo.
         #Le pasamos la bandera ocultar por si seleccionamos el resumen
-        self.final(resultado, "Mortalidad estandarizada: Es un indicador de resultado que mide la calidad y efectividad " \
+        self.final(resultado, "Mortalidad Estandarizada:Es un indicador de resultado que mide la calidad y efectividad " \
         "de un Servicio de Medicina Intensiva (SMI). " \
         "Su propósito es corregir las limitaciones de la 'mortalidad cruda'.", ocultar=ocultar)
         
@@ -366,7 +366,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Reingresos no programados: Es un indicador de resultado que mide la proporción de pacientes que, " \
+        self.final(resultado, "Reingresos no Programados:Es un indicador de resultado que mide la proporción de pacientes que, " \
         "tras haber sido dados de alta de la UCI a una planta de hospitalización, " \
         "deben ser reingresados de forma imprevista en la UCI en un periodo de 48 horas.", ocultar=ocultar)
 
@@ -412,7 +412,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}")
         
-        self.final(resultado, "Indice de barotrauma: Es un indicador de seguridad y proceso que mide la aparición de complicaciones " \
+        self.final(resultado, "Incidencia de Barotrauma:Es un indicador de seguridad y proceso que mide la aparición de complicaciones " \
         "pulmonares relacionadas con el daño físico provocado por la ventilación mecánica.", ocultar=ocultar)
 
     def posicion_semiincorporada_VMI(self, ocultar = False):
@@ -456,7 +456,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Posicion semiincorporada con VMI: Es un indicador de proceso que mide el porcentaje de pacientes " \
+        self.final(resultado, "Posición Semiincorporada con VMI:Es un indicador de proceso que mide el porcentaje de pacientes " \
         "con ventilación mecánica invasiva que se mantienen con el cabecero de la cama elevado 20º, con el fin de prevenir " \
         "la neumonía asociada a la ventilación", ocultar=ocultar)
     
@@ -497,7 +497,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Incidencias úlcera por presión UPP: Es un indicador de seguridad que mide el porcentaje " \
+        self.final(resultado, "Incidencias Úlcera por Presión UPP:Es un indicador de seguridad que mide el porcentaje " \
         "de pacientes que desarrollan lesiones en la piel o tejidos subyacentes por presión prolongada durante su estancia en " \
         "la UCI, con el objetivo de evaluar la efectividad de las medidas de prevención y cuidados de enfermería", ocultar=ocultar)
 
@@ -542,7 +542,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Interrupción de la sedación: Es un indicador de proceso que mide el porcentaje " \
+        self.final(resultado, "Interrupción Diaria de la Sedación:Es un indicador de proceso que mide el porcentaje " \
         "de días en los que se evalúa y ejecuta la suspensión diaria de la sedación continua en pacientes con ventilación mecánica, " \
         "con el fin de reducir la duración del soporte ventilatorio y la estancia en la UCI. " \
         "Debido a la estructura de la base de datos, " \
@@ -592,7 +592,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Prevención enfermedad tromboembólica: Es un indicador de proceso que mide el porcentaje de pacientes " \
+        self.final(resultado, "Prevención Enfermedad Tromboembólica:Es un indicador de proceso que mide el porcentaje de pacientes " \
         "que reciben profilaxis antitrombótica adecuada (farmacológica o mecánica), " \
         "con el fin de evitar complicaciones graves como la trombosis venosa profunda o el tromboembolismo pulmonar.", ocultar=ocultar)
 
@@ -638,7 +638,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Mantenimiento de niveles de glucemia: Es un indicador de proceso que mide el porcentaje de pacientes en " \
+        self.final(resultado, "Mantenimiento de Niveles de Glucemia:Es un indicador de proceso que mide el porcentaje de pacientes en " \
         "los que se mantiene una glucemia capilar de 150, con el fin de evitar tanto la hiperglucemia como la hipoglucemia " \
         "grave y reducir así la morbi-mortalidad asociada.", ocultar=ocultar)
 
@@ -752,7 +752,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Resucitación precoz de la sepsis: Es un indicador de proceso que mide el porcentaje de " \
+        self.final(resultado, "Resucitación Precoz de la Sepsis:Es un indicador de proceso que mide el porcentaje de " \
         "pacientes con sepsis o shock séptico que reciben el paquete de medidas de tratamiento inicial (administración de fluidos y " \
         "vasopresores) en los plazos establecidos, con el fin de restaurar la perfusión tisular y reducir la mortalidad.", ocultar=ocultar)
 
@@ -797,7 +797,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Traslado intrahospitalario: Es un indicador de proceso que mide el porcentaje de traslados de pacientes " \
+        self.final(resultado, "Traslado Intrahospitalario:Es un indicador de proceso que mide el porcentaje de traslados de pacientes " \
         "críticos fuera de la UCI (a pruebas de imagen o quirófano) realizados utilizando un listado de verificación (check-list) " \
         "estandarizado, con el fin de minimizar los eventos adversos y garantizar la seguridad durante el transporte.", ocultar=ocultar)
 
@@ -859,7 +859,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Tratamiento empírico adecuado: Es un indicador de proceso que mide el porcentaje de " \
+        self.final(resultado, "Tratamiento Empírico Adecuado:Es un indicador de proceso que mide el porcentaje de " \
         "pacientes con sospecha de infección grave que reciben una terapia antibiótica inicial ajustada a las guías clínicas y a los " \
         "mapas de resistencias locales en menos de una hora, con el fin de reducir drásticamente la mortalidad y la " \
         "disfunción orgánica", ocultar=ocultar)
@@ -902,7 +902,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Neumonia asociada a VMI: Es un indicador de seguridad que mide el número de episodios " \
+        self.final(resultado, "Neumonia Asociada a VMI:Es un indicador de seguridad que mide el número de episodios " \
         "de neumonía desarrollados por cada 1.000 días de ventilación mecánica, con el " \
         "fin de evaluar la eficacia de las medidas preventivas y reducir las complicaciones infecciosas del paciente crítico", ocultar=ocultar)
 
@@ -948,7 +948,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Reintubación: Es un indicador de resultado que mide el porcentaje de pacientes que requieren " \
+        self.final(resultado, "Reintubación:Es un indicador de resultado que mide el porcentaje de pacientes que requieren " \
         "la inserción de un tubo endotraqueal posterior a una extubación planificada, con el objetivo de evaluar " \
         "el éxito del destete y evitar el aumento de la morbimortalidad asociada al fracaso de la extubación.", ocultar=ocultar)
     
@@ -1000,7 +1000,7 @@ class Programa(State):
         
         #Flag que nos permite identificar cuando se activa este indicador para modificar los graficos
         self.ind_especi = True
-        self.final(resultado, "Especialidad con mayor ingreso: Identifica la especialidad médica o quirúrgica que genera " \
+        self.final(resultado, "Especialidades con Mayores Ingresos:Identifica la especialidad médica o quirúrgica que genera " \
         "el mayor número de ingresos en el Servicio de Medicina Intensiva (SMI). Esto es fundamental para la planificación de " \
         "recursos, la formación del personal y la creación de protocolos específicos.", ocultar=ocultar)
         
@@ -1078,7 +1078,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Profilaxis de ulcera por estrés con NE: Es un indicador de proceso que mide el porcentaje de " \
+        self.final(resultado, "Profilaxis de Úlcera por Estrés con NE:Es un indicador de proceso que mide el porcentaje de " \
         "pacientes con nutrición enteral que no reciben fármacos supresores del ácido gástrico innecesariamente, con el fin de " \
         "evitar efectos adversos, ya que la propia nutrición se considera protectora.", ocultar=ocultar)
 
@@ -1146,7 +1146,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Sedación adecuada: Sedación adecuada es el mantenimiento de " \
+        self.final(resultado, "Sedación Adecuada:Sedación adecuada es el mantenimiento de " \
         "los resultados de las escalas de sedación dentro del rango prescrito (objetivo) para ese enfermo en particular.", ocultar=ocultar)
 
     def ingresos_urgentes(self, ocultar = False):
@@ -1187,7 +1187,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Porcentaje de ingresos urgentes: Indicador de estructura y proceso que " \
+        self.final(resultado, "Ingresos Urgentes:Indicador de estructura y proceso que " \
         "mide la proporción de pacientes que ingresan en el Servicio de Medicina Intensiva (SMI) de forma no programada. " \
         "Estos ingresos suelen proceder de Urgencias, plantas de hospitalización "
         "(tras un deterioro agudo) o tras cirugías de emergencia.", ocultar=ocultar)
@@ -1235,7 +1235,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Eventos adversos durante el traslado: Es un indicador de seguridad que mide la incidencia de " \
+        self.final(resultado, "Eventos Adversos Durante el Traslado:Es un indicador de seguridad que mide la incidencia de " \
         "incidentes o accidentes que ocurren durante el traslado de un paciente crítico fuera de la UCI (traslados intrahospitalarios), " \
         "ya sea para pruebas diagnósticas (TAC, Resonancia) o intervenciones (Quirófano).", ocultar=ocultar)
 
@@ -1286,7 +1286,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Nutrición enteral precoz: Es un indicador de proceso que mide la capacidad " \
+        self.final(resultado, "Nutrición Enteral Precoz:Es un indicador de proceso que mide la capacidad " \
         "del servicio para iniciar el soporte nutricional por vía digestiva (enteral) en las primeras 48 horas desde " \
         "el ingreso del paciente crítico, siempre que no existan contraindicaciones.", ocultar=ocultar)
 
@@ -1340,7 +1340,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "Sobretransfusión de hematies: Es un indicador de proceso que mide el porcentaje de " \
+        self.final(resultado, "Sobretransfusión de Hematíes:Es un indicador de proceso que mide el porcentaje de " \
         "pacientes que reciben una transfusión de concentrados de hematíes (CH) cuando se trasfunde " \
         "más de una unidad sin reevaluar al paciente.", ocultar=ocultar)
     
@@ -1386,7 +1386,7 @@ class Programa(State):
         except ValueError as e:
             return rx.window_alert(f"Error crítico: {e}") 
         
-        self.final(resultado, "TET por maniobras: Mide el número de episodios de salida no planificada del " \
+        self.final(resultado, "TET por Maniobras:Mide el número de episodios de salida no planificada del " \
         "tubo endotraqueal (TET) en pacientes sometidos a ventilación mecánica. Se considera una de las complicaciones más graves de " \
         "la vía aérea en la UCI debido al riesgo de hipoxia, parada cardiorrespiratoria o trauma laríngeo", ocultar=ocultar)
 
@@ -1642,14 +1642,16 @@ class Programa(State):
         self.csv_final.append({"name": "Especialidades.csv", "valor": csv_espe})
 
         self.mostrar_resultado = True
-        self.texto = "Tabla resumen: Permite ver de manera global los indicadores de cada año"
-        return rx.toast(f"Analisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Analisis del documente completado")
+        self.texto = "Resumen Indicadores:Permite comparar y observar los datos numéricos de manera global de los indicadores de cada año. Concede la capacidad de descargar " \
+        "la tabla en formato CSV de los indicadores o de las especialidades de ingreso, además facilita la descarga del Informe Final, el cual incluye todos los datos " \
+        "así como los gráficos a elección del facultativo."
+        return rx.toast(f"Análisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Análisis del documente completado")
 
     def generar_pdf_final(self):
         #Preparamos el PDF vacio
         pdf = PDF()
         pdf.set_title("Indicadores REA")
-        pdf.set_author("Nicolas García Gómez")
+        pdf.set_author("Nicolás García Gómez")
         pdf.primera_pagina()
         capitulos = 1
 
@@ -1710,7 +1712,7 @@ class Programa(State):
             self.lista_selecc.append(seleccionado)
             return self.mezcla()
         else:
-            return rx.window_alert("Solo se pueden meter 3 indicadores sin repetir")
+            return rx.window_alert("Solo se permite incluir 3 indicadores sin repetición")
         
     def mezcla(self):
         #Recorre los resultados tras ejecutar cada indicador y añade el valor numerico obtenido
@@ -1727,16 +1729,16 @@ class Programa(State):
             return max(valores) if valores else 0
 
         #Diccionario con todos los metodos
-        claves = {"Mortalidad Estandarizada":self.mortalidad_estandarizada, "Reingresos no programados": self.reingresos_no_programados, 
-                  "Incidencia de barotrauma": self.incidencia_de_barotrauma, "Posicion semiincorporada con VMI": self.posicion_semiincorporada_VMI, 
-                  "Incidencias úlcera por presión": self.incidencia_ulceras_presion,"Valoración diaria de la interrupción de la sedación": self.valoracion_interrupcion_sedacion, 
-                  "Prevención de la enfermedad tromboembólica": self.prevencion_enfermedad_tromboembolica, "Mantenimiento de niveles de glucemia": self.mantenimiento_niveles_glucemia,
-                  "Resucitación precoz de la sepsis": self.resucitacion_precoz_sepsis, "Traslado intrahospitalario": self.traslado_intrahospitalario, 
-                  "Tratamiento empírico adecuado en infección": self.tratamiento_empirico_infeccion, "Neumonia asociada a ventilacion mecanica": self.neumonia_asociada_vmi,
-                  "Reintubación": self.reintubacion,"Profilaxis de la úlcera por estrés en enfermos con NE": self.profilaxis_ulcera_enfermos_NE, 
-                  "Sedación adecuada": self.sedacion_adecuada, "Ingresos urgentes": self.ingresos_urgentes,
-                  "Eventos adversos durante el traslado intrahospitalario": self.adversos_traslado, "Nutrición enteral precoz": self.ne_precoz, 
-                  "Sobretransfusión de concentrados de hematies": self.sobretransfusion_hematies, "Retirada accidental del tubo endotraqueal": self.retirada_accidental}
+        claves = {"Mortalidad Estandarizada":self.mortalidad_estandarizada, "Reingresos no Programados": self.reingresos_no_programados, 
+                  "Incidencia de Barotrauma": self.incidencia_de_barotrauma, "Posición Semiincorporada con VMI": self.posicion_semiincorporada_VMI, 
+                  "Incidencias Úlcera por Presión UPP": self.incidencia_ulceras_presion,"Interrupción Diaria de la Sedación": self.valoracion_interrupcion_sedacion, 
+                  "Prevención Enfermedad Tromboembólica": self.prevencion_enfermedad_tromboembolica, "Mantenimiento de Niveles de Glucemia": self.mantenimiento_niveles_glucemia,
+                  "Resucitación Precoz de la Sepsis": self.resucitacion_precoz_sepsis, "Traslado Intrahospitalario": self.traslado_intrahospitalario, 
+                  "Tratamiento Empírico Adecuado": self.tratamiento_empirico_infeccion, "Neumonia Asociada a VMI": self.neumonia_asociada_vmi,
+                  "Reintubación": self.reintubacion,"Profilaxis de Úlcera por Estrés con NE": self.profilaxis_ulcera_enfermos_NE, 
+                  "Sedación Adecuada": self.sedacion_adecuada, "Ingresos Urgentes": self.ingresos_urgentes,
+                  "Eventos Adversos Durante el Traslado": self.adversos_traslado, "Nutrición Enteral Precoz": self.ne_precoz, 
+                  "Sobretransfusión de Hematíes": self.sobretransfusion_hematies, "TET por Maniobras": self.retirada_accidental}
                 
         #Limpiamos las variables y activamos el booleano si la lista esta vacia 
         if len(self.lista_selecc) == 0:  
@@ -1760,8 +1762,8 @@ class Programa(State):
 
         self.datos_final = self.datos_mezcla
         self.mostrar_resultado = True
-        self.texto = "Mezcla de Indicadores: Puedes seleccionar un máximo de tres indicadores para que aparezca mezclados en los graficos."
+        self.texto = "Mezcla de Indicadores:Interconecta gráficamente un máximo de tres indicadores permitiendo su comparación directa al mismo tiempo."
         if len(self.lista_selecc) > 1:
-            return rx.toast(f"Analisis de los {len(self.lista_selecc)} indicadores completado")
+            return rx.toast(f"Análisis de los {len(self.lista_selecc)} indicadores completado")
         elif len(self.lista_selecc) == 1:
-            return rx.toast(f"Analisis del indicador completado")       
+            return rx.toast(f"Análisis del indicador completado")       

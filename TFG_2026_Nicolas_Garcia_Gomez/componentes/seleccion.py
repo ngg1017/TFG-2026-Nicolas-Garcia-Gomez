@@ -43,48 +43,48 @@ def seleccion(icon: str) -> rx.Component:
 
                             #Opciones del menu
                             rx.menu.item("Mortalidad Estandarizada", on_click=Programa.mortalidad_estandarizada(ocultar = False)),
-                            rx.menu.item("Reingresos no programados", on_click=Programa.reingresos_no_programados(ocultar = False)),
-                            rx.menu.item("Incidencia de barotrauma", on_click=Programa.incidencia_de_barotrauma(ocultar = False)),
-                            rx.menu.item("Posición semiincorporada con VMI", on_click=Programa.posicion_semiincorporada_VMI(ocultar = False)),
-                            rx.menu.item("Incidencias úlcera por presión", on_click=Programa.incidencia_ulceras_presion(ocultar = False)),
+                            rx.menu.item("Reingresos no Programados", on_click=Programa.reingresos_no_programados(ocultar = False)),
+                            rx.menu.item("Incidencia de Barotrauma", on_click=Programa.incidencia_de_barotrauma(ocultar = False)),
+                            rx.menu.item("Posición Semiincorporada con VMI", on_click=Programa.posicion_semiincorporada_VMI(ocultar = False)),
+                            rx.menu.item("Incidencias Úlcera por Presión UPP", on_click=Programa.incidencia_ulceras_presion(ocultar = False)),
                             rx.menu.item(
-                                "Valoración diaria de la interrupción de la sedación", 
+                                "Interrupción Diaria de la Sedación", 
                                 on_click=Programa.valoracion_interrupcion_sedacion(ocultar = False)
                                 ),
                             rx.menu.item(
-                                "Prevención de la enfermedad tromboembólica", 
+                                "Prevención Enfermedad Tromboembólica", 
                                 on_click=Programa.prevencion_enfermedad_tromboembolica(ocultar = False)
                                 ),
                             rx.menu.item(
-                                "Mantenimiento de niveles de glucemia", 
+                                "Mantenimiento de Niveles de Glucemia", 
                                 on_click=Programa.mantenimiento_niveles_glucemia(ocultar = False)
                                 ),
-                            rx.menu.item("Resucitación precoz de la sepsis", on_click=Programa.resucitacion_precoz_sepsis(ocultar = False)),
-                            rx.menu.item("Traslado intrahospitalario", on_click=Programa.traslado_intrahospitalario(ocultar = False)),
+                            rx.menu.item("Resucitación Precoz de la Sepsis", on_click=Programa.resucitacion_precoz_sepsis(ocultar = False)),
+                            rx.menu.item("Traslado Intrahospitalario", on_click=Programa.traslado_intrahospitalario(ocultar = False)),
                             rx.menu.item(
-                                "Tratamiento empírico adecuado en infección", 
+                                "Tratamiento Empírico Adecuado", 
                                 on_click=Programa.tratamiento_empirico_infeccion(ocultar = False)
                             ),
-                            rx.menu.item("Neumonía asociada a ventilacion mecánica", on_click=Programa.neumonia_asociada_vmi(ocultar = False)),
+                            rx.menu.item("Neumonia Asociada a VMI", on_click=Programa.neumonia_asociada_vmi(ocultar = False)),
                             rx.menu.item("Reintubación", on_click=Programa.reintubacion(ocultar = False)),
-                            rx.menu.item("Especialidad con mayor ingreso", on_click=Programa.especialidad_ingreso(ocultar = False)),
+                            rx.menu.item("Especialidades con Mayores Ingresos", on_click=Programa.especialidad_ingreso(ocultar = False)),
                             rx.menu.item(
-                                "Profilaxis de la úlcera por estrés en enfermos con NE", 
+                                "Profilaxis de Úlcera por Estrés con NE", 
                                 on_click=Programa.profilaxis_ulcera_enfermos_NE(ocultar = False)
                             ),
-                            rx.menu.item("Sedación adecuada", on_click=Programa.sedacion_adecuada(ocultar = False)),
-                            rx.menu.item("Ingresos urgentes", on_click=Programa.ingresos_urgentes(ocultar = False)),
+                            rx.menu.item("Sedación Adecuada", on_click=Programa.sedacion_adecuada(ocultar = False)),
+                            rx.menu.item("Ingresos Urgentes", on_click=Programa.ingresos_urgentes(ocultar = False)),
                             rx.menu.item(
-                                "Eventos adversos durante el traslado intrahospitalario", 
+                                "Eventos Adversos Durante el Traslado", 
                                 on_click=Programa.adversos_traslado(ocultar = False)
                             ),
-                            rx.menu.item("Nutrición enteral precoz", on_click=Programa.ne_precoz(ocultar = False)),
+                            rx.menu.item("Nutrición Enteral Precoz", on_click=Programa.ne_precoz(ocultar = False)),
                             rx.menu.item(
-                                "Sobretransfusión de concentrados de hematíes", 
+                                "Sobretransfusión de Hematíes", 
                                 on_click=Programa.sobretransfusion_hematies(ocultar = False)
                             ),
-                            rx.menu.item("Retirada accidental del tubo endotraqueal", on_click=Programa.retirada_accidental(ocultar = False)),
-                            rx.menu.item("Mezcla de indicadores", on_click=Programa.mezcla),
+                            rx.menu.item("TET por Maniobras", on_click=Programa.retirada_accidental(ocultar = False)),
+                            rx.menu.item("Mezcla de Indicadores", on_click=Programa.mezcla),
                             rx.menu.item("Resumen Indicadores", on_click=Programa.tabla_resumen),
 
                             #Aseguramos que el menu flote por encima de todo

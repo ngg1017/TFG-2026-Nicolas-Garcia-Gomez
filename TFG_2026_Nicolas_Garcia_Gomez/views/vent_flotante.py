@@ -44,11 +44,16 @@ def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.
                             lambda item: rx.card(
                                 rx.vstack(
                                     rx.text(
-                                        f"El año: {item["name"]}",
+                                        f"En el año: {item["name"]}",
                                         align="center"
                                     ),
                                     rx.text(
-                                        f"Tuvimos: {item["valor"]}",
+                                        #Condicional para poner % o partes por 1000
+                                        rx.cond(
+                                            (texto.split(":")[0] == "Incidencia de Barotrauma") | (texto.split(":")[0] == "Neumonia Asociada a VMI") | (texto.split(":")[0] == "TET por Maniobras"),
+                                            f"Tuvimos un: {item["valor"]}‰",
+                                            f"Tuvimos un: {item["valor"]}%"
+                                        ),
                                         align="center"
                                     ),
                                     align="center",
@@ -87,7 +92,7 @@ def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.
                                     rx.menu.root(
                                         rx.menu.trigger(
                                             rx.button(
-                                                "Seleccionar Gráfico",
+                                                "Seleccione un Gráfico",
                                                 variant="surface",
                                                 width="100%",
                                             )
@@ -117,8 +122,8 @@ def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.
                                 #Condicional que nos permite ajustar el mensaje ya sea para seleccionar graficos o indicadores
                                 rx.cond(
                                     Programa.lista_selecc.length() > 0,
-                                    rx.text("Selecciona un gráfico para que se muestren"),
-                                    rx.text("Seleccione un indicador para poder seleccionar los gráficos")
+                                    rx.text("Seleccione el gráfico a mostrar."),
+                                    rx.text("Seleccione un indicador para permitir la selección de gráficos.")
                                 ),
                             ),
                             align="center"
@@ -130,7 +135,7 @@ def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.
                                     #Boton para abrir el desplebagle
                                     rx.menu.trigger(
                                         rx.button(
-                                            "Seleccionar Gráfico",
+                                            "Seleccione un Gráfico",
                                             variant="surface",
                                             width="100%",
                                         )
@@ -162,7 +167,7 @@ def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.
                                 ("pie", graf_pie(datos_tarta)),
 
                                 #Texto cuando no se da ningun match
-                                rx.text("Selecciona un gráfico para que se muestren"),
+                                rx.text("Seleccione un gráfico para que se muestren."),
                             ),
                             align="center"
                         )
@@ -190,7 +195,7 @@ def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.
                                     #Boton para abrir el desplebagle
                                     rx.menu.trigger(
                                         rx.button(
-                                            "Seleccionar Gráfico a Incluir",
+                                            "Seleccione el Gráfico a Incluir",
                                             variant="surface",
                                             width="100%",
                                         )
