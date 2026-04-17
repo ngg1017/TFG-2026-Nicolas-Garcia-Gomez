@@ -5,11 +5,13 @@ from TFG_2026_Nicolas_Garcia_Gomez.views.cabecera import cabecera
 from TFG_2026_Nicolas_Garcia_Gomez.views.pie import pie
 from TFG_2026_Nicolas_Garcia_Gomez.views.instrucciones import instrucciones
 from TFG_2026_Nicolas_Garcia_Gomez.views.vent_flotante import vent_flotante
+from TFG_2026_Nicolas_Garcia_Gomez.views.acceso import acceso
 from Logica.Programa import Programa
+from Logica.Usuarios import Usuarios
 from Logica.State import State
 
-#Colocamos los elementos de la web
-def index() -> rx.Component:
+#Colocamos los elementos de la pagina principal
+def vista() -> rx.Component:
     return rx.box(
         navbar(),
         rx.center(
@@ -22,6 +24,16 @@ def index() -> rx.Component:
                 spacing = "9"
             )
         )
+    )
+
+#Llamamos a la pagina principal o a la pagina de acceso
+def index() -> rx.Component:
+    return rx.cond(
+        Usuarios.autenticado,
+        #Si la variable autenticado es True. Pasa a ver la pagina principal
+        vista(), 
+        #Si la variable autenticado es False. Se queda en el login
+        acceso()
     )
 
 #Se ejecutal al inciar el servidor
