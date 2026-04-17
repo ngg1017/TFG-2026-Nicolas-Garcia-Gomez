@@ -212,10 +212,10 @@ class PDF(FPDF):
         self.multi_cell(0, 6, (
             "Para evitar falsas alarmas provocadas por fluctuaciones estadísticas normales, el sistema evalúa "
             "cada período usando la regla de las dos Desviaciones Estándar (2-Sigma). Las columnas o puntos del gráfico (incluyendo una línea vertical) cambiarán "
-            "de color solo si superan este umbral crítico:\n"
-            "- Color Rojo: Alerta por resultado aumentado. Señala una desviación significativa que "
+            "de color solo si superan este umbral crítico. La dirección del color Verde y Rojo dependerá del indicador, pero siempre reflejarán lo mismo:\n"
+            "- Color Rojo: Alerta por empeoramiento del resultado. Señala una desviación significativa que "
             "requiere la revisión de los procesos.\n"
-            "- Color Verde: Alerta por disminucion del resultado. Señala una desviación significativa que "
+            "- Color Verde: Alerta por mejora del resultado. Señala una desviación significativa que "
             "requiere la revisión de los procesos.\n"
             "- Color Azul: Comportamiento estable y dentro de la normalidad esperada "
             "del servicio."

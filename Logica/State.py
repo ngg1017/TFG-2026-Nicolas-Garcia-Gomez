@@ -78,6 +78,7 @@ class State(rx.State):
         self.barra = False
         yield rx.toast(f"Se cargaron: {self.cargados} archivos con éxito")
     
+    
     #Metodo que usa los botones con un rx.toast
     def borrar_datos(self):
         self.borrar_datos_limpio()
@@ -176,5 +177,5 @@ class State(rx.State):
                 #Una vez que el usuario se ha ido, el guardian ya no es necesario.
                 break  
 
-            #Espera 5 segundos entre cada comprobacion
-            await asyncio.sleep(5)
+            #Espera 2 segundos entre cada comprobacion
+            await asyncio.sleep(2)

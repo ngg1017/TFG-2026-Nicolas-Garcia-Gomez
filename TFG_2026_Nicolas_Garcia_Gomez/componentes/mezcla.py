@@ -18,17 +18,49 @@ def mezcla() -> rx.Component:
             ),
             rx.form.root(
                 rx.flex(
-                    #La barra de seleccion
-                    rx.select(
-                        ["Mortalidad Estandarizada", "Reingresos no Programados", "Incidencia de Barotrauma", "Posición Semiincorporada con VMI", 
-                         "Incidencias Úlcera por Presión UPP", "Interrupción Diaria de la Sedación", "Prevención Enfermedad Tromboembólica", 
-                         "Mantenimiento de Niveles de Glucemia", "Resucitación Precoz de la Sepsis", "Traslado Intrahospitalario", "Tratamiento Empírico Adecuado", 
-                         "Neumonia Asociada a VMI", "Reintubación", "Profilaxis de Úlcera por Estrés con NE", "Sedación Adecuada", "Ingresos Urgentes",
-                         "Eventos Adversos Durante el Traslado", "Nutrición Enteral Precoz", "Sobretransfusión de Hematíes",
-                         "TET por Maniobras"],
+                    #La barra de seleccion                    
+                    rx.select.root(
+                        #Boton del desplegable
+                        rx.select.trigger(
+                            placeholder="Seleccione un indicador",
+                            style={
+                                "background_color": Color.OSCURO.value,
+                                "color": TextoColor.PRIMARIO.value,
+                                "borderRadius": "0.75rem",
+                            }
+                        ),
+                        
+                        #Lista desplegable
+                        rx.select.content(
+                            rx.select.group(
+                                #Generamos las opciones una a una para poder darles estilo
+                                rx.foreach(
+                                    [
+                                        "Mortalidad Estandarizada", "Reingresos no Programados", "Incidencia de Barotrauma", 
+                                        "Posición Semiincorporada con VMI", "Incidencias Úlcera por Presión UPP", 
+                                        "Interrupción Diaria de la Sedación", "Prevención Enfermedad Tromboembólica", 
+                                        "Mantenimiento de Niveles de Glucemia", "Resucitación Precoz de la Sepsis", 
+                                        "Traslado Intrahospitalario", "Tratamiento Empírico Adecuado", 
+                                        "Neumonia Asociada a VMI", "Reintubación", "Profilaxis de Úlcera por Estrés con NE", 
+                                        "Sedación Adecuada", "Ingresos Urgentes", "Eventos Adversos Durante el Traslado", 
+                                        "Nutrición Enteral Precoz", "Sobretransfusión de Hematíes", "TET por Maniobras", 
+                                        "Bacteriemia relacionada a CVC"
+                                    ],
+                                    lambda ind: rx.select.item(
+                                        ind, 
+                                        value=ind,
+                                        #Color del texto de cada opcion
+                                        style={
+                                            "color": TextoColor.SECUNDARIO.value,
+                                            "_hover": {"color": TextoColor.PRIMARIO.value}
+                                        }
+                                    )
+                                )
+                            ),
+                            #Color de fondo de la ventana desplegable
+                            style={"background_color": Color.ACENTO.value}
+                        ),
                         name="indicador",
-                        #Aparece antes de seleccionar nada
-                        placeholder="Seleccione un indicador",
                         required=True,
                     ),
                     #Botones de control
@@ -38,7 +70,7 @@ def mezcla() -> rx.Component:
                     spacing="3",
                 ),
                 on_submit=Programa.seleccion_ind,
-                reset_on_submit=True
+                reset_on_submit=True,
             ),
             #Barra divisoria
             rx.divider(),
@@ -67,7 +99,6 @@ def mezcla() -> rx.Component:
                 ),
                 align_items="center"
             ),
-            align_items="left",
             width="100%",
         ),
         width="100%",

@@ -28,9 +28,8 @@ ESTILO_BASE = {
     "background": Color.PRIMARIO.value,
     
     rx.heading: {
-        "color": TextoColor.OSCURO.value,
+        "color": TextoColor.ACENTO.value,
         "font_family": Fuente.defecto.value,
-        "text_shadow": "0px 0px 3px rgba(255, 255, 255, 0.8)",
     },
     
     rx.link: {

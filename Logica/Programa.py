@@ -241,14 +241,14 @@ class Programa(State):
     #Metodo que sirve para leer los archivos csv independientemente de su separador
     def lectura_archivos(self, ruta):
         #Leemos solo la primera linea del archivo para inspeccionarlo
-        with open(ruta, "r", encoding="utf-8") as f:
+        with open(ruta, "r", encoding="latin1") as f:
             primera_linea = f.readline()
 
         #Que separador se usa en esa primera linea
         separador_detectado = ";" if primera_linea.count(";") > primera_linea.count(",") else ","
 
         #Leemos el CSV usando el separador exacto
-        df = pd.read_csv(ruta, sep=separador_detectado)
+        df = pd.read_csv(ruta, sep=separador_detectado, encoding="latin1")
         return df
 
     #Metodo para la conversion del codigo apache
@@ -331,20 +331,16 @@ class Programa(State):
                 if "FECHA_ALTA" not in df.columns:
                     raise ValueError(f"Falta la columna 'Fecha alta' en {nombre}")
                 
-                if "FECHA_REINGRESO" not in df.columns:
-                    raise ValueError(f"Falta la columna 'Fecha reingreso' en {nombre}")
+                if "REINGRESO_48" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Reingreso 48' en {nombre}")
                 
                 #Logica de calculo
                 #Conversion a fechas
                 df["FECHA_ALTA"] = pd.to_datetime(df["FECHA_ALTA"], format="%d/%m/%Y", errors="coerce")
-                df["FECHA_REINGRESO"] = pd.to_datetime(df["FECHA_REINGRESO"], format="%d/%m/%Y", errors="coerce")
-
-                #Usamos total_seconds() / 3600 para que si pasan 3 dias, nos de 72 horas.
-                df["HORAS_DIFERENCIA"] = (df["FECHA_REINGRESO"] - df["FECHA_ALTA"]).dt.total_seconds() / 3600
+                reingreso = df["REINGRESO_48"].fillna(False)
 
                 #Contar reingresos
-                #Filtramos donde la diferencia sea mayor a 48 y sumamos los casos
-                numero_reingresos = (df["HORAS_DIFERENCIA"] > 48).sum()
+                numero_reingresos = reingreso.sum()
 
                 #Contar altas
                 numero_alta = (df["FECHA_ALTA"].notna()).sum()
@@ -354,12 +350,12 @@ class Programa(State):
 
                 data_resumen = {
                     "FECHA_ALTA": ["RESUMEN GLOBAL reingresos no programados"],
-                    "FECHA_REINGRESO": [f"Total: {numero_reingresos}"],
+                    "REINGRESO_48": [f"Total: {numero_reingresos}"],
                     "NUMERO_ALTAS": [f"Total: {numero_alta}"],
                     "REINGRESOS_NO_PROGRAMADOS": [f"SMI: {float(valor_final)}"]
                 }
                 self.csv_metodo(
-                    data_resumen, ["FECHA_ALTA","FECHA_REINGRESO"], [df["FECHA_ALTA"], df["FECHA_REINGRESO"]], 
+                    data_resumen, ["FECHA_ALTA","REINGRESO_48"], [df["FECHA_ALTA"], df["REINGRESO_48"]], 
                     f"indicador_reingresos_{self.encontrar_año(nombre)}.csv"
                 )
                 
@@ -1390,6 +1386,52 @@ class Programa(State):
         "tubo endotraqueal (TET) en pacientes sometidos a ventilación mecánica. Se considera una de las complicaciones más graves de " \
         "la vía aérea en la UCI debido al riesgo de hipoxia, parada cardiorrespiratoria o trauma laríngeo", ocultar=ocultar)
 
+    def bacteriemia(self, ocultar = False):
+        resultado = self.limpieza()
+
+        try:
+            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
+                df = self.lectura_archivos(ruta)
+                df.columns = [self.normalizar_frame(col) for col in df.columns]
+                if df.columns.duplicated().any():
+                    df = df.loc[:, ~df.columns.duplicated()]
+
+                if "NUMERO_EPISODIOS_BACTERIEMIA" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Numero Episodios Bacteriemia' en {nombre}")
+                
+                if "NUMERO_TOTAL_DE_DIAS_CVC" not in df.columns:
+                    raise ValueError(f"Falta la columna 'Numero total de días CVC' en {nombre}")
+                
+                #Logica de calculo
+                bacteriemia = pd.to_numeric(df["NUMERO_EPISODIOS_BACTERIEMIA"], errors="coerce")
+                cvc = pd.to_numeric(df["NUMERO_TOTAL_DE_DIAS_CVC"], errors="coerce")
+
+                #Numero bacteriemia
+                num_bacteriemia = bacteriemia.sum()
+                #Numero de dias CVS
+                num_cvc = cvc.sum()
+
+                valor_final = (num_bacteriemia/num_cvc)*1000 if num_cvc != 0 else 0.0
+                resultado.append(float(valor_final))
+
+                data_resumen = {
+                    "EPISODIOS_BACTERIEMIA": ["RESUMEN GLOBAL bacteriemia relacionada a CVC"],
+                    "NUMERO_EPISODIOS_BACTERIEMIA": [f"Total: {num_bacteriemia}"],
+                    "NUMERO_TOTAL_DE_DIAS_CVC": [f"Total: {num_cvc}"],
+                    "INDICADOR_FINAL": [f"Total: {float(valor_final)}"]
+                }
+                self.csv_metodo(
+                    data_resumen, ["NUMERO_EPISODIOS_BACTERIEMIA", "NUMERO_TOTAL_DE_DIAS_CVC"], [bacteriemia,cvc], 
+                    f"bacteriemia_CVC_{self.encontrar_año(nombre)}.csv"
+                )
+                
+        except ValueError as e:
+            return rx.window_alert(f"Error crítico: {e}") 
+        
+        self.final(resultado, "Bacteriemia relacionada a CVC:Mide los episodios de infección del torrente sanguíneo " \
+        "relacionados con el uso de catéteres venosos centrales. Es una de las complicaciones más importantes en la UCI, " \
+        "asociada a un incremento en la mortalidad y días de estancia. Estándar esperado: < 3 episodios por 1.000 días de CVC.", ocultar=ocultar)
+
     #Funcion que hace los calculos
     def calculos_estadisticos(self, eje_x, eje_y, individual = False):
         #Calculamos la media y  la desviacion
@@ -1427,11 +1469,47 @@ class Programa(State):
         #Creamos el objeto io
         grafico_bytes = io.BytesIO()
         
+        #Claves que determinan el color
+        claves = {
+            "Mortalidad Estandarizada": True,                 #Bajar es bueno (menor mortalidad)
+            "Reingresos no Programados": True,                #Bajar es bueno (menor tasa de fracaso al alta)
+            "Incidencia de Barotrauma": True,                 #Bajar es bueno (complicación)
+            "Posición Semiincorporada con VMI": False,        #Subir es bueno (adherencia a medida preventiva)
+            "Incidencias Úlcera por Presión UPP": True,       #Bajar es bueno (complicación)
+            "Interrupción Diaria de la Sedación": False,      #Subir es bueno (adherencia a protocolo)
+            "Prevención Enfermedad Tromboembólica": False,    #Subir es bueno (adherencia a profilaxis)
+            "Mantenimiento de Niveles de Glucemia": False,    #Subir es bueno (mayor % de pacientes en rango)
+            "Resucitación Precoz de la Sepsis": False,        #Subir es bueno (adherencia a las guías)
+            "Traslado Intrahospitalario": False,              #Subir es bueno (asumiendo que mide adecuación/seguridad del protocolo)
+            "Tratamiento Empírico Adecuado": False,           #Subir es bueno (mayor % de acierto empírico)
+            "Neumonia Asociada a VMI": True,                  #Bajar es bueno (infección nosocomial)
+            "Reintubación": True,                             #Bajar es bueno (fracaso de extubación)
+            "Profilaxis de Úlcera por Estrés con NE": False,  #Subir es bueno (adecuación de la profilaxis)
+            "Sedación Adecuada": False,                       #Subir es bueno (mayor % de tiempo en objetivo)
+            "Ingresos Urgentes": True,                        #Bajar es bueno (si mide retrasos o ingresos imprevistos)
+            "Eventos Adversos Durante el Traslado": True,     #Bajar es bueno (complicaciones)
+            "Nutrición Enteral Precoz": False,                #Subir es bueno (adherencia a protocolo)
+            "Sobretransfusión de Hematíes": True,             #Bajar es bueno (evitar transfusiones innecesarias)
+            "TET por Maniobras": True,                        #Bajar es bueno (extubación accidental/retirada, complicación)
+            "Bacteriemia relacionada a CVC": True             #Bajar es bueno (infección nosocomial)
+        }
+
         #Regla de las 2 Sigmas para dar color a las columnas
         colores = []
+
         for valor in eje_y:
-            if valor > media + 2 * desviacion: colores.append("red") 
-            elif valor < media - 2 * desviacion: colores.append("green") 
+            if valor > media + 2 * desviacion:
+                if texto not in claves.keys() or claves[texto] == True:
+                    colores.append("red")
+                else:
+                    colores.append("green")
+                
+            elif valor < media - 2 * desviacion:
+                if texto not in claves.keys() or claves[texto] == True:
+                    colores.append("green")
+                else:
+                    colores.append("red") 
+
             else: colores.append(Color.ACENTO.value) 
 
         #Creacion del grafico
@@ -1590,7 +1668,7 @@ class Programa(State):
                         "Traslado intrahospitalario", "Tratamiento empírico adecuado en infección", "Neumonia asociada a ventilacion mecanica",
                         "Reintubación", "Profilaxis de la úlcera por estrés en enfermos con NE", "Sedación adecuada", "Ingresos urgentes",
                         "Eventos adversos durante el traslado intrahospitalario", "Nutrición enteral precoz", 
-                        "Sobretransfusión de concentrados de hematies","Retirada accidental del tubo endotraqueal"]
+                        "Sobretransfusión de concentrados de hematies","Retirada accidental del tubo endotraqueal", "Bacteriemia relacionada a CVC"]
                         }
         df_resumen = pd.DataFrame(data_resumen)
         
@@ -1601,7 +1679,7 @@ class Programa(State):
                   self.incidencia_ulceras_presion, self.valoracion_interrupcion_sedacion, self.prevencion_enfermedad_tromboembolica, self.mantenimiento_niveles_glucemia,
                   self.resucitacion_precoz_sepsis, self.traslado_intrahospitalario, self.tratamiento_empirico_infeccion, self.neumonia_asociada_vmi,
                   self.reintubacion, self.profilaxis_ulcera_enfermos_NE, self.sedacion_adecuada, self.ingresos_urgentes, self.adversos_traslado, self.ne_precoz, 
-                  self.sobretransfusion_hematies, self.retirada_accidental]
+                  self.sobretransfusion_hematies, self.retirada_accidental, self.bacteriemia]
         
         #Ejecutamos el metodo de calculo con True para el resumen(no dispara la interfaz individual)
         #Si el calculo falla o devuelve algo inesperado, detiene el proceso
@@ -1738,7 +1816,7 @@ class Programa(State):
                   "Reintubación": self.reintubacion,"Profilaxis de Úlcera por Estrés con NE": self.profilaxis_ulcera_enfermos_NE, 
                   "Sedación Adecuada": self.sedacion_adecuada, "Ingresos Urgentes": self.ingresos_urgentes,
                   "Eventos Adversos Durante el Traslado": self.adversos_traslado, "Nutrición Enteral Precoz": self.ne_precoz, 
-                  "Sobretransfusión de Hematíes": self.sobretransfusion_hematies, "TET por Maniobras": self.retirada_accidental}
+                  "Sobretransfusión de Hematíes": self.sobretransfusion_hematies, "TET por Maniobras": self.retirada_accidental, "Bacteriemia relacionada a CVC": self.bacteriemia}
                 
         #Limpiamos las variables y activamos el booleano si la lista esta vacia 
         if len(self.lista_selecc) == 0:  

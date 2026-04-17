@@ -11,7 +11,7 @@ A. DATOS GENERALES Y FECHAS (Formato Fecha: dd/mm/aaaa)
 ------------------------------------------------------------
 1. Fecha Ingreso: Fecha del ingreso en UCI.
 2. Fecha Alta: Fecha de salida de la UCI.
-3. Fecha Reingreso: Fecha si el paciente vuelve a entrar (dejar vacío si no reingresa).
+3. Reingreso 48: Booleano (True / False).
 4. Especialidad de Ingreso: Texto (Ej: Cardiología, Digestivo, Cirugía General).
 5. Ingreso por Urgencia: Booleano (True / False).
 6. Fallecimiento: Booleano (True / False).
@@ -47,36 +47,38 @@ D. INFECTOLOGÍA Y ANTIBIÓTICOS
 27. Tratamiento adecuado: Booleano (True / False).
 28. Cobertura empírica completa: Booleano (True / False).
 29. Resistencia antibióticos: Booleano (True / False).
+30. Número Episodios Bacteriemia: Número entero - Total de episodios sufridos. 
+31. Número total de días CVC: Número decimal - Total de días(puede o no tener decimales) con catéteres venosos centrales.
 
 E. SEDACIÓN Y MONITORIZACIÓN NEUROLÓGICA
 ------------------------------------------------------------
-30. RASS: Número entero (-5 a +4).
-31. BIS: Número entero (0 a 100).
-32. RASS objetivo: Número entero (-5 a +4) - Valor prescrito por el médico.
-33. BIS objetivo: Número entero (0 a 100) - Valor prescrito por el médico.
-34. Ventana de sedación: Número entero o decimal de días - Interrupción diaria de sedación.
+32. RASS: Número entero (-5 a +4).
+33. BIS: Número entero (0 a 100).
+34. RASS objetivo: Número entero (-5 a +4) - Valor prescrito por el médico.
+35. BIS objetivo: Número entero (0 a 100) - Valor prescrito por el médico.
+36. Ventana de sedación: Número entero o decimal de días - Interrupción diaria de sedación.
 
 F. NUTRICIÓN Y RIESGOS GASTROINTESTINALES
 ------------------------------------------------------------
-35. Fecha Inicio NE: Fecha (dd/mm/aaaa) - Inicio de Nutrición Enteral.
-36. Omeprazol: Booleano (True / False) - Si recibe profilaxis gástrica.
-37. Tratamiento Corticoides: Booleano (True / False).
-38. Antecedentes Hemorragia GI: Booleano (True / False).
-39. Coagulopatía: Booleano (True / False).
-40. Insuficiencia Renal: Booleano (True / False).
-41. Insuficiencia Hepatica: Booleano (True / False).
+37. Fecha Inicio NE: Fecha (dd/mm/aaaa) - Inicio de Nutrición Enteral.
+38. Omeprazol: Booleano (True / False) - Si recibe profilaxis gástrica.
+39. Tratamiento Corticoides: Booleano (True / False).
+40. Antecedentes Hemorragia GI: Booleano (True / False).
+41. Coagulopatía: Booleano (True / False).
+42. Insuficiencia Renal: Booleano (True / False).
+43. Insuficiencia Hepatica: Booleano (True / False).
 
 G. SEGURIDAD Y OTROS CUIDADOS
 ------------------------------------------------------------
-42. UPP: Booleano (True / False) - Presencia de Úlceras por Presión.
-43. Profilaxis TVP: Booleano (True / False).
-44. TVP: Booleano (True / False) - Trombosis Venosa Profunda confirmada.
-45. Glucemia: Número decimal/entero (mg/dl).
-46. Tratamiento Insulina: Booleano (True / False).
-47. Traslado Intrahospitalario: Booleano (True / False).
-48. Listado de verificación: Booleano (True / False) - Check-list de seguridad en traslado.
-49. Eventos Adversos Traslado: Booleano (True / False).
-50. Actos Transfusionales: Booleano (True / False).
-51. Sangrado Activo: Booleano (True / False).
-52. Cantidad Transfusion Dia: Número entero - Número de concentrados de hematíes.
+44. UPP: Booleano (True / False) - Presencia de Úlceras por Presión.
+45. Profilaxis TVP: Booleano (True / False).
+46. TVP: Booleano (True / False) - Trombosis Venosa Profunda confirmada.
+47. Glucemia: Número decimal/entero (mg/dl).
+48. Tratamiento Insulina: Booleano (True / False).
+49. Traslado Intrahospitalario: Booleano (True / False).
+50. Listado de verificación: Booleano (True / False) - Check-list de seguridad en traslado.
+51. Eventos Adversos Traslado: Booleano (True / False).
+52. Actos Transfusionales: Booleano (True / False).
+53. Sangrado Activo: Booleano (True / False).
+54. Cantidad Transfusion Dia: Número entero - Número de concentrados de hematíes.
 ============================================================

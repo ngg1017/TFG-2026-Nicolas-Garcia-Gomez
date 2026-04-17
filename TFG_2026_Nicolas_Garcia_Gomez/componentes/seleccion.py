@@ -84,6 +84,7 @@ def seleccion(icon: str) -> rx.Component:
                                 on_click=Programa.sobretransfusion_hematies(ocultar = False)
                             ),
                             rx.menu.item("TET por Maniobras", on_click=Programa.retirada_accidental(ocultar = False)),
+                            rx.menu.item("Bacteriemia relacionada a CVC", on_click=Programa.bacteriemia(ocultar = False)),
                             rx.menu.item("Mezcla de Indicadores", on_click=Programa.mezcla),
                             rx.menu.item("Resumen Indicadores", on_click=Programa.tabla_resumen),
 

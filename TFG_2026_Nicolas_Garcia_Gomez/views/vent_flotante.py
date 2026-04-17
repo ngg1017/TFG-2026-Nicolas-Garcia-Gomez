@@ -50,7 +50,7 @@ def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.
                                     rx.text(
                                         #Condicional para poner % o partes por 1000
                                         rx.cond(
-                                            (texto.split(":")[0] == "Incidencia de Barotrauma") | (texto.split(":")[0] == "Neumonia Asociada a VMI") | (texto.split(":")[0] == "TET por Maniobras"),
+                                            (texto.split(":")[0] == "Incidencia de Barotrauma") | (texto.split(":")[0] == "Neumonia Asociada a VMI") | (texto.split(":")[0] == "TET por Maniobras") | (texto.split(":")[0] == "Bacteriemia relacionada a CVC"),
                                             f"Tuvimos un: {item["valor"]}‰",
                                             f"Tuvimos un: {item["valor"]}%"
                                         ),
