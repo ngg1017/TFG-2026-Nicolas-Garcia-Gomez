@@ -2,5 +2,13 @@
     "admin": {
         "password": "1",
         "rol": 3
+    },
+    "a": {
+        "password": "1",
+        "rol": 2
+    },
+    "b": {
+        "password": "1",
+        "rol": 1
     }
 }

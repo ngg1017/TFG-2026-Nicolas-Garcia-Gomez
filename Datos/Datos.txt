@@ -66,7 +66,7 @@ F. NUTRICIÓN Y RIESGOS GASTROINTESTINALES
 40. Antecedentes Hemorragia GI: Booleano (True / False).
 41. Coagulopatía: Booleano (True / False).
 42. Insuficiencia Renal: Booleano (True / False).
-43. Insuficiencia Hepatica: Booleano (True / False).
+43. Insuficiencia Hepática: Booleano (True / False).
 
 G. SEGURIDAD Y OTROS CUIDADOS
 ------------------------------------------------------------
@@ -80,5 +80,5 @@ G. SEGURIDAD Y OTROS CUIDADOS
 51. Eventos Adversos Traslado: Booleano (True / False).
 52. Actos Transfusionales: Booleano (True / False).
 53. Sangrado Activo: Booleano (True / False).
-54. Cantidad Transfusion Dia: Número entero - Número de concentrados de hematíes.
+54. Cantidad Transfusión Dia: Número entero - Número de concentrados de hematíes.
 ============================================================

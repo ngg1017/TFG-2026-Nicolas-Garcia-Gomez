@@ -4,6 +4,8 @@ from TFG_2026_Nicolas_Garcia_Gomez.estilos.estilos import Size, Color, TextoColo
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.boton_subida import boton_subida
 from Logica.State import State
 from Logica.Programa import Programa
+from Logica.Usuarios import Usuarios
+from Logica.BBDD import BBDD
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.seleccion import seleccion
 
 def instrucciones() -> rx.Component:
@@ -120,8 +122,30 @@ def instrucciones() -> rx.Component:
             #Centra el boton de subida
             rx.center(                      
                 boton_subida("Carga de archivos"),
+                #Condicional que permite controlar el acceso a los diferentes roles
+                rx.cond(
+                    Usuarios.rol == 3,
+                    rx.vstack(
+                        rx.button("Carga de Datos desde la BBDD", on_click=BBDD.abrir_consulta),
+                        rx.button("Acceso a la BBD"),
+                        rx.button("Exportacion archivos en CSV"),
+                        align="center",
+                        spacing="4"
+                    ),
+                    rx.cond(
+                        Usuarios.rol == 2,
+                        rx.vstack(
+                            rx.button("Carga de Datos desde la BBDD", on_click=BBDD.abrir_consulta),
+                            rx.button("Acceso a la BBD"),
+                            align="center",
+                            spacing="4"
+                        ),
+                        rx.button("Carga de Datos desde la BBDD", on_click=BBDD.abrir_consulta)
+                    )
+                ),
                 width="100%", 
-                margin_bottom=Size.PEQUEÑO.value
+                margin_bottom=Size.PEQUEÑO.value,
+                spacing="9"
             ),
             
             #Centra el boton para seleccionar los condicionantes

@@ -923,7 +923,7 @@ class Programa(State):
                 extuba = df["EXTUBACION_PROGRAMADA"].fillna(False)
 
                 #Aquellos que contengan mas de un registro en intubaciones busco varios caracteres con expresiones regulares
-                reintubaciones = (intuba.str.contains(r",|-|y|;", na=False)).sum()
+                reintubaciones = (intuba.astype(str).str.contains(r",|-|y|;", na=False)).sum()
                 num_extuba = ((intuba.notna())&(extuba == True)).sum()
 
                 valor_final = (reintubaciones/num_extuba)*100 if num_extuba != 0 else 0.0

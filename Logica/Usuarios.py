@@ -73,11 +73,8 @@ class Usuarios(rx.State):
         self.rol = 0
         self.email = ""
         self.password = ""
-        #Devolvemos una lista con las ordenes externas que Reflex debe ejecutar
-        return [
-            State.borrar_datos(), 
-            rx.redirect("/")      
-        ]
+        #Devolvemos el metodo que borra los archivos
+        return State.borrar_datos() 
     
     def cargar_usuarios_tabla(self):
         #Pasa los datos del JSON (un diccionario) a una lista 2D (filas y columnas)

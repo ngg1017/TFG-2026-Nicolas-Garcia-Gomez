@@ -6,22 +6,32 @@ from TFG_2026_Nicolas_Garcia_Gomez.views.pie import pie
 from TFG_2026_Nicolas_Garcia_Gomez.views.instrucciones import instrucciones
 from TFG_2026_Nicolas_Garcia_Gomez.views.vent_flotante import vent_flotante
 from TFG_2026_Nicolas_Garcia_Gomez.views.acceso import acceso
+from TFG_2026_Nicolas_Garcia_Gomez.views.vistas_bbdd import vistas_bbdd
 from Logica.Programa import Programa
 from Logica.Usuarios import Usuarios
+from Logica.BBDD import BBDD
 from Logica.State import State
 
-#Colocamos los elementos de la pagina principal
 def vista() -> rx.Component:
-    return rx.box(
-        navbar(),
-        rx.center(
-            rx.vstack(
-                cabecera(),
-                instrucciones(),
-                vent_flotante(Programa.texto, Programa.datos_final, Programa.datos_tarta),
-                pie(),
-                width = "100%",
-                spacing = "9"
+    return rx.cond(
+        #Consultar la BBDD
+        BBDD.viendo_consulta,
+        
+        #Si es True: Muestra la pantalla de base de datos
+        vistas_bbdd(),
+        
+        #Si es False: Muestra tu panel normal
+        rx.box(
+            navbar(),
+            rx.center(
+                rx.vstack(
+                    cabecera(),
+                    instrucciones(),
+                    vent_flotante(Programa.texto, Programa.datos_final, Programa.datos_tarta),
+                    pie(),
+                    width="100%",
+                    spacing="9"
+                )
             )
         )
     )
