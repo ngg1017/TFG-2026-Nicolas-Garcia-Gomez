@@ -3,6 +3,7 @@ import pandas as pd
 import tempfile
 import os
 from Logica.State import State 
+from Logica.Modelo import Modelo
 
 class BBDD(rx.State):
     #Variable que controla si el panel de la tabla es visible o no
@@ -10,15 +11,15 @@ class BBDD(rx.State):
     #Lista que almacena temporalmente los años que el usuario selecciona
     años_seleccionados: list[str] = []
     
-    #Lista principal con los nombres completos necesarios para los calculos internos
+    #Lista principal con los nombres exactos de la base de datos
     cabeceras: list[str] = [
-        "Num Historia", "Fecha Ingreso", "Fecha Alta", "Reingreso 48", "Especialidad de ingreso", "Ingreso por Urgencia", "Fallecimiento", "APACHE",
-        "VMI", "Días VMI", "Barotrauma", "Grados Inclinación", "Episodios NAV", "Registro Intubaciones", "Extubación Programada", "Extubación por Maniobras",
-        "Sepsis", "Shock Séptico", "PAM ingreso", "PAM 6h", "PAM 24h", "Diuresis Ingreso", "Diuresis 6h", "Diuresis 24h", "Lactato Ingreso", "Lactato 6h", "Lactato 24h",
-        "Tratamiento adecuado", "Cobertura empírica completa", "Resistencia antibióticos", "Número Episodios Bacteriemia", "Número total de días CVC",
-        "RASS", "BIS", "RASS objetivo", "BIS objetivo", "Ventana de sedación",
-        "Fecha Inicio NE", "Omeprazol", "Tratamiento Corticoides", "Antecedentes Hemorragia GI", "Coagulopatía", "Insuficiencia Renal", "Insuficiencia Hepática",
-        "UPP", "Profilaxis TVP", "TVP", "Glucemia", "Tratamiento insulina", "Traslado Intrahospitalario", "Listado de verificación", "Eventos Adversos Traslado", "Actos Transfusionales", "Sangrado Activo", "Cantidad Transfusión Dia"
+        "num_historia", "fecha_ingreso", "fecha_alta", "reingreso_48", "especialidad_ingreso", "ingreso_urgencia", "fallecimiento", "apache",
+        "vmi", "dias_vmi", "barotrauma", "grados_inclinacion", "episodios_nav", "registro_intubaciones", "extubacion_programada", "extubacion_maniobras",
+        "sepsis", "shock_septico", "pam_ingreso", "pam_6h", "pam_24h", "diuresis_ingreso", "diuresis_6h", "diuresis_24h", "lactato_ingreso", "lactato_6h", "lactato_24h",
+        "tratamiento_adecuado", "cobertura_empirica_completa", "resistencia_antibioticos", "numero_episodios_bacteriemia", "numero_total_dias_cvc",
+        "rass", "bis", "rass_objetivo", "bis_objetivo", "ventana_sedacion",
+        "fecha_inicio_ne", "omeprazol", "tratamiento_corticoides", "antecedentes_hemorragia_gi", "coagulopatia", "insuficiencia_renal", "insuficiencia_hepatica",
+        "upp", "profilaxis_tvp", "tvp", "glucemia", "tratamiento_insulina", "traslado_intrahospitalario", "listado_verificacion", "eventos_adversos_traslado", "actos_transfusionales", "sangrado_activo", "cantidad_transfusion_dia"
     ]
 
     #Lista secundaria con abreviaturas legibles exclusivamente para la interfaz grafica
@@ -32,72 +33,71 @@ class BBDD(rx.State):
         "UPP", "Profilaxis TVP", "TVP", "Glucemia", "Trat. Insulina", "Traslado Intra.", "Listado Verific.", "Eventos Traslado", "Transfusiones", "Sangrado Activo", "Cant. Transfusiones"
     ]
 
-    #Matriz bidimensional que contiene todos los registros historicos de los pacientes
-    datos_mostrados: list[list[str]] = [
-        #Rellena el resto de las cincuenta y cinco columnas con ceros para cuadrar el dataframe
-        ["H-2026-001", "10/01/2026", "25/01/2026", "False", "Cardiología", "True", "False", "18"] + ["0"] * 47,
-        ["H-2025-045", "15/12/2025", "05/01/2026", "False", "Digestivo", "False", "False", "9"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2024", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-11", "20/05/2023", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-1", "20/05/2022", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2021", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2020", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2019", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2018", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2017", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2016", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2026-001", "10/01/2026", "25/01/2026", "False", "Cardiología", "True", "False", "18"] + ["0"] * 47,
-        ["H-2025-045", "15/12/2025", "05/01/2026", "False", "Digestivo", "False", "False", "9"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2024", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-11", "20/05/2023", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-1", "20/05/2022", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2021", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2020", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2019", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2018", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2017", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2016", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2026-001", "10/01/2026", "25/01/2026", "False", "Cardiología", "True", "False", "18"] + ["0"] * 47,
-        ["H-2025-045", "15/12/2025", "05/01/2026", "False", "Digestivo", "False", "False", "9"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2024", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-11", "20/05/2023", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-1", "20/05/2022", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2021", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2020", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2019", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2018", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2017", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2016", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2026-001", "10/01/2026", "25/01/2026", "False", "Cardiología", "True", "False", "18"] + ["0"] * 47,
-        ["H-2025-045", "15/12/2025", "05/01/2026", "False", "Digestivo", "False", "False", "9"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2024", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-11", "20/05/2023", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-1", "20/05/2022", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2021", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2020", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2019", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2018", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2017", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
-        ["H-2024-112", "20/05/2016", "30/05/2024", "True", "Neumología", "True", "True", "25"] + ["0"] * 47,
+    #Lista terciaria exclusiva para exportar los CSV con los nombres que exige el script de Pandas
+    cabeceras_exportacion: list[str] = [
+        "Num Historia", "Fecha Ingreso", "Fecha Alta", "Reingreso 48", "Especialidad de ingreso", "Ingreso por Urgencia", "Fallecimiento", "APACHE",
+        "VMI", "Dias VMI", "Barotrauma", "Grados Inclinacion", "Episodios NAV", "Registro Intubaciones", "Extubacion Programada", "Extubacion por Maniobras",
+        "Sepsis", "Shock Septico", "PAM ingreso", "PAM 6h", "PAM 24h", "Diuresis Ingreso", "Diuresis 6h", "Diuresis 24h", "Lactato Ingreso", "Lactato 6h", "Lactato 24h",
+        "Tratamiento adecuado", "Cobertura empirica completa", "Resistencia antibioticos", "Numero Episodios Bacteriemia", "Numero total de días CVC",
+        "RASS", "BIS", "RASS objetivo", "BIS objetivo", "Ventana de sedacion",
+        "Fecha Inicio NE", "Omeprazol", "Tratamiento Corticoides", "Antecedentes Hemorragia GI", "Coagulopatia", "Insuficiencia Renal", "Insuficiencia Hepatica",
+        "UPP", "Profilaxis TVP", "TVP", "Glucemia", "Tratamiento Insulina", "Traslado Intrahospitalario", "Listado de verificacion", "Eventos Adversos Traslado", "Actos Transfusionales", "Sangrado Activo", "Cantidad Transfusion Dia"
     ]
+
+    #Matriz bidimensional que contiene todos los registros historicos de los pacientes
+    datos_mostrados: list[list[str]] = []
+
+    #Variable para almacenar solo los años
+    lista_años_bd: list[str] = []
+
+    #Variable que almacena el numero de historia escrito en el buscador web
+    termino_busqueda: str = ""
 
     #Decorador que indica a reflex que esta variable se calcula dinamicamente
     @rx.var
-    #Funcion que extrae todos los años disponibles sin repeticiones
     def años_disponibles(self) -> list[str]:
-        años = set()
+        return self.lista_años_bd
 
-        #Itera sobre cada paciente dentro de los datos
-        for fila in self.datos_mostrados:
-            #Extrae el indice uno correspondiente a la fecha de ingreso
-            fecha_ingreso = fila[1] 
-            #Comprueba que la variable fecha no este vacia
-            if fecha_ingreso:
-                año = fecha_ingreso.split("/")[-1] 
-                años.add(año)
-
-        #Retorna la lista final convertida y ordenada de forma descendente
-        return sorted(list(años), reverse=True)
+    #Funcion puente que viaja a PostgreSQL, extrae los pacientes y formatea la pantalla
+    def cargar_datos_bd(self):
+        #Abre una sesion de comunicacion segura con la base de datos
+        with rx.session() as session:
+            #Carga el directorio completo de pacientes en la memoria de Python (No satura RAM)
+            pacientes_db = session.exec(Modelo.select()).all()
+            
+            matriz_formateada = []
+            años_temporales = set()
+            pacientes_filtrados = []
+            
+            #1. Lee la fecha de todos para no romper los botones exportadores
+            for p in pacientes_db:
+                if p.fecha_ingreso and p.fecha_ingreso != "---":
+                    año = str(p.fecha_ingreso).split("/")[-1]
+                    años_temporales.add(año)
+            
+            #2. Decide que pacientes van a la pantalla
+            #Limpia espacios en blanco del buscador para evitar errores
+            busqueda_limpia = self.termino_busqueda.strip().upper()
+            
+            if busqueda_limpia == "":
+                #Si el buscador esta vacio, muestra unicamente el primer paciente de la base de datos
+                if len(pacientes_db) > 0:
+                    pacientes_filtrados = [pacientes_db[0]]
+            else:
+                #Si hay texto, busca todos los ingresos asociados a ese numero de historia
+                pacientes_filtrados = [p for p in pacientes_db if p.num_historia and p.num_historia.upper() == busqueda_limpia]
+            
+            #3. Prepara las 54 columnas solo de los pacientes filtrados
+            for p in pacientes_filtrados:
+                fila = []
+                for attr in self.cabeceras:
+                    valor = getattr(p, attr)
+                    fila.append(str(valor) if valor is not None else "---")
+                matriz_formateada.append(fila)
+            
+            #Inyecta los datos a la pantalla
+            self.datos_mostrados = matriz_formateada
+            self.lista_años_bd = sorted(list(años_temporales), reverse=True)
 
     #Funcion que gestiona la logica de marcado y desmarcado de los botones de años
     def toggle_año(self, año: str):
@@ -115,74 +115,87 @@ class BBDD(rx.State):
             #Bloque que se ejecuta si el usuario intenta superar el limite establecido
             else:
                 return rx.toast("Has alcanzado el máximo de 10 años")
-
-    #Funcion asincrona responsable de filtrar y exportar los datos al analizador
-    async def enviar_a_analisis(self):
-        #Verifica que haya al menos una seleccion activa antes de procesar
+    
+    #Funcion puente que prepara la interfaz antes del calculo 
+    def preparar_analisis(self):
+        #Corte de seguridad
         if len(self.años_seleccionados) == 0:
             return rx.toast("Seleccione al menos un año")
+            
+        #1. Cierra la ventana visual
+        self.viendo_consulta = False
+        
+        #2. Devuelve una "cadena de ordenes" directas a la interfaz web.
+        #Reflex las ejecutara en este orden exacto.
+        return [
+            #Enciende la barra en el estado principal
+            State.set_barra(True),
+            #Baja la pantalla          
+            rx.scroll_to("zona_de_carga"),
+            #Lanza la extraccion de datos  
+            BBDD.enviar_a_analisis          
+        ]
 
-        #Pausa la ejecucion para extraer las variables del estado principal
+    #Funcion asincrona responsable de exportar los datos desde PostgreSQL al analizador
+    async def enviar_a_analisis(self):
         estado_principal = await self.get_state(State)
         archivos_creados = 0
 
-        #Itera individualmente sobre cada año que el usuario haya seleccionado
-        for año in self.años_seleccionados:
-            #Crea una lista por comprension que solo guarda las filas terminadas en el año actual
-            datos_filtrados = [fila for fila in self.datos_mostrados if str(fila[1]).endswith(año)]
+        #Abre sesion directa con la BBDD para no saturar la RAM de la web
+        with rx.session() as session:
+            #Extrae la base de datos completa de fondo
+            todos_pacientes = session.exec(Modelo.select()).all()
 
-            #Comprueba si el filtrado no ha devuelto resultados para evitar errores
-            if len(datos_filtrados) == 0:
-                #Salta directamente al siguiente ciclo del bucle si no hay pacientes
-                continue
+            for año in self.años_seleccionados:
+                datos_filtrados = []
+                
+                #Busca los pacientes que coincidan con el año actual
+                for p in todos_pacientes:
+                    if p.fecha_ingreso and str(p.fecha_ingreso).endswith(año):
+                        #Formatea la fila con los atributos exactos pero reemplazando nulos por vacio para el CSV
+                        fila = [str(getattr(p, attr)) if getattr(p, attr) is not None else "" for attr in self.cabeceras]
+                        datos_filtrados.append(fila)
 
-            #Genera el dataframe utilizando la lista de cabeceras largas originales
-            df = pd.DataFrame(datos_filtrados, columns=self.cabeceras)
+                if len(datos_filtrados) == 0:
+                    continue
 
-            #Abre un flujo seguro para crear el archivo temporal en el disco duro
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", mode='w', encoding='latin1', newline='') as tmp:
-                #Vuelca el dataframe completo transformandolo en formato csv
-                df.to_csv(tmp, sep=',', index=False)
-                #Captura la ruta fisica donde el sistema operativo guardo el archivo
-                ruta_tmp = tmp.name
+                #Genera el CSV directamente
+                df = pd.DataFrame(datos_filtrados, columns=self.cabeceras_exportacion)
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", mode='w', encoding='latin1', newline='') as tmp:
+                    df.to_csv(tmp, sep=',', index=False)
+                    ruta_tmp = tmp.name
 
-            #Genera un nombre estetico que vera el usuario en el historial
-            nombre_ficticio = f"BBDD_Historico_{año}.csv"
+                nombre_ficticio = f"BBDD_Historico_{año}.csv"
 
-            #Bucle de seguridad para mantener limpia la memoria eliminando archivos antiguos
-            while len(estado_principal.rutas_archivos) >= 10:
-                #Extrae y elimina la ruta mas antigua de la primera posicion de la cola
-                ruta_a_borrar = estado_principal.rutas_archivos.pop(0)
-                #Extrae el nombre asociado de la lista paralela
-                nombre_a_borrar = estado_principal.nombres_archivos.pop(0)
-                #Guarda el nombre en el historial de archivos borrados
-                estado_principal.nombres_archivos_eliminados.append(nombre_a_borrar)
-                #Comprueba si la ruta sigue existiendo fisicamente en el disco
-                if os.path.exists(ruta_a_borrar):
-                    #Ordena al sistema operativo la destruccion del archivo
-                    os.remove(ruta_a_borrar)
+                #Gestor de memoria de archivos
+                while len(estado_principal.rutas_archivos) >= 10:
+                    ruta_a_borrar = estado_principal.rutas_archivos.pop(0)
+                    nombre_a_borrar = estado_principal.nombres_archivos.pop(0)
+                    estado_principal.nombres_archivos_eliminados.append(nombre_a_borrar)
+                    if os.path.exists(ruta_a_borrar):
+                        os.remove(ruta_a_borrar)
 
-            #Inyecta la nueva ruta generada en la logica global de la aplicacion
-            estado_principal.rutas_archivos.append(ruta_tmp)
-            #Inyecta el nombre estetico correspondiente en el estado principal
-            estado_principal.nombres_archivos.append(nombre_ficticio)
-            #Suma un digito al contador global de exito por cada iteracion completada
-            archivos_creados += 1
+                estado_principal.rutas_archivos.append(ruta_tmp)
+                estado_principal.nombres_archivos.append(nombre_ficticio)
+                archivos_creados += 1
 
-        #Actualiza la estadistica general de archivos analizados por la plataforma
         estado_principal.cargados += archivos_creados
-        #Vacia la lista de seleccion para reiniciar el componente visual
         self.años_seleccionados = [] 
-        #Cambia el booleano para cerrar automaticamente la ventana tras el volcado
-        self.viendo_consulta = False
         
-        #Muestra el aviso final detallando cuantos años fueron extraidos correctamente
-        return rx.toast(f"Registros de {archivos_creados} años cargados. Haciendo un total de {estado_principal.cargados} archivos procesados.")
+        #Apaga la barra al terminar
+        estado_principal.barra = False
+        return rx.toast(f"Registros de {archivos_creados} años cargados.")
     
-    #Metodos que cambia el estado booleano para desplegar/cerrar la ventana
+    #Metodos que cambia el estado booleano para desplegar la ventana
     def abrir_consulta(self):
+        #Lanza la consulta a la base de datos justo antes de abrir el panel
+        self.cargar_datos_bd()
         self.viendo_consulta = True
 
     def cerrar_consulta(self):
         self.viendo_consulta = False
-        self.años_seleccionados = [] 
+        self.años_seleccionados = []
+        self.termino_busqueda = ""
+    
+    def set_termino_busqueda(self, valor: str):
+        self.termino_busqueda = valor

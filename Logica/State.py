@@ -179,3 +179,6 @@ class State(rx.State):
 
             #Espera 2 segundos entre cada comprobacion
             await asyncio.sleep(2)
+    
+    def set_barra(self, valor: bool):
+        self.barra = valor

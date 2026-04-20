@@ -57,6 +57,22 @@ def vistas_bbdd() -> rx.Component:
                     ),
                     background_color=Color.ACENTO.value, margin_bottom="1em"
                 ),
+
+                #Barra de busqueda
+                rx.hstack(
+                    rx.input(
+                        placeholder="Ej. 111111",
+                        #Conecta lo que escribe el usuario con la variable del backend
+                        on_change=BBDD.set_termino_busqueda, 
+                        width="300px",
+                    ),
+                    rx.button(
+                        "Buscar Paciente",
+                        #Dispara la recarga de datos aplicando el filtro
+                        on_click=BBDD.cargar_datos_bd
+                    ),
+                    margin_bottom="1em"
+                ),
                 
                 #Caja maestra que sincroniza el scroll horizontal de ambas tablas a la vez
                 rx.box( 
@@ -133,7 +149,7 @@ def vistas_bbdd() -> rx.Component:
                     rx.button(
                         "Cargar para Análisis", 
                         #Ejecuta el puente de conexion con la logica asincrona
-                        on_click=BBDD.enviar_a_analisis,
+                        on_click=BBDD.preparar_analisis,
                         width="100%",
                         size="3",
                     ),

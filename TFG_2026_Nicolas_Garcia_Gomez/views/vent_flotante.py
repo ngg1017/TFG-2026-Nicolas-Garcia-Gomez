@@ -213,8 +213,8 @@ def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.
                                 rx.match(
                                     Programa.ind_grafico,
                                     #Devolvemos un boton que por dentro tiene la accion
-                                    ("barras", rx.button("Descargar Informe (Barras)", on_click=Programa.generar_pdf_final)),
-                                    ("lineal", rx.button("Descargar Informe (Lineal)", on_click=Programa.generar_pdf_final))
+                                    ("barras", rx.button("Descargar Informe (Barras)", on_click=Programa.preparar_analisis)),
+                                    ("lineal", rx.button("Descargar Informe (Lineal)", on_click=Programa.preparar_analisis))
                                 ),
                                 padding_bottom = "10px",
                                 padding_top = "9px"

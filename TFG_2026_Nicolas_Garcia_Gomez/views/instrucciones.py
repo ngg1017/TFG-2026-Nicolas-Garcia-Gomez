@@ -111,7 +111,7 @@ def instrucciones() -> rx.Component:
                 State.barra,
                 rx.vstack(
                     rx.text("Procesando archivos..."),
-                    rx.progress(is_indeterminate=True, width="100%"),
+                    rx.progress(is_indeterminate=False, width="100%"),
                     width="100%",
                     padding_top="1em",
                 ),
@@ -143,6 +143,8 @@ def instrucciones() -> rx.Component:
                         rx.button("Carga de Datos desde la BBDD", on_click=BBDD.abrir_consulta)
                     )
                 ),
+                #Añadimos un id para poder ir con rx.scroll_to
+                id="zona_de_carga",
                 width="100%", 
                 margin_bottom=Size.PEQUEÑO.value,
                 spacing="9"

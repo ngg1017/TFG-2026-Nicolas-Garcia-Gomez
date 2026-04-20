@@ -7,6 +7,7 @@ import reflex as rx
 import pandas as pd
 import unicodedata
 import numpy as np
+import asyncio
 import re
 import io
 
@@ -1725,6 +1726,22 @@ class Programa(State):
         "así como los gráficos a elección del facultativo."
         return rx.toast(f"Análisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Análisis del documente completado")
 
+    #Funcion puente que prepara la interfaz para la descarga del informe
+    async def preparar_analisis(self):
+        #1. Mutamos directamente las variables
+        self.cerrar_ventana()
+        self.barra = True
+        yield
+        
+        #2. Mandamos la orden visual a la zona de carga
+        yield rx.scroll_to("zona_de_carga")
+        
+        #3. Obliga al navegador a bajar la pantalla y encender la barra antes de crear el PDF
+        await asyncio.sleep(0.5)
+        
+        #4. Llamamos a la funcion
+        yield self.generar_pdf_final()          
+
     def generar_pdf_final(self):
         #Preparamos el PDF vacio
         pdf = PDF()
@@ -1766,6 +1783,8 @@ class Programa(State):
         
         #Reseteamos el indicador de grafico para que una vez se descargue el informe desaparezca el boton
         self.ind_grafico = ""
+
+        self.barra = False
         
         #Le enviamos el archivo al navegador del usuario
         return rx.download(
