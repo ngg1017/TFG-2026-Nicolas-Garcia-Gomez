@@ -122,27 +122,7 @@ def instrucciones() -> rx.Component:
             #Centra el boton de subida
             rx.center(                      
                 boton_subida("Carga de archivos"),
-                #Condicional que permite controlar el acceso a los diferentes roles
-                rx.cond(
-                    Usuarios.rol == 3,
-                    rx.vstack(
-                        rx.button("Carga de Datos desde la BBDD", on_click=BBDD.abrir_consulta),
-                        rx.button("Acceso a la BBD"),
-                        rx.button("Exportacion archivos en CSV"),
-                        align="center",
-                        spacing="4"
-                    ),
-                    rx.cond(
-                        Usuarios.rol == 2,
-                        rx.vstack(
-                            rx.button("Carga de Datos desde la BBDD", on_click=BBDD.abrir_consulta),
-                            rx.button("Acceso a la BBD"),
-                            align="center",
-                            spacing="4"
-                        ),
-                        rx.button("Carga de Datos desde la BBDD", on_click=BBDD.abrir_consulta)
-                    )
-                ),
+                rx.button("Apertura de la BBDD", on_click=BBDD.abrir_consulta),
                 #Añadimos un id para poder ir con rx.scroll_to
                 id="zona_de_carga",
                 width="100%", 

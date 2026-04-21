@@ -17,7 +17,7 @@ def acceso() -> rx.Component:
             rx.center(
                 rx.card(
                     rx.vstack(
-                        rx.heading("Acceso Restringido - REA", size="6", align="center"),
+                        rx.heading("Acceso - URCCPQ", size="6", align="center"),
                         rx.text("Introduzca sus credenciales para acceder al sistema.", align="center", color="gray"),
                         
                         #Formulario de acceso
@@ -90,7 +90,7 @@ def vista_gestion_usuarios() -> rx.Component:
     return rx.center(
         rx.card(
             rx.vstack(
-                rx.heading("Gestión de Accesos REA", size="6"),
+                rx.heading("Gestión de Accesos URCCPQ", size="6"),
                 rx.text("Panel exclusivo para administración.", color="gray", margin_bottom="1em"),
                 
                 #Creacion de usuarios
@@ -159,7 +159,7 @@ def vista_gestion_usuarios() -> rx.Component:
                                     rx.table.cell(usr[2]), 
                                     rx.table.cell(
                                         rx.button(
-                                            "Eliminar", 
+                                            rx.icon(tag="trash"),
                                             size="1",
                                             on_click=Usuarios.eliminar_usuario(usr[0]) 
                                         )

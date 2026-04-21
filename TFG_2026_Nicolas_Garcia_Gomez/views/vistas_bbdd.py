@@ -1,6 +1,7 @@
 import reflex as rx
-from Logica.BBDD import BBDD
+from Logica.Usuarios import Usuarios
 from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import Color, TextoColor
+from Logica.BBDD import BBDD
 
 #Funcion principal que dibuja la vista de carga desde la base de datos
 def vistas_bbdd() -> rx.Component:
@@ -46,8 +47,7 @@ def vistas_bbdd() -> rx.Component:
                                             "color": TextoColor.SECUNDARIO.value
                                         }
                                     },
-                                    border_radius="2rem", 
-                                    cursor="pointer",
+                                    border_radius="2rem"
                                 )
                             ),
                             #Ordena al contenedor que envuelva los elementos en lugar de encogerlos
@@ -61,9 +61,10 @@ def vistas_bbdd() -> rx.Component:
                 #Barra de busqueda
                 rx.hstack(
                     rx.input(
-                        placeholder="Ej. 111111",
+                        placeholder="Buscar por Nº Historia... Ej. 111111",
                         #Conecta lo que escribe el usuario con la variable del backend
-                        on_change=BBDD.set_termino_busqueda, 
+                        value=BBDD.termino_busqueda, 
+                        on_change=BBDD.set_termino_busqueda,
                         width="300px",
                     ),
                     rx.button(
@@ -71,7 +72,16 @@ def vistas_bbdd() -> rx.Component:
                         #Dispara la recarga de datos aplicando el filtro
                         on_click=BBDD.cargar_datos_bd
                     ),
-                    margin_bottom="1em"
+                    #Boton de añadir condicionado al rol
+                    rx.cond(
+                        Usuarios.rol >= 2,
+                        rx.button(
+                            "＋ Añadir Paciente", 
+                            on_click=BBDD.abrir_modal
+                        )
+                    ),
+                    margin_bottom="1em",
+                    justify="between" 
                 ),
                 
                 #Caja maestra que sincroniza el scroll horizontal de ambas tablas a la vez
@@ -81,17 +91,28 @@ def vistas_bbdd() -> rx.Component:
                         rx.table.root(
                             rx.table.header(
                                 rx.table.row(
-                                    #Itera sobre la lista de alias cortos para mejorar la legibilidad
+                                    #Celda para la papelera (Solo rol >= 2)
+                                    rx.cond(
+                                        Usuarios.rol >= 2, 
+                                        rx.table.column_header_cell(
+                                            "Acción", 
+                                            width="100px", 
+                                            min_width="100px", 
+                                            max_width="100px", 
+                                            text_align="center", 
+                                            background_color=Color.PRIMARIO.value
+                                        )
+                                    ),
+                                    #Itera sobre la lista de alias cortos
                                     rx.foreach(
                                         BBDD.cabeceras_display,
                                         lambda alias: rx.table.column_header_cell(
                                             alias, 
                                             white_space="nowrap",
-                                            #Fuerza medidas exactas y restrictivas para alinear esta celda con la de abajo
                                             width="150px", 
-                                            min_width="150px",
+                                            min_width="150px", 
                                             max_width="150px",
-                                            text_align="center",
+                                            text_align="center", 
                                             background_color=Color.PRIMARIO.value,
                                         )
                                     )
@@ -110,16 +131,34 @@ def vistas_bbdd() -> rx.Component:
                                     rx.foreach(
                                         BBDD.datos_mostrados,
                                         lambda fila: rx.table.row(
+                                            #Boton papelera que usa el ID (fila[0])
+                                            rx.cond(
+                                                Usuarios.rol >= 2,
+                                                rx.table.cell(
+                                                    rx.button(
+                                                        rx.icon(tag="trash"), 
+                                                        on_click=BBDD.borrar_paciente(fila[0])
+                                                    ),
+                                                    width="100px", 
+                                                    min_width="100px", 
+                                                    max_width="100px", 
+                                                    text_align="center",
+                                                )
+                                            ),
+                                            #Pinta las celdas usando un condicional sobre el indice
                                             rx.foreach(
                                                 fila,
-                                                lambda celda: rx.table.cell(
-                                                    celda, 
-                                                    white_space="nowrap",
-                                                    #Aplica las mismas medidas matematicas que la cabecera para evitar descuadres
-                                                    width="150px",
-                                                    min_width="150px",
-                                                    max_width="150px",
-                                                    text_align="center",
+                                                lambda celda, indice: rx.cond(
+                                                    #Si es > 0 (no es el ID oculto), dibuja la celda normal
+                                                    indice > 0, 
+                                                    rx.table.cell(
+                                                        celda, 
+                                                        white_space="nowrap",
+                                                        width="150px", 
+                                                        min_width="150px", 
+                                                        max_width="150px", 
+                                                        text_align="center",
+                                                    )
                                                 )
                                             )
                                         )
@@ -132,7 +171,9 @@ def vistas_bbdd() -> rx.Component:
                             max_height="45vh", 
                             overflow_y="auto", 
                             #Desactiva el scroll horizontal secundario para que lo gestione la caja maestra
-                            overflow_x="hidden", 
+                            overflow_x="hidden",
+                            #Frena el scroll para que no contagie a la pantalla principal
+                            style={"overscroll_behavior": "contain"}
                         ),
                         #Elimina la separacion entre las dos tablas para simular que son la misma
                         spacing="0" 
@@ -142,6 +183,111 @@ def vistas_bbdd() -> rx.Component:
                     overflow_x="auto", 
                     class_name="container-fluid border border-red rounded"
                 ),
+
+                #Para añadir pacientes
+                rx.dialog.root(
+                    rx.dialog.content(
+                        rx.dialog.title(
+                            "Añadir Nuevo Registro",
+                            color=Color.ACENTO.value
+                        ),
+                        #Area de relleno
+                        rx.scroll_area(
+                            rx.vstack(
+                                rx.foreach(
+                                    BBDD.orden_formulario,
+                                    lambda campo: rx.vstack(
+                                        rx.text(campo, size="2", weight="bold"),
+                                        
+                                        #¿Es Booleano?
+                                        rx.cond(
+                                            BBDD.campos_display_booleano.contains(campo),
+                                            rx.box(
+                                                rx.select(
+                                                    ["True", "False"], 
+                                                    placeholder="Seleccione (Vacío por defecto)...", 
+                                                    on_change=lambda v: BBDD.actualizar_campo_nuevo(campo, v), 
+                                                    width="100%",
+                                                    size="3",
+                                                    variant="ghost",
+                                                ),
+                                                width="100%",
+                                                background_color=Color.BOOLEANO_FONDO.value, 
+                                                border=f"1px solid #3f3f46",
+                                                border_radius="6px",
+                                                padding="0"
+                                            ),
+                                            
+                                            #¿Es Fecha Simple?
+                                            rx.cond(
+                                                BBDD.campos_display_fecha.contains(campo),
+                                                rx.input(
+                                                    placeholder="Ej. DD/MM/YYYY", 
+                                                    on_change=lambda v: BBDD.actualizar_campo_nuevo(campo, v), 
+                                                    background_color="#EF444426",
+                                                    width="100%",
+                                                    size="3"
+                                                ),
+                                                
+                                                #¿Es Fecha Multiple?
+                                                rx.cond(
+                                                    BBDD.campos_display_fecha_multiple.contains(campo),
+                                                    rx.input(
+                                                        placeholder="Ej. 14/10/2026; 18/10/2026", 
+                                                        on_change=lambda v: BBDD.actualizar_campo_nuevo(campo, v), 
+                                                        width="100%",
+                                                        background_color="#EF444426",
+                                                        size="3"
+                                                    ),
+                                                    
+                                                    #¿Es Numerico?
+                                                    rx.cond(
+                                                        BBDD.campos_display_numerico.contains(campo),
+                                                        rx.input(
+                                                            placeholder="Introduzca un número...", 
+                                                            on_change=lambda v: BBDD.actualizar_campo_nuevo(campo, v), 
+                                                            width="100%",
+                                                            background_color="#10B9811B",
+                                                            size="3"
+                                                        ),
+                                                        
+                                                        #Texto normal 
+                                                        rx.input(
+                                                            placeholder="Introduzca texto...", 
+                                                            on_change=lambda v: BBDD.actualizar_campo_nuevo(campo, v), 
+                                                            width="100%",
+                                                            background_color="#F59E0B1A",
+                                                            size="3"
+                                                        )
+                                                    )
+                                                )
+                                            )
+                                        ),
+                                        align_items="start",
+                                        width="100%",
+                                        spacing="0",
+                                        margin_bottom="19px",
+                                        margin_top="1px"
+                                    )
+                                )
+                            ),
+                            height="60vh", padding_right="1em"
+                        ),
+                        #Botonera
+                        rx.hstack(
+                            rx.button(
+                                "Cancelar", 
+                                on_click=BBDD.cerrar_modal
+                            ),
+                            rx.button(
+                                "Guardar Paciente", 
+                                on_click=BBDD.guardar_nuevo_paciente, 
+                            ),
+                            margin_top="1em", justify="end"
+                        )
+                    ),
+                    open=BBDD.modal_añadir_abierto,
+                ),
                 
                 #Seccion inferior con los botones de control principal
                 rx.divider(margin_top="1em"),
@@ -150,17 +296,34 @@ def vistas_bbdd() -> rx.Component:
                         "Cargar para Análisis", 
                         #Ejecuta el puente de conexion con la logica asincrona
                         on_click=BBDD.preparar_analisis,
-                        width="100%",
+                        width="18%",
                         size="3",
                     ),
                     rx.button(
                         "Cancelar", 
                         #Cierra el panel sin realizar ninguna exportacion
                         on_click=BBDD.cerrar_consulta, 
-                        width="30%",
+                        width="6%",
                         size="3"
                     ),
-                    width="20%",
+                    rx.spacer(),
+                    #Boton de exportacion (solo para roles 3)
+                    rx.cond(
+                        Usuarios.rol >= 3,
+                        rx.button(
+                            rx.icon(tag="download"),
+                            on_click=BBDD.preparar_exportacion,
+                            background_color="red",
+                            width="7%",
+                            size="3",
+                            style={
+                                "_hover": {
+                                    "color": TextoColor.SECUNDARIO.value
+                                }
+                            }
+                        )
+                    ),
+                    width="100%",
                     spacing="4"
                 )
             ),
@@ -168,8 +331,8 @@ def vistas_bbdd() -> rx.Component:
             box_shadow="lg",
             #Dimensiones relativas para asegurar que la interfaz respire bien en cualquier monitor
             width="90vw",
-            max_height="90vh"
         ),
         min_height="100vh", 
-        background_color=Color.PRIMARIO.value
+        padding_y="2em",
+        background_color=Color.PRIMARIO.value,
     )

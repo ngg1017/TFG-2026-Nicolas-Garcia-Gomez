@@ -20,7 +20,7 @@ def vista() -> rx.Component:
         #Si es True: Muestra la pantalla de base de datos
         vistas_bbdd(),
         
-        #Si es False: Muestra tu panel normal
+        #Si es False: Muestra el panel normal
         rx.box(
             navbar(),
             rx.center(
@@ -60,6 +60,6 @@ app.add_page(
     index,
     #Funcion de perrito guardian se carga al inicio
     on_load=State.loop_monitor_conexion,
-    title = "Indicadores de calidad REA",
-    description = "Explciar como subir todos los componentes"
+    title = "Indicadores de calidad URCCPQ",
+    description = "Calculadora Indicadores de calidad URCCPQ"
 )

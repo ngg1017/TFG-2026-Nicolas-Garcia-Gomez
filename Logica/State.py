@@ -5,7 +5,6 @@ import time
 import asyncio
 import glob
 
-
 class State(rx.State):
     rutas_archivos: list[str]
     nombres_archivos: list[str]
@@ -38,7 +37,7 @@ class State(rx.State):
         for file in files:  
             try: 
                 #Creamos un archivo temporal fisico en el disco
-                #delete=False es vital para que el archivo no se borre al cerrar el 'with'
+                #delete=False es vital para que el archivo no se borre al cerrar el "with"
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as tmp:
                     contenido = await file.read()
                     tmp.write(contenido)
@@ -143,7 +142,7 @@ class State(rx.State):
         #Importacion local para evitar errores circulares
         import TFG_2026_Nicolas_Garcia_Gomez.TFG_2026_Nicolas_Garcia_Gomez as main_file
         
-        #Obtenemos la instancia de la app que creaste con rx.App()
+        #Obtenemos la instancia de la app que se crea con rx.App()
         #Si aun no se ha creado, devuelve None en lugar de dar un error, gracias a getattr.
         app_instance = getattr(main_file, "app", None)
 

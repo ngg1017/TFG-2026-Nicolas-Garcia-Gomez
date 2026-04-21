@@ -36,7 +36,7 @@ class PDF(FPDF):
         self.multi_cell(0, 5, descripcion)
         self.ln(5)
         
-        #Convertimos los datos a lista por si vienen como objeto 'zip'
+        #Convertimos los datos a lista por si vienen como objeto "zip"
         datos_lista = list(datos) 
         
         #Altura de la fila

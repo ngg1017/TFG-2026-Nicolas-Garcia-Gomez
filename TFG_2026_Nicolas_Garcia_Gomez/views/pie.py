@@ -7,7 +7,7 @@ def pie() -> rx.Component:
     return rx.hstack(
         rx.vstack(
             rx.text(
-                "Indicadores de calidad de la REA",
+                "Indicadores de calidad de la URCCPQ",
                 size = "2"
                 ),
 

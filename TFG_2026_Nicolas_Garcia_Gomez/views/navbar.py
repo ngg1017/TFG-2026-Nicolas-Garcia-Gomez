@@ -34,7 +34,7 @@ def navbar() -> rx.Component:
             rx.spacer(),
             #Creamos el boton en la navbar                               
             link_icon(                                    
-                "Página web REA", 
+                "Página web URCCPQ", 
                 constantes.REA_URL
             ),
             #Tamaño de la barra(ocupa la totalidad)

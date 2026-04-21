@@ -8,7 +8,7 @@ def cabecera() -> rx.Component:
 
         #Titulo
         rx.heading(      
-            "Indicadores de calidad REA",
+            "Indicadores de calidad URCCPQ",
             size = "9",
 
             #Para dejar espacios con los bordes

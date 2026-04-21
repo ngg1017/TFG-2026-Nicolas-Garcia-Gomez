@@ -24,7 +24,7 @@ B. VENTILACIÓN MECÁNICA Y RESPIRATORIO
 10. Barotrauma: Booleano (True / False).
 11. Grados Inclinación: Número entero (0 a 90).
 12. Episodios NAV: Booleano (True / False).
-13. Registro Intubaciones: Fechas separadas por comas (Ej: "14/10/2025, 18/10/2025").
+13. Registro Intubaciones: Fechas separadas por punto y comas (Ej: "14/10/2025; 18/10/2025").
 14. Extubación Programada: Booleano (True / False).
 15. Extubación por Maniobras: Booleano (True / False) - Retirada accidental.
 
