@@ -203,14 +203,14 @@ class BBDD(rx.State):
                 for p in todos_pacientes:
                     if p.fecha_ingreso and str(p.fecha_ingreso).endswith(año):
                         #Formatea la fila con los atributos exactos pero reemplazando nulos por vacio para el CSV
-                        fila = [str(getattr(p, attr)) if getattr(p, attr) is not None else "" for attr in self.cabeceras]
+                        fila = [str(getattr(p, attr)) if getattr(p, attr) is not None else "" for attr in self.cabeceras[1:]]
                         datos_filtrados.append(fila)
 
                 if len(datos_filtrados) == 0:
                     continue
 
                 #Genera el CSV directamente
-                df = pd.DataFrame(datos_filtrados, columns=self.cabeceras_exportacion)
+                df = pd.DataFrame(datos_filtrados, columns=self.cabeceras_exportacion[1:])
                 with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", mode="w", encoding="latin1", newline="") as tmp:
                     df.to_csv(tmp, sep=",", index=False)
                     ruta_tmp = tmp.name
@@ -230,6 +230,9 @@ class BBDD(rx.State):
                 archivos_creados += 1
 
         estado_principal.cargados += archivos_creados
+        
+        #Registro auditoria
+        await self.registrar_log_bbdd("ANALISIS_DATOS", f"Análisis de los años: {self.años_seleccionados}")
         self.años_seleccionados = [] 
         
         #Apaga la barra al terminar
@@ -237,7 +240,7 @@ class BBDD(rx.State):
         return rx.toast(f"Registros de {archivos_creados} años cargados.")
     
     #Funcion de borrado
-    def borrar_paciente(self, id_paciente: str):
+    async def borrar_paciente(self, id_paciente: str):
         with rx.session() as session:
             #Buscamos al paciente por su ID primario
             paciente = session.get(Modelo, int(id_paciente))
@@ -248,6 +251,9 @@ class BBDD(rx.State):
 
                 session.delete(paciente)
                 session.commit()
+
+                #Registro auditoria
+                await self.registrar_log_bbdd("BORRAR_PACIENTE", f"Se eliminó el Nº Historia: {numero_historia}")
                 
                 #Le pedimos a la base de datos que busque si queda alguna fila con ese mismo numero
                 quedan_registros = session.exec(
@@ -281,7 +287,7 @@ class BBDD(rx.State):
         #Machacamos la variable original. Esto avisa a Reflex de que hay datos nuevos
         self.nuevo_paciente_dict = temp_dict
 
-    def guardar_nuevo_paciente(self):
+    async def guardar_nuevo_paciente(self):
         #1. Validacion de Nº Historia
         n_historia_raw = str(self.nuevo_paciente_dict.get("Nº Historia", "")).strip()
         if n_historia_raw == "":
@@ -397,6 +403,9 @@ class BBDD(rx.State):
             session.commit()
         
         self.modal_añadir_abierto = False
+
+        #Registro auditoria
+        await self.registrar_log_bbdd("NUEVO_PACIENTE", f"Nº Historia creado: {datos_limpios.get('num_historia')}")
         self.cargar_datos_bd()
         return rx.toast("Nuevo paciente registrado con éxito")
     
@@ -470,10 +479,29 @@ class BBDD(rx.State):
                 filename="Exportacion_Pendrive_BBDD.zip"
             )
 
+        await self.registrar_log_bbdd("EXPORTAR_PENDRIVE", f"Años extraídos: {self.años_seleccionados}")
         estado_principal.barra=False
         self.años_seleccionados = []
         yield rx.toast("Descargas anónimas realizadas correctamente. (Carpeta 'Descargas')")
         return
+
+    #Sistema de auditoria
+    async def registrar_log_bbdd(self, accion: str, detalles: str = ""):
+        from Logica.Usuarios import Usuarios
+        from Logica.Modelo import Auditoria
+        
+        #Le preguntamos al estado de Usuarios quien esta iniciado en la sesion
+        estado_usuario = await self.get_state(Usuarios)
+        correo_medico = estado_usuario.email
+
+        with rx.session() as session:
+            log = Auditoria(
+                usuario_final=correo_medico,
+                accion=accion,
+                detalles=detalles
+            )
+            session.add(log)
+            session.commit()
     
     #Metodos que cambia el estado booleano para desplegar la ventana
     def abrir_consulta(self):

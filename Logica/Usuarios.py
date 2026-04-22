@@ -58,6 +58,9 @@ class Usuarios(rx.State):
         #Logica de validacion
         if email_seguro in base_usuarios:
             if base_usuarios[email_seguro]["password"] == self.password:
+                #Registro de auditoria
+                self.registrar_log("INICIAR_SESION", "El usuario inició sesión")
+
                 #Levanta la barrera y carga los permisos de ese usuario especifico
                 self.autenticado = True
                 self.rol = base_usuarios[email_seguro]["rol"]
@@ -70,9 +73,12 @@ class Usuarios(rx.State):
         #Destruye la sesion actual, devolviendo todas las variables a su estado inicial. 
         #El redirect expulsa al usuario al Login.
         self.autenticado = False
+
+        self.registrar_log("CERRAR_SESION", "El usuario cerró sesión")
         self.rol = 0
         self.email = ""
         self.password = ""
+
         #Devolvemos el metodo que borra los archivos
         return State.borrar_datos() 
     
@@ -133,6 +139,7 @@ class Usuarios(rx.State):
                 json.dump(base, f, indent=4)
             #Fuerza a la tabla a repintarse sin ese usuario
             self.cargar_usuarios_tabla() 
+            self.registrar_log("BORRAR_USUARIO", f"Se eliminó la cuenta: {email_a_borrar}", self.email_admin_confirmacion)
             return rx.toast(f"Usuario {email_a_borrar} eliminado")
 
     def añadir_usuario(self):
@@ -168,6 +175,7 @@ class Usuarios(rx.State):
         self.nuevo_email = ""
         self.nueva_password = ""
         
+        self.registrar_log("NUEVO_USUARIO", f"Se creó cuenta para: {email_seguro} con Rol {self.nuevo_rol}", self.email_admin_confirmacion)
         return rx.toast(f"Usuario {email_seguro} añadido con éxito")
 
     def cambiar_contraseña(self):
@@ -212,7 +220,21 @@ class Usuarios(rx.State):
         #Ejecutamos la funcion que cierra la ventana de recuperación y vuelve al Login
         self.cerrar_recuperacion()
         
+        self.registrar_log("CAMBIO_CONTRASEÑA", "Se cambio la contraseña", self.email_antiguo)
         return rx.toast(f"Cambio de contraseña en Usuario {email_seguro} exitoso")
+    
+    #Sistema de auditoria
+    def registrar_log(self, accion: str, detalles: str = "", usuario: str = ""):
+        #Importamos la tabla para auditoria
+        from Logica.Modelo import Auditoria 
+        with rx.session() as session:
+            log = Auditoria(
+                usuario_final=self.email if usuario=="" else usuario,
+                accion=accion,
+                detalles=detalles
+            )
+            session.add(log)
+            session.commit()
 
     #Funciones que controlan la apertura de la recuperacion
     def abrir_recuperacion(self):

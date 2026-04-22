@@ -1,6 +1,9 @@
 import reflex as rx
 from typing import Optional
+from datetime import datetime, timezone
+from sqlmodel import Field
 
+#Al heredar de rx.Model, Reflex crea automaticamente una columna 'id' (entero, clave primaria)
 class Modelo(rx.Model, table=True):
     #Identificador unico (Obligatorio)
     num_historia: str
@@ -72,3 +75,13 @@ class Modelo(rx.Model, table=True):
     actos_transfusionales: Optional[str] = None
     sangrado_activo: Optional[str] = None
     cantidad_transfusion_dia: Optional[float] = None
+
+class Auditoria(rx.Model, table=True):
+    usuario_final: str 
+    accion: str   
+    detalles: Optional[str] = None  
+    
+    #Genera la fecha y hora exacta automaticamente en el momento de guardarse
+    fecha: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
