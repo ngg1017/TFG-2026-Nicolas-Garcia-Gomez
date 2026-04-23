@@ -86,7 +86,7 @@ def seleccion(icon: str) -> rx.Component:
                             rx.menu.item("TET por Maniobras", on_click=Programa.retirada_accidental(ocultar = False)),
                             rx.menu.item("Bacteriemia relacionada a CVC", on_click=Programa.bacteriemia(ocultar = False)),
                             rx.menu.item("Mezcla de Indicadores", on_click=Programa.mezcla),
-                            rx.menu.item("Resumen Indicadores", on_click=Programa.tabla_resumen),
+                            rx.menu.item("Resumen Indicadores", on_click=Programa.preparar_resumen),
 
                             #Aseguramos que el menu flote por encima de todo
                             z_index="500", 

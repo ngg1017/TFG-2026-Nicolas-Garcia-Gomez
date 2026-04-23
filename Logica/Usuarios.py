@@ -1,7 +1,16 @@
 import reflex as rx
-import json
-import os
 from Logica.State import State
+import bcrypt
+from Logica.Modelo import UsuarioDb
+
+#Funciones de criptografia
+def encriptar_password(password: str) -> str:
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password.encode("utf-8"), salt)
+    return hashed.decode("utf-8")
+
+def verificar_password(password_plana: str, password_cifrada: str) -> bool:
+    return bcrypt.checkpw(password_plana.encode("utf-8"), password_cifrada.encode("utf-8"))
 
 class Usuarios(rx.State):
     #Login normal
@@ -41,33 +50,29 @@ class Usuarios(rx.State):
     def iniciar_sesion(self):
         #Desaparezcan mensajes de error antiguos
         self.mensaje_error = ""
-
-        #Comprobacion: Evita que la app crashee si se borra el archivo JSON accidentalmente
-        ruta_archivo = "usuarios.json"
-        if not os.path.exists(ruta_archivo):
-            self.mensaje_error = "Error: No se encuentra la base de usuarios."
-            return
-
-        #Lectura de BBDD local
-        with open(ruta_archivo, "r", encoding="utf-8") as f:
-            base_usuarios = json.load(f)
-
         #strip() quita espacios invisibles al copiar/pegar y lower() evita problemas de mayusculas
         email_seguro = self.email.strip().lower()
 
-        #Logica de validacion
-        if email_seguro in base_usuarios:
-            if base_usuarios[email_seguro]["password"] == self.password:
-                #Registro de auditoria
-                self.registrar_log("INICIAR_SESION", "El usuario inició sesión")
+        with rx.session() as session:
+            #Buscamos al usuario en la base de datos
+            usuario_db = session.exec(
+                UsuarioDb.select().where(UsuarioDb.email == email_seguro)
+            ).first()
 
-                #Levanta la barrera y carga los permisos de ese usuario especifico
-                self.autenticado = True
-                self.rol = base_usuarios[email_seguro]["rol"]
+            #Logica de validacion
+            if usuario_db:
+                #Comparamos la clave escrita con el Hash guardado
+                if verificar_password(self.password, usuario_db.password_hash):
+                    #Registro de auditoria
+                    self.registrar_log("INICIAR_SESION", "El usuario inició sesión", email_seguro)
+
+                    #Levanta la barrera y carga los permisos de ese usuario especifico
+                    self.autenticado = True
+                    self.rol = usuario_db.rol
+                else:
+                    self.mensaje_error = "Contraseña incorrecta."
             else:
-                self.mensaje_error = "Contraseña incorrecta."
-        else:
-            self.mensaje_error = "El usuario no existe."
+                self.mensaje_error = "El usuario no existe."
             
     def cerrar_sesion(self):
         #Destruye la sesion actual, devolviendo todas las variables a su estado inicial. 
@@ -83,39 +88,37 @@ class Usuarios(rx.State):
         return State.borrar_datos() 
     
     def cargar_usuarios_tabla(self):
-        #Pasa los datos del JSON (un diccionario) a una lista 2D (filas y columnas)
-        #Esto es obligatorio porque el componente rx.table de Reflex solo entiende listas iterables.
-        ruta_archivo = "usuarios.json"
-        if os.path.exists(ruta_archivo):
-            with open(ruta_archivo, "r", encoding="utf-8") as f:
-                base = json.load(f)
-            #Comprension de listas en Python: [email, contraseña, rol convertido a texto]
-            self.lista_usuarios_tabla = [[k, v["password"], str(v["rol"])] for k, v in base.items()]
+        #Pasa los datos de PostgreSQL a una lista 2D (filas y columnas)
+        with rx.session() as session:
+            todos = session.exec(UsuarioDb.select()).all()
+            #Mostramos "*******" en la tabla en vez del hash real por estetica
+            self.lista_usuarios_tabla = [[u.email, "*******", str(u.rol)] for u in todos]
 
     def abrir_gestion(self):
         #Triple barrera de seguridad para acceder al panel de creacion de usuarios
         email_seguro = self.email_admin_confirmacion.strip().lower()
-        ruta_archivo = "usuarios.json"
         
-        with open(ruta_archivo, "r", encoding="utf-8") as f:
-            base = json.load(f)
-        
-        #1. ¿Existes?
-        if email_seguro in base:
-            #2. ¿Tienes el maximo poder (Rol 3)? 
-            if base[email_seguro]["rol"] == 3:
-                #3. ¿Es su clave? 
-                if base[email_seguro]["password"] == self.clave_admin_confirmacion: 
-                    self.viendo_gestion = True
-                    self.mensaje_error = ""
-                    #Carga los datos para que la tabla no aparezca vacia
-                    self.cargar_usuarios_tabla() 
+        with rx.session() as session:
+            #1. ¿Existes?
+            admin_db = session.exec(
+                UsuarioDb.select().where(UsuarioDb.email == email_seguro)
+            ).first()
+            
+            if admin_db:
+                #2. ¿Tienes el rol 3? 
+                if admin_db.rol == 3:
+                    #3. ¿Es su clave?
+                    if verificar_password(self.clave_admin_confirmacion, admin_db.password_hash): 
+                        self.viendo_gestion = True
+                        self.mensaje_error = ""
+                        #Carga los datos para que la tabla no aparezca vacia
+                        self.cargar_usuarios_tabla() 
+                    else:
+                        self.mensaje_error = "Contraseña de administrador incorrecta."
                 else:
-                    self.mensaje_error = "Contraseña de administrador incorrecta."
+                    self.mensaje_error = "Este usuario no tiene permisos (Rol 3)."
             else:
-                self.mensaje_error = "Este usuario no tiene permisos (Rol 3)."
-        else:
-            self.mensaje_error = "El usuario administrador no existe."
+                self.mensaje_error = "El usuario administrador no existe."
 
     def cerrar_gestion(self):
         #Cierra el panel de administracion sin cerrar la sesion principal
@@ -128,45 +131,45 @@ class Usuarios(rx.State):
         if email_a_borrar == self.email_admin_confirmacion.strip().lower():
             return rx.toast("No puedes eliminar tu propia cuenta") 
         
-        ruta_archivo = "usuarios.json"
-        with open(ruta_archivo, "r", encoding="utf-8") as f:
-            base = json.load(f)
-        
-        #Si pasa las reglas, se borra del diccionario y se sobreescribe el archivo
-        if email_a_borrar in base:
-            del base[email_a_borrar]
-            with open(ruta_archivo, "w", encoding="utf-8") as f:
-                json.dump(base, f, indent=4)
-            #Fuerza a la tabla a repintarse sin ese usuario
-            self.cargar_usuarios_tabla() 
-            self.registrar_log("BORRAR_USUARIO", f"Se eliminó la cuenta: {email_a_borrar}", self.email_admin_confirmacion)
-            return rx.toast(f"Usuario {email_a_borrar} eliminado")
+        with rx.session() as session:
+            #Buscamos al usuario y lo borramos
+            usuario_db = session.exec(
+                UsuarioDb.select().where(UsuarioDb.email == email_a_borrar)
+            ).first()
+            if usuario_db:
+                session.delete(usuario_db)
+                session.commit()
+                
+                #Fuerza a la tabla a repintarse sin ese usuario
+                self.cargar_usuarios_tabla() 
+                self.registrar_log("BORRAR_USUARIO", f"Se eliminó la cuenta: {email_a_borrar}", self.email_admin_confirmacion)
+                return rx.toast(f"Usuario {email_a_borrar} eliminado")
 
     def añadir_usuario(self):
         email_seguro = self.nuevo_email.strip().lower()
-        password_segura = self.nueva_password
         
         #Evita que se guarden datos corruptos o vacios
         if email_seguro == "": 
             return rx.toast("Debes introducir un email para el nuevo usuario")
-        if password_segura == "":
+        if self.nueva_password == "":
             return rx.toast("La contraseña no puede estar vacía")
             
-        ruta_archivo = "usuarios.json"
-        with open(ruta_archivo, "r", encoding="utf-8") as f:
-            base = json.load(f)
-        
-        #Validacion de duplicados
-        if email_seguro in base:
-            return rx.toast("Este correo ya está registrado en el sistema")
-            
-        #Creacion del nuevo nodo en el JSON
-        base[email_seguro] = {
-            "password": password_segura,
-            "rol": int(self.nuevo_rol)
-        }
-        with open(ruta_archivo, "w", encoding="utf-8") as f:
-            json.dump(base, f, indent=4)
+        with rx.session() as session:
+            #Validacion de duplicados
+            existe = session.exec(
+                UsuarioDb.select().where(UsuarioDb.email == email_seguro)
+            ).first()
+            if existe:
+                return rx.toast("Este correo ya está registrado en el sistema")
+                
+            #Creacion del nuevo nodo en PostgreSQL
+            nuevo_user = UsuarioDb(
+                email=email_seguro,
+                password_hash=encriptar_password(self.nueva_password),
+                rol=int(self.nuevo_rol)
+            )
+            session.add(nuevo_user)
+            session.commit()
 
         #Actualiza la vista  
         self.cargar_usuarios_tabla() 
@@ -185,10 +188,8 @@ class Usuarios(rx.State):
         #Evita que el programa intente procesar datos corruptos, vacios o mal escritos.
         if email_seguro == "": 
             return rx.toast("Debes introducir tu correo electrónico")
-            
         if self.contraseña_nueva == "":
             return rx.toast("La contraseña no puede estar vacía")
-            
         if self.contraseña_nueva2 == "":
             return rx.toast("Debes repetir la contraseña")
             
@@ -196,31 +197,28 @@ class Usuarios(rx.State):
         if self.contraseña_nueva != self.contraseña_nueva2:
             return rx.toast("Las contraseñas deben coincidir")
             
-        #Lectura de la base de datos
-        ruta_archivo = "usuarios.json"
-        with open(ruta_archivo, "r", encoding="utf-8") as f:
-            base = json.load(f)
+        with rx.session() as session:
+            #Si el usuario introduce un correo que no esta registrado, se bloquea el proceso.
+            usuario_db = session.exec(
+                UsuarioDb.select().where(UsuarioDb.email == email_seguro)
+            ).first()
+            if not usuario_db:
+                return rx.toast("El usuario no existe en el sistema.")
+            
+            #Sobreescribimos la contraseña encriptada
+            usuario_db.password_hash = encriptar_password(self.contraseña_nueva)
+            session.add(usuario_db)
+            session.commit()
         
-        #Si el usuario introduce un correo que no esta registrado, se bloquea el proceso.
-        if email_seguro not in base:
-            return rx.toast("El usuario no existe en el sistema.")
-        
-        #Sobreescribimos el valor de la clave "password" de ese usuario especifico
-        base[email_seguro]["password"] = self.contraseña_nueva
-
-        #Abrimos el archivo en modo escritura ("w") y guardamos el diccionario actualizado
-        with open(ruta_archivo, "w", encoding="utf-8") as f:
-            json.dump(base, f, indent=4)
-        
-        # Vaciamos los campos de texto para que, si otro usuario intenta recuperar su clave después, no vea las contraseñas escritas anteriormente.
+        #Vaciamos los campos de texto
         self.email_antiguo = ""
         self.contraseña_nueva = ""
         self.contraseña_nueva2 = ""
         
-        #Ejecutamos la funcion que cierra la ventana de recuperación y vuelve al Login
+        #Ejecutamos la funcion que cierra la ventana de recuperacion y vuelve al Login
         self.cerrar_recuperacion()
         
-        self.registrar_log("CAMBIO_CONTRASEÑA", "Se cambio la contraseña", self.email_antiguo)
+        self.registrar_log("CAMBIO_CONTRASEÑA", "Se cambio la contraseña", email_seguro)
         return rx.toast(f"Cambio de contraseña en Usuario {email_seguro} exitoso")
     
     #Sistema de auditoria

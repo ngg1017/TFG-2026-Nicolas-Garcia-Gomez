@@ -4,7 +4,6 @@ from TFG_2026_Nicolas_Garcia_Gomez.estilos.estilos import Size, Color, TextoColo
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.boton_subida import boton_subida
 from Logica.State import State
 from Logica.Programa import Programa
-from Logica.Usuarios import Usuarios
 from Logica.BBDD import BBDD
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.seleccion import seleccion
 
@@ -82,7 +81,7 @@ def instrucciones() -> rx.Component:
 
                     #Condicional para cuando existan documentos aparezca el boton de borrar
                     rx.cond(
-                        State.rutas_archivos.length() > 0,
+                        State.nombres_archivos.length() > 0,
                         rx.button(
                             "Borrar",
                             size = "2",
@@ -132,7 +131,7 @@ def instrucciones() -> rx.Component:
             
             #Centra el boton para seleccionar los condicionantes
             rx.cond(
-                State.rutas_archivos.length() > 0,
+                State.nombres_archivos.length() > 0,
                 rx.center(
                 seleccion("Selección de Indicadores"),
                 width="100%",

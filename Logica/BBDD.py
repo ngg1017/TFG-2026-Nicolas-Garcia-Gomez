@@ -1,7 +1,5 @@
 import reflex as rx
 import pandas as pd
-import tempfile
-import os
 import unicodedata
 from Logica.State import State 
 from Logica.Modelo import Modelo
@@ -186,14 +184,12 @@ class BBDD(rx.State):
             BBDD.enviar_a_analisis          
         ]
 
-    #Funcion asincrona responsable de exportar los datos desde PostgreSQL al analizador
+    #Funcion asincrona responsable de exportar los datos desde PostgreSQL directamente a la RAM
     async def enviar_a_analisis(self):
         estado_principal = await self.get_state(State)
         archivos_creados = 0
 
-        #Abre sesion directa con la BBDD para no saturar la RAM de la web
         with rx.session() as session:
-            #Extrae la base de datos completa de fondo
             todos_pacientes = session.exec(Modelo.select()).all()
 
             for año in self.años_seleccionados:
@@ -202,42 +198,37 @@ class BBDD(rx.State):
                 #Busca los pacientes que coincidan con el año actual
                 for p in todos_pacientes:
                     if p.fecha_ingreso and str(p.fecha_ingreso).endswith(año):
-                        #Formatea la fila con los atributos exactos pero reemplazando nulos por vacio para el CSV
+                        #Formatea la fila ignorando el num_historia
                         fila = [str(getattr(p, attr)) if getattr(p, attr) is not None else "" for attr in self.cabeceras[1:]]
                         datos_filtrados.append(fila)
 
                 if len(datos_filtrados) == 0:
                     continue
 
-                #Genera el CSV directamente
+                #Genera el DataFrame a partir de la lista
                 df = pd.DataFrame(datos_filtrados, columns=self.cabeceras_exportacion[1:])
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", mode="w", encoding="latin1", newline="") as tmp:
-                    df.to_csv(tmp, sep=",", index=False)
-                    ruta_tmp = tmp.name
-
                 nombre_ficticio = f"BBDD_Historico_{año}.csv"
 
-                #Gestor de memoria de archivos
-                while len(estado_principal.rutas_archivos) >= 10:
-                    ruta_a_borrar = estado_principal.rutas_archivos.pop(0)
+                #Gestor de memoria de DataFrames en RAM
+                while len(estado_principal._dataframes_memoria) >= 10:
+                    estado_principal._dataframes_memoria.pop(0)
                     nombre_a_borrar = estado_principal.nombres_archivos.pop(0)
                     estado_principal.nombres_archivos_eliminados.append(nombre_a_borrar)
-                    if os.path.exists(ruta_a_borrar):
-                        os.remove(ruta_a_borrar)
 
-                estado_principal.rutas_archivos.append(ruta_tmp)
+                #Guardamos el df directo en la RAM
+                estado_principal._dataframes_memoria.append(df)
                 estado_principal.nombres_archivos.append(nombre_ficticio)
                 archivos_creados += 1
 
         estado_principal.cargados += archivos_creados
         
         #Registro auditoria
-        await self.registrar_log_bbdd("ANALISIS_DATOS", f"Análisis de los años: {self.años_seleccionados}")
+        await self.registrar_log_bbdd("ANALISIS_DATOS", f"Análisis en RAM de los años: {self.años_seleccionados}")
         self.años_seleccionados = [] 
         
         #Apaga la barra al terminar
         estado_principal.barra = False
-        return rx.toast(f"Registros de {archivos_creados} años cargados.")
+        return rx.toast(f"Registros de {archivos_creados} años cargados listos para análisis.")
     
     #Funcion de borrado
     async def borrar_paciente(self, id_paciente: str):

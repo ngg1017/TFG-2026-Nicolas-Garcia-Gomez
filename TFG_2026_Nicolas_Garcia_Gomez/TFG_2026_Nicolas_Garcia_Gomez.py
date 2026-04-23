@@ -10,7 +10,6 @@ from TFG_2026_Nicolas_Garcia_Gomez.views.vistas_bbdd import vistas_bbdd
 from Logica.Programa import Programa
 from Logica.Usuarios import Usuarios
 from Logica.BBDD import BBDD
-from Logica.State import State
 
 def vista() -> rx.Component:
     return rx.cond(
@@ -46,8 +45,6 @@ def index() -> rx.Component:
         acceso()
     )
 
-#Se ejecutal al inciar el servidor
-State.limpieza_inteligente_csv()
 #Establecemos los estilos
 app = rx.App(
     stylesheets = estilos.HOJAESTILO,
@@ -58,8 +55,6 @@ app = rx.App(
 app.add_page(
     #Le añadimos los componentes
     index,
-    #Funcion de perrito guardian se carga al inicio
-    on_load=State.loop_monitor_conexion,
     title = "Indicadores de calidad URCCPQ",
     description = "Calculadora Indicadores de calidad URCCPQ"
 )

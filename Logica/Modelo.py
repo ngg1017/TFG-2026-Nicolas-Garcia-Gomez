@@ -85,3 +85,10 @@ class Auditoria(rx.Model, table=True):
     fecha: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)
     )
+
+class UsuarioDb(rx.Model, table=True):
+    #unique=True impide duplicados
+    email: str = Field(unique=True, index=True) 
+    #Guardaremos el cifrado, nunca la clave real
+    password_hash: str 
+    rol: int

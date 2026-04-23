@@ -15,7 +15,7 @@ import io
 class Programa(State):
     #Almecen de todos los datos a mostrar
     datos_final: list[dict]
-    csv_final: list[dict]
+    _csv_final: list[dict] = []
     texto: str
 
     #Indicadores para mostrar la ventana, el drawer y el indicador por especialidad
@@ -25,7 +25,7 @@ class Programa(State):
 
     #Indicadores para mostrar la tabla resumen
     ind_resumen: bool
-    lista_unida: list[list[str], list[list]]
+    lista_unida: list[list[str], list[list]] = []
 
     #Indicador para controlar los graficos que se visualizan
     ind_grafico: str
@@ -47,7 +47,7 @@ class Programa(State):
     texto_error: list[str]
 
     #Variable donde guardaremos todos los datos estadisticos de los indicadores
-    memoria_informe: list[dict]
+    _memoria_informe: list[dict] = []
 
     #Metodo que nos permite encontrar el año del documento
     def encontrar_año(self, nombre: str):
@@ -157,7 +157,7 @@ class Programa(State):
         
         #Ordenamos la lista de diccionarios csv_final por años para que se muestren y descarguen por orden
         self.datos_final.sort(key= lambda x: x["name"])
-        self.csv_final.sort(key= lambda x: x["name"])
+        self._csv_final.sort(key= lambda x: x["name"])
 
     #Metodo para cerrar la ventana flotante
     def cerrar_ventana(self):
@@ -179,7 +179,7 @@ class Programa(State):
         self.manejo_drawer(False)
         self.datos_final = []
         self.texto = ""
-        self.csv_final = []
+        self._csv_final = []
         self.nombres_especialidades = []
         self.texto_tendencia = []
         self.texto_r2 = []
@@ -193,7 +193,7 @@ class Programa(State):
             self.parsear_datos(datos)
             self.texto = texto
             self.mostrar_resultado = True
-            return rx.toast(f"Análisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Análisis del documente completado")
+            return rx.toast(f"Análisis de los {len(self.nombres_archivos)} documentos completado") if len(self.nombres_archivos) > 1 else rx.toast(f"Análisis del documente completado")
         
         #Si ocultar=True(tabla resumen) solo muestra la tabla resumen
         else: 
@@ -214,13 +214,13 @@ class Programa(State):
 
         #Pegamos el resumen arriba y los datos abajo
         df_final_para_doctora = pd.concat([df_resumen, df_principal], ignore_index=True)
-        self.csv_final.append({"name": nombre_archivo, "valor": df_final_para_doctora})
+        self._csv_final.append({"name": nombre_archivo, "valor": df_final_para_doctora})
     
     #Metodo que se dispara al presionar el boton de descarga y que basicamente hace lo que indica su nombre
     def descargar_archivo(self, indice: int):
         #Obtenemos el dataFrame y su nombre de la lista de diccionarios
-        datos = self.csv_final[indice]["valor"]
-        nombre = self.csv_final[indice]["name"]
+        datos = self._csv_final[indice]["valor"]
+        nombre = self._csv_final[indice]["name"]
 
         #Lo convertimos a STRING (formato CSV)
         archivo = datos.to_csv( 
@@ -238,19 +238,6 @@ class Programa(State):
     #Metodo para cambiar la variable del grafico
     def cambiar_grafico(self, grafico: str):
         self.ind_grafico = grafico
-    
-    #Metodo que sirve para leer los archivos csv independientemente de su separador
-    def lectura_archivos(self, ruta):
-        #Leemos solo la primera linea del archivo para inspeccionarlo
-        with open(ruta, "r", encoding="latin1") as f:
-            primera_linea = f.readline()
-
-        #Que separador se usa en esa primera linea
-        separador_detectado = ";" if primera_linea.count(";") > primera_linea.count(",") else ","
-
-        #Leemos el CSV usando el separador exacto
-        df = pd.read_csv(ruta, sep=separador_detectado, encoding="latin1")
-        return df
 
     #Metodo para la conversion del codigo apache
     def codigo_apache(self, apache: int):
@@ -268,10 +255,13 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            #Iteramos sobre las RUTAS temporales
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                #Leemos el CSV en funcion de sus separadores
-                df = self.lectura_archivos(ruta)
+            #Iteramos sobre los archivos temporales en RAM
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                #Hacemos una copia para no alterar la BBDD en RAM
+                df = dataframe_memoria.copy()
+
+                #Reemplazo ultrarapido
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
 
                 #Normalizamos sus columnas
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
@@ -323,8 +313,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -371,8 +363,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -416,8 +410,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -461,8 +457,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -502,8 +500,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -551,8 +551,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -597,8 +599,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -643,8 +647,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -757,8 +763,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -802,8 +810,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -865,8 +875,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -907,8 +919,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -953,8 +967,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1005,8 +1021,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1083,8 +1101,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1150,8 +1170,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1193,8 +1215,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1240,8 +1264,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1291,8 +1317,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1345,8 +1373,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1391,8 +1421,10 @@ class Programa(State):
         resultado = self.limpieza()
 
         try:
-            for (ruta,nombre) in zip(self.rutas_archivos, self.nombres_archivos):
-                df = self.lectura_archivos(ruta)
+            for (dataframe_memoria, nombre) in zip(self._dataframes_memoria, self.nombres_archivos):
+                df = dataframe_memoria.copy()
+                df = df.replace({"True": True, "true": True, "False": False, "false": False, "None": pd.NA, "": pd.NA})
+                
                 df.columns = [self.normalizar_frame(col) for col in df.columns]
                 if df.columns.duplicated().any():
                     df = df.loc[:, ~df.columns.duplicated()]
@@ -1571,10 +1603,26 @@ class Programa(State):
         plt.savefig(grafico_bytes, format="png", dpi=300)
         plt.close(fig)
         return grafico_bytes
+    
+    #Funcion puente que prepara la interfaz antes del resumen 
+    async def preparar_resumen(self):
+        #1. Mutamos directamente las variables
+        self.manejo_drawer(False)
+        self.barra = True
+        yield
+        
+        #2. Mandamos la orden visual a la zona de carga
+        yield rx.scroll_to("zona_de_carga")
+        
+        #3. Obliga al navegador a bajar la pantalla y encender la barra antes de abrir el resumen
+        await asyncio.sleep(0.5)
+        
+        #4. Llamamos a la funcion
+        yield self.tabla_resumen()
 
     def tabla_resumen(self):
         #Limpiamos la memoria de calculos anteriores
-        self.memoria_informe = []
+        self._memoria_informe = []
 
         #Recorre los resultados tras ejecutar cada indicador y añadiendo el valor numerico obtenido
         def recuperar_datos():
@@ -1589,7 +1637,7 @@ class Programa(State):
             media, desviacion, error_tipico, pend_tendencia, y_tendencia, r2 = self.calculos_estadisticos(x, y)
             
             #Guardamos la informacion en memoria
-            self.memoria_informe.append({
+            self._memoria_informe.append({
                 "x": x,
                 "y": y,
                 "titulo": self.texto.split(":")[0],
@@ -1628,7 +1676,7 @@ class Programa(State):
                 media, desviacion, error_tipico, pend_tendencia, y_tendencia, r2 = self.calculos_estadisticos(lista_años, valores_historicos)
 
                 #Añadimos los valores de cada especialidad
-                self.memoria_informe.append({
+                self._memoria_informe.append({
                     "x": lista_años,            
                     "y": valores_historicos,
                     "titulo": f"Especialidad de ingreso: {especialidad}",
@@ -1709,22 +1757,23 @@ class Programa(State):
         ]
         self.limpieza()
 
-        #Guardamos los resultados finales, prepara el objeto para que el usuario pueda descargar el resumen y la especialidad como CSV
-        #Disparamos la ventana flotante y modificamos el texto saltandonos el metodo final
-        self.datos_final.append({"name": "Resumen", "valor": csv_indi})
-        self.datos_final.append({"name": "Especialidades", "valor": csv_espe})
+        #Guardamos los resultados finales. Solo pasamos un texto ("listo") a "valor" para no colapsar la RAM del navegador.
+        #Los datos reales de descarga ya estan a salvo en self._csv_final
+        self.datos_final.append({"name": "Resumen", "valor": "listo"})
+        self.datos_final.append({"name": "Especialidades", "valor": "listo"})
 
         #Meto una cadena vacia para que se genere un tercer boton de descarga(el de los informes)
         self.datos_final.append("")
         
-        self.csv_final.append({"name": "Resumen.csv", "valor": csv_indi})
-        self.csv_final.append({"name": "Especialidades.csv", "valor": csv_espe})
+        self._csv_final.append({"name": "Resumen.csv", "valor": csv_indi})
+        self._csv_final.append({"name": "Especialidades.csv", "valor": csv_espe})
 
+        self.barra = False
         self.mostrar_resultado = True
         self.texto = "Resumen Indicadores:Permite comparar y observar los datos numéricos de manera global de los indicadores de cada año. Concede la capacidad de descargar " \
         "la tabla en formato CSV de los indicadores o de las especialidades de ingreso, además facilita la descarga del Informe Final, el cual incluye todos los datos " \
         "así como los gráficos a elección del facultativo."
-        return rx.toast(f"Análisis de los {len(self.rutas_archivos)} documentos completado") if len(self.rutas_archivos) > 1 else rx.toast(f"Análisis del documente completado")
+        return rx.toast(f"Análisis de los {len(self.nombres_archivos)} documentos completado") if len(self.nombres_archivos) > 1 else rx.toast(f"Análisis del documente completado")
 
     #Funcion puente que prepara la interfaz para la descarga del informe
     async def preparar_analisis(self):
@@ -1751,7 +1800,7 @@ class Programa(State):
         capitulos = 1
 
         #Recorremos los calculos almacenados
-        for indicador in self.memoria_informe:
+        for indicador in self._memoria_informe:
             
             #Llamamos al metodo grafico desempaquetando las listas
             grafico_bytes = self.grafico(
@@ -1776,8 +1825,8 @@ class Programa(State):
             capitulos += 1
 
         #Añadimos las tablas finales al PDF y descargamos
-        pdf.incluir_tabla(self.csv_final[0]["valor"])
-        pdf.incluir_tabla(self.csv_final[1]["valor"])
+        pdf.incluir_tabla(self._csv_final[0]["valor"])
+        pdf.incluir_tabla(self._csv_final[1]["valor"])
         
         pdf_bytes = bytes(pdf.output(dest="S"))
         
