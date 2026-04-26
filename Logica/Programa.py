@@ -1571,7 +1571,12 @@ class Programa(State):
         ax.set_title(f"{texto}\n(Tendencia: {tend:.4f}, R²: {r2:.4f})")
 
         #Añadimos un colchon arriba y abajo para que no se apelmazen los graficos
-        ax.set_ylim(min(eje_y)*0.9, max(eje_y)*1.1)
+        if min(eje_y) == max(eje_y):
+            #Si todos los valores son iguales, sumamos y restamos un margen fijo (+- 1)
+            ax.set_ylim(min(eje_y)-1, max(eje_y)+1)
+        else:
+            # Si hay variacion en los datos, usamos la formula original
+            ax.set_ylim(min(eje_y)*0.9, max(eje_y)*1.1)
 
         #Convertimos y_tendencia a un array de numpy para poder sumarle/restarle el error facilmente
         y_tend_np = np.array(y_tendencia)

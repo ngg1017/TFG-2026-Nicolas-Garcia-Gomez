@@ -54,6 +54,16 @@ class Usuarios(rx.State):
         email_seguro = self.email.strip().lower()
 
         with rx.session() as session:
+            # if not session.exec(UsuarioDb.select()).first():
+            #     print("Base de datos vacía detectada. Creando SuperAdmin temporal...")
+            #     admin = UsuarioDb(
+            #         email="admin", 
+            #         password_hash=encriptar_password("admin"), 
+            #         rol=3
+            #     )
+            #     session.add(admin)
+            #     session.commit()
+
             #Buscamos al usuario en la base de datos
             usuario_db = session.exec(
                 UsuarioDb.select().where(UsuarioDb.email == email_seguro)
