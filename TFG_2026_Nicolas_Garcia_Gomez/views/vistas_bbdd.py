@@ -94,13 +94,23 @@ def vistas_bbdd() -> rx.Component:
                                     #Celda para la papelera (Solo rol >= 2)
                                     rx.cond(
                                         Usuarios.rol >= 2, 
-                                        rx.table.column_header_cell(
-                                            "Acción", 
-                                            width="100px", 
-                                            min_width="100px", 
-                                            max_width="100px", 
-                                            text_align="center", 
-                                            background_color=Color.PRIMARIO.value
+                                        rx.fragment(
+                                            rx.table.column_header_cell(
+                                                "Borrado", 
+                                                width="100px", 
+                                                min_width="100px", 
+                                                max_width="100px", 
+                                                text_align="center", 
+                                                background_color=Color.PRIMARIO.value
+                                            ),
+                                            rx.table.column_header_cell(
+                                                "Edición", 
+                                                width="100px", 
+                                                min_width="100px", 
+                                                max_width="100px", 
+                                                text_align="center", 
+                                                background_color=Color.PRIMARIO.value
+                                            )
                                         )
                                     ),
                                     #Itera sobre la lista de alias cortos
@@ -134,15 +144,28 @@ def vistas_bbdd() -> rx.Component:
                                             #Boton papelera que usa el ID (fila[0])
                                             rx.cond(
                                                 Usuarios.rol >= 2,
-                                                rx.table.cell(
-                                                    rx.button(
-                                                        rx.icon(tag="trash"), 
-                                                        on_click=BBDD.borrar_paciente(fila[0])
+                                                rx.fragment(
+                                                    rx.table.cell(
+                                                        rx.button(
+                                                            rx.icon(tag="trash"), 
+                                                            on_click=BBDD.borrar_paciente(fila[0])
+                                                        ),
+                                                        width="100px", 
+                                                        min_width="100px", 
+                                                        max_width="100px", 
+                                                        text_align="center",
                                                     ),
-                                                    width="100px", 
-                                                    min_width="100px", 
-                                                    max_width="100px", 
-                                                    text_align="center",
+                                                    rx.table.cell(
+                                                        rx.button(
+                                                            rx.icon(tag="pen"), 
+                                                            on_click=BBDD.abrir_modal_edicion(fila[0])
+                                                        ),
+                                                        width="100px", 
+                                                        min_width="100px", 
+                                                        max_width="100px", 
+                                                        text_align="center",
+                                                    )
+                                                        
                                                 )
                                             ),
                                             #Pinta las celdas usando un condicional sobre el indice
@@ -188,7 +211,11 @@ def vistas_bbdd() -> rx.Component:
                 rx.dialog.root(
                     rx.dialog.content(
                         rx.dialog.title(
-                            "Añadir Nuevo Registro",
+                            rx.cond(
+                                BBDD.modal_edicion,
+                                "Editar Registro",
+                                "Añadir Nuevo Registro",
+                            ),
                             color=Color.ACENTO.value
                         ),
                         #Area de relleno
@@ -205,6 +232,7 @@ def vistas_bbdd() -> rx.Component:
                                             rx.box(
                                                 rx.select(
                                                     ["True", "False"], 
+                                                    value=BBDD.nuevo_paciente_dict[campo].to(str).title(),
                                                     placeholder="Seleccione (Vacío por defecto)...", 
                                                     on_change=lambda v: BBDD.actualizar_campo_nuevo(campo, v), 
                                                     width="100%",
@@ -222,6 +250,7 @@ def vistas_bbdd() -> rx.Component:
                                             rx.cond(
                                                 BBDD.campos_display_fecha.contains(campo),
                                                 rx.input(
+                                                    value=BBDD.nuevo_paciente_dict[campo],
                                                     placeholder="Ej. DD/MM/YYYY", 
                                                     on_change=lambda v: BBDD.actualizar_campo_nuevo(campo, v), 
                                                     background_color="#EF444426",
@@ -233,6 +262,7 @@ def vistas_bbdd() -> rx.Component:
                                                 rx.cond(
                                                     BBDD.campos_display_fecha_multiple.contains(campo),
                                                     rx.input(
+                                                        value=BBDD.nuevo_paciente_dict[campo],
                                                         placeholder="Ej. 14/10/2026; 18/10/2026", 
                                                         on_change=lambda v: BBDD.actualizar_campo_nuevo(campo, v), 
                                                         width="100%",
@@ -244,6 +274,7 @@ def vistas_bbdd() -> rx.Component:
                                                     rx.cond(
                                                         BBDD.campos_display_numerico.contains(campo),
                                                         rx.input(
+                                                            value=BBDD.nuevo_paciente_dict[campo],
                                                             placeholder="Introduzca un número...", 
                                                             on_change=lambda v: BBDD.actualizar_campo_nuevo(campo, v), 
                                                             width="100%",
@@ -253,6 +284,7 @@ def vistas_bbdd() -> rx.Component:
                                                         
                                                         #Texto normal 
                                                         rx.input(
+                                                            value=BBDD.nuevo_paciente_dict[campo],
                                                             placeholder="Introduzca texto...", 
                                                             on_change=lambda v: BBDD.actualizar_campo_nuevo(campo, v), 
                                                             width="100%",
@@ -280,7 +312,11 @@ def vistas_bbdd() -> rx.Component:
                                 on_click=BBDD.cerrar_modal
                             ),
                             rx.button(
-                                "Guardar Paciente", 
+                                rx.cond(
+                                    BBDD.modal_edicion,
+                                    "Editar Paciente",
+                                    "Guardar Paciente"
+                                ),
                                 on_click=BBDD.guardar_nuevo_paciente, 
                             ),
                             margin_top="1em", justify="end"

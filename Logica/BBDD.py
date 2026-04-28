@@ -76,6 +76,12 @@ class BBDD(rx.State):
     #Diccionario para capturar los datos del nuevo paciente (54 campos)
     nuevo_paciente_dict: dict = {}
 
+    #Variable para controlar el dialogo de edicion
+    modal_edicion: bool = False
+
+    #Guarda el ID interno de la base de datos del paciente que estamos editando
+    id_paciente_editar: str = ""
+
     #Lista de control del formulario
     campos_display_fecha: list[str] = ["Fecha Ingreso", "Fecha Alta", "Fecha Inicio NE"]
     
@@ -263,12 +269,17 @@ class BBDD(rx.State):
                 return rx.toast(f"Paciente {paciente.num_historia} eliminado correctamente")
 
     def abrir_modal(self):
+        #Aseguramos que estamos en modo Añadir
+        self.modal_edicion = False
+        self.id_paciente_editar = ""
+
         #Inicializamos con los nombres display para que coincidan con la vista web
         self.nuevo_paciente_dict = {attr: "" for attr in self.cabeceras_display}
         self.modal_añadir_abierto = True
 
     def cerrar_modal(self):
         self.modal_añadir_abierto = False
+        self.modal_edicion = False
 
     def actualizar_campo_nuevo(self, campo: str, valor: str):
         #Hacemos una copia exacta del diccionario actual
@@ -389,16 +400,57 @@ class BBDD(rx.State):
                     #Pone la primera letra de cada palabra en mayuscula (.title())
                     datos_limpios[clave_db] = sin_tildes.title().strip()
 
-            nuevo = Modelo(**datos_limpios)
-            session.add(nuevo)
-            session.commit()
-        
-        self.modal_añadir_abierto = False
+            if self.modal_edicion:
+                #Modo edicion: Buscamos el paciente existente
+                paciente_existente = session.get(Modelo, int(self.id_paciente_editar))
+                
+                if paciente_existente:
+                    historia_previa = paciente_existente.num_historia
+                    
+                    #Machacamos sus atributos antiguos con los nuevos
+                    for clave, valor in datos_limpios.items():
+                        setattr(paciente_existente, clave, valor)
+                    
+                    session.add(paciente_existente)
+                    session.commit()
+                    
+                    #Registro auditoria
+                    await self.registrar_log_bbdd("EDITAR_PACIENTE", f"Nº Historia editado: {datos_limpios.get('num_historia')}")
+                    mensaje_toast = "Paciente editado con éxito"
 
-        #Registro auditoria
-        await self.registrar_log_bbdd("NUEVO_PACIENTE", f"Nº Historia creado: {datos_limpios.get('num_historia')}")
+                    #Le pedimos a la base de datos que busque si queda alguna fila con ese mismo numero
+                    quedan_registros = session.exec(
+                        Modelo.select().where(Modelo.num_historia == historia_previa)
+                    ).first()
+                    
+                    #Limpiamos espacios y forzamos mayusculas en ambos textos para compararlos
+                    termino_limpio = self.termino_busqueda.strip().upper()
+                    historia_limpia = str(historia_previa).strip().upper()
+
+                    if not quedan_registros and termino_limpio == historia_limpia:
+                        self.termino_busqueda=""
+
+                else:
+                    return rx.toast("Error crítico: El paciente a editar ya no existe.")
+            
+            else:
+                #Modo añadir: Creamos uno nuevo desde cero
+                nuevo = Modelo(**datos_limpios)
+                session.add(nuevo)
+                session.commit()
+                
+                #Registro auditoria
+                await self.registrar_log_bbdd("NUEVO_PACIENTE", f"Nº Historia creado: {datos_limpios.get('num_historia')}")
+                mensaje_toast = "Nuevo paciente registrado con éxito"
+        
+        #Cerramos el modal y reseteamos el modo edicion por seguridad
+        self.modal_añadir_abierto = False
+        self.modal_edicion = False
+        self.id_paciente_editar = ""
+        
+        #Recargamos la tabla para que se vean los cambios al instante
         self.cargar_datos_bd()
-        return rx.toast("Nuevo paciente registrado con éxito")
+        return rx.toast(mensaje_toast)
     
     #Funcion puente que prepara la interfaz antes de descargar los CSV
     def preparar_exportacion(self):
@@ -493,6 +545,27 @@ class BBDD(rx.State):
             )
             session.add(log)
             session.commit()
+    
+    def abrir_modal_edicion(self, id_paciente: str):
+        #Entramos en modo edicion y guardamos a quien editamos
+        self.modal_edicion = True
+        self.id_paciente_editar = id_paciente
+        
+        with rx.session() as session:
+            #Buscamos al paciente en la BBDD
+            paciente = session.get(Modelo, int(id_paciente))
+            
+            if paciente:
+                self.nuevo_paciente_dict = {}
+                #Cruzamos los nombres de la base de datos con los nombres visuales
+                for display_name, db_name in zip(self.cabeceras_display, self.cabeceras):
+                    valor = getattr(paciente, db_name)
+                    #Lo pasamos a string para que se vea bien en los inputs y selects
+                    self.nuevo_paciente_dict[display_name] = str(valor) if valor is not None else ""
+            else:
+                return rx.toast("Error: No se ha encontrado el paciente")
+
+        self.modal_añadir_abierto = True
     
     #Metodos que cambia el estado booleano para desplegar la ventana
     def abrir_consulta(self):

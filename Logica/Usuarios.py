@@ -54,15 +54,16 @@ class Usuarios(rx.State):
         email_seguro = self.email.strip().lower()
 
         with rx.session() as session:
-            # if not session.exec(UsuarioDb.select()).first():
-            #     print("Base de datos vacía detectada. Creando SuperAdmin temporal...")
-            #     admin = UsuarioDb(
-            #         email="admin", 
-            #         password_hash=encriptar_password("admin"), 
-            #         rol=3
-            #     )
-            #     session.add(admin)
-            #     session.commit()
+            #Crea un usuario inicial para poder entrar la primera vez
+            if not session.exec(UsuarioDb.select()).first():
+                print("Base de datos vacía detectada. Creando SuperAdmin temporal...")
+                admin = UsuarioDb(
+                    email="admin", 
+                    password_hash=encriptar_password("admin"), 
+                    rol=3
+                )
+                session.add(admin)
+                session.commit()
 
             #Buscamos al usuario en la base de datos
             usuario_db = session.exec(
@@ -93,6 +94,7 @@ class Usuarios(rx.State):
         self.rol = 0
         self.email = ""
         self.password = ""
+        self.reset()
 
         #Devolvemos el metodo que borra los archivos
         return State.borrar_datos() 
