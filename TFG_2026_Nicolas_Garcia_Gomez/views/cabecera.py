@@ -19,7 +19,7 @@ def cabecera() -> rx.Component:
         #Para estructurar el contenido
         rx.flex(          
             rx.image(
-                src = "rea.png",
+                src = "urccpq.png",
                 alt = "Icono de Sacyl",
                 width = "25em",
                 height = "16em",

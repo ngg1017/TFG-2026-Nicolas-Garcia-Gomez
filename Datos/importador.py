@@ -3,8 +3,11 @@ import glob
 from sqlalchemy import create_engine, text
 import unicodedata # NUEVO: Para quitar tildes
 
-#Establece la conexion
-engine = create_engine("postgresql://postgres:postgres@localhost:5432/tfg_bbdd")
+#Establece la conexion antigua
+#engine = create_engine("postgresql://postgres:postgres@localhost:5432/tfg_bbdd")
+
+#Apunta a tu base de datos de Docker
+engine = create_engine("postgresql://medico:secreto123@localhost:5433/hospital_db")
 
 #Limpia la tabla
 with engine.begin() as conn:

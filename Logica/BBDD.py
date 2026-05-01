@@ -250,7 +250,7 @@ class BBDD(rx.State):
                 session.commit()
 
                 #Registro auditoria
-                await self.registrar_log_bbdd("BORRAR_PACIENTE", f"Se eliminó el Nº Historia: {numero_historia}")
+                await self.registrar_log_bbdd("BORRAR_REGISTRO", f"Se eliminó el Nº Historia: {numero_historia}")
                 
                 #Le pedimos a la base de datos que busque si queda alguna fila con ese mismo numero
                 quedan_registros = session.exec(
@@ -266,7 +266,7 @@ class BBDD(rx.State):
 
                 #Recargamos la tabla para que desaparezca visualmente
                 self.cargar_datos_bd()
-                return rx.toast(f"Paciente {paciente.num_historia} eliminado correctamente")
+                return rx.toast(f"Registro {paciente.num_historia} eliminado correctamente")
 
     def abrir_modal(self):
         #Aseguramos que estamos en modo Añadir
@@ -415,8 +415,8 @@ class BBDD(rx.State):
                     session.commit()
                     
                     #Registro auditoria
-                    await self.registrar_log_bbdd("EDITAR_PACIENTE", f"Nº Historia editado: {datos_limpios.get('num_historia')}")
-                    mensaje_toast = "Paciente editado con éxito"
+                    await self.registrar_log_bbdd("EDITAR_REGISTRO", f"Nº Historia editado: {datos_limpios.get('num_historia')}")
+                    mensaje_toast = "Registro editado con éxito"
 
                     #Le pedimos a la base de datos que busque si queda alguna fila con ese mismo numero
                     quedan_registros = session.exec(
@@ -431,7 +431,7 @@ class BBDD(rx.State):
                         self.termino_busqueda=""
 
                 else:
-                    return rx.toast("Error crítico: El paciente a editar ya no existe.")
+                    return rx.toast("Error crítico: El Registro a editar ya no existe.")
             
             else:
                 #Modo añadir: Creamos uno nuevo desde cero
@@ -440,8 +440,8 @@ class BBDD(rx.State):
                 session.commit()
                 
                 #Registro auditoria
-                await self.registrar_log_bbdd("NUEVO_PACIENTE", f"Nº Historia creado: {datos_limpios.get('num_historia')}")
-                mensaje_toast = "Nuevo paciente registrado con éxito"
+                await self.registrar_log_bbdd("NUEVO_REGISTRO", f"Nº Historia creado: {datos_limpios.get('num_historia')}")
+                mensaje_toast = "Nuevo registro registrado con éxito"
         
         #Cerramos el modal y reseteamos el modo edicion por seguridad
         self.modal_añadir_abierto = False
@@ -563,7 +563,7 @@ class BBDD(rx.State):
                     #Lo pasamos a string para que se vea bien en los inputs y selects
                     self.nuevo_paciente_dict[display_name] = str(valor) if valor is not None else ""
             else:
-                return rx.toast("Error: No se ha encontrado el paciente")
+                return rx.toast("Error: No se ha encontrado el registro")
 
         self.modal_añadir_abierto = True
     

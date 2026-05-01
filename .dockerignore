@@ -1,0 +1,8 @@
+.venv
+entorno_local
+ent_practicas
+__pycache__
+.web
+*.sqlite3
+*.db
+.git

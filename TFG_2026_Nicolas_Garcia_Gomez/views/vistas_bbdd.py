@@ -68,7 +68,7 @@ def vistas_bbdd() -> rx.Component:
                         width="300px",
                     ),
                     rx.button(
-                        "Buscar Paciente",
+                        "Buscar Registro",
                         #Dispara la recarga de datos aplicando el filtro
                         on_click=BBDD.cargar_datos_bd
                     ),
@@ -76,7 +76,7 @@ def vistas_bbdd() -> rx.Component:
                     rx.cond(
                         Usuarios.rol >= 2,
                         rx.button(
-                            "＋ Añadir Paciente", 
+                            "＋ Añadir Registro", 
                             on_click=BBDD.abrir_modal
                         )
                     ),
@@ -314,8 +314,8 @@ def vistas_bbdd() -> rx.Component:
                             rx.button(
                                 rx.cond(
                                     BBDD.modal_edicion,
-                                    "Editar Paciente",
-                                    "Guardar Paciente"
+                                    "Editar Registro",
+                                    "Guardar Registro"
                                 ),
                                 on_click=BBDD.guardar_nuevo_paciente, 
                             ),
