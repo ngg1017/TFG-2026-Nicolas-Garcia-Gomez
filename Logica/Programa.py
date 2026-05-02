@@ -1782,8 +1782,10 @@ class Programa(State):
 
     #Funcion puente que prepara la interfaz para la descarga del informe
     async def preparar_analisis(self):
+        grafico=self.ind_grafico
         #1. Mutamos directamente las variables
         self.cerrar_ventana()
+        self.ind_grafico=grafico
         self.barra = True
         yield
         

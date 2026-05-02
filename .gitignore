@@ -43,3 +43,11 @@ Datos/Exitus_2025.csv
 /entorno_local
 Datos/Datos_Necesitamos.xlsx
 Datos/Datos_Necesitamos.xlsx
+*.aux
+*.bbl
+*.blg
+*.lof
+*.lot
+*.out
+*.gz
+*.toc
