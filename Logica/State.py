@@ -82,7 +82,7 @@ class State(rx.State):
         self.nombres_archivos_eliminados = self.nombres_archivos.copy()
         self.nombres_archivos = []
         if len(self.nombres_archivos_eliminados) != 0:
-            print(f"Todos los archivos borrados de la RAM: {[e for e in self.nombres_archivos_eliminados]}")
+            print(f"Todos los archivos borrados de la RAM: {[e for e in self.nombres_archivos_eliminados]}", flush=True)
 
     def set_barra(self, valor: bool):
         self.barra = valor

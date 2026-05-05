@@ -2,7 +2,7 @@ import reflex as rx
 import os
 
 #Lee la URL de los secretos del servidor (Docker o HUBU)
-#Si no existe esa variable, usa tu base de datos local por defecto
+#Si no existe esa variable, usa la base de datos local por defecto
 DATABASE_URL = os.getenv(
     "DATABASE_URL", 
     "postgresql://postgres:postgres@localhost:5432/tfg_bbdd"

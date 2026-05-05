@@ -2,7 +2,7 @@ import reflex as rx
 import pandas as pd
 import unicodedata
 from Logica.State import State 
-from Logica.Modelo import Modelo
+from Logica.Modelo import Registro
 import io
 import zipfile
 
@@ -113,7 +113,7 @@ class BBDD(rx.State):
         #Abre una sesion de comunicacion segura con la base de datos
         with rx.session() as session:
             #Carga el directorio completo de pacientes en la memoria de Python (No satura RAM)
-            pacientes_db = session.exec(Modelo.select()).all()
+            pacientes_db = session.exec(Registro.select()).all()
             
             matriz_formateada = []
             años_temporales = set()
@@ -196,7 +196,7 @@ class BBDD(rx.State):
         archivos_creados = 0
 
         with rx.session() as session:
-            todos_pacientes = session.exec(Modelo.select()).all()
+            todos_pacientes = session.exec(Registro.select()).all()
 
             for año in self.años_seleccionados:
                 datos_filtrados = []
@@ -240,7 +240,7 @@ class BBDD(rx.State):
     async def borrar_paciente(self, id_paciente: str):
         with rx.session() as session:
             #Buscamos al paciente por su ID primario
-            paciente = session.get(Modelo, int(id_paciente))
+            paciente = session.get(Registro, int(id_paciente))
 
             if paciente:
                 #Guardamos el num_historia para borrar la busqueda
@@ -254,7 +254,7 @@ class BBDD(rx.State):
                 
                 #Le pedimos a la base de datos que busque si queda alguna fila con ese mismo numero
                 quedan_registros = session.exec(
-                    Modelo.select().where(Modelo.num_historia == numero_historia)
+                    Registro.select().where(Registro.num_historia == numero_historia)
                 ).first()
                 
                 #Limpiamos espacios y forzamos mayusculas en ambos textos para compararlos
@@ -402,7 +402,7 @@ class BBDD(rx.State):
 
             if self.modal_edicion:
                 #Modo edicion: Buscamos el paciente existente
-                paciente_existente = session.get(Modelo, int(self.id_paciente_editar))
+                paciente_existente = session.get(Registro, int(self.id_paciente_editar))
                 
                 if paciente_existente:
                     historia_previa = paciente_existente.num_historia
@@ -420,7 +420,7 @@ class BBDD(rx.State):
 
                     #Le pedimos a la base de datos que busque si queda alguna fila con ese mismo numero
                     quedan_registros = session.exec(
-                        Modelo.select().where(Modelo.num_historia == historia_previa)
+                        Registro.select().where(Registro.num_historia == historia_previa)
                     ).first()
                     
                     #Limpiamos espacios y forzamos mayusculas en ambos textos para compararlos
@@ -435,7 +435,7 @@ class BBDD(rx.State):
             
             else:
                 #Modo añadir: Creamos uno nuevo desde cero
-                nuevo = Modelo(**datos_limpios)
+                nuevo = Registro(**datos_limpios)
                 session.add(nuevo)
                 session.commit()
                 
@@ -478,7 +478,7 @@ class BBDD(rx.State):
         estado_principal = await self.get_state(State)
 
         with rx.session() as session:
-            todos_pacientes = session.exec(Modelo.select()).all()
+            todos_pacientes = session.exec(Registro.select()).all()
 
             #Creamos un ZIP virtual en la memoria RAM
             zip_buffer = io.BytesIO()
@@ -553,7 +553,7 @@ class BBDD(rx.State):
         
         with rx.session() as session:
             #Buscamos al paciente en la BBDD
-            paciente = session.get(Modelo, int(id_paciente))
+            paciente = session.get(Registro, int(id_paciente))
             
             if paciente:
                 self.nuevo_paciente_dict = {}

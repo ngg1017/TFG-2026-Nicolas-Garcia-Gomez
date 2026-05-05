@@ -13,8 +13,8 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  #2: Aplicación de Reflex
-  calculadora-app:
+  #2: Aplicacion de Reflex
+  calculadora_app:
     build: .
     container_name: reflex_app_tfg
     restart: always

@@ -56,7 +56,7 @@ class Usuarios(rx.State):
         with rx.session() as session:
             #Crea un usuario inicial para poder entrar la primera vez
             if not session.exec(UsuarioDb.select()).first():
-                print("Base de datos vacía detectada. Creando SuperAdmin temporal...")
+                print("Base de datos vacía detectada. Creando SuperAdmin temporal...", flush=True)
                 admin = UsuarioDb(
                     email="admin", 
                     password_hash=encriptar_password("admin"), 

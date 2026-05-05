@@ -306,7 +306,7 @@ class Programa(State):
         #Metodo que hace todas las operaciones finales para ahorrarnos algo de codigo.
         #Le pasamos la bandera ocultar por si seleccionamos el resumen
         self.final(resultado, "Mortalidad Estandarizada:Es un indicador de resultado que mide la calidad y efectividad " \
-        "de un Servicio de Medicina Intensiva (SMI). " \
+        "de un servicio. " \
         "Su propósito es corregir las limitaciones de la 'mortalidad cruda'.", ocultar=ocultar)
         
     def reingresos_no_programados(self, ocultar = False):
@@ -356,8 +356,8 @@ class Programa(State):
             return rx.window_alert(f"Error crítico: {e}") 
         
         self.final(resultado, "Reingresos no Programados:Es un indicador de resultado que mide la proporción de pacientes que, " \
-        "tras haber sido dados de alta de la UCI a una planta de hospitalización, " \
-        "deben ser reingresados de forma imprevista en la UCI en un periodo de 48 horas.", ocultar=ocultar)
+        "tras haber sido dados de alta de la URCCPQ a una planta de hospitalización, " \
+        "deben ser reingresados de forma imprevista en la unidad en un periodo de 48 horas.", ocultar=ocultar)
 
     def incidencia_de_barotrauma(self, ocultar = False):
         resultado = self.limpieza()
@@ -451,7 +451,7 @@ class Programa(State):
         
         self.final(resultado, "Posición Semiincorporada con VMI:Es un indicador de proceso que mide el porcentaje de pacientes " \
         "con ventilación mecánica invasiva que se mantienen con el cabecero de la cama elevado 20º, con el fin de prevenir " \
-        "la neumonía asociada a la ventilación", ocultar=ocultar)
+        "la neumonía asociada a la ventilación.", ocultar=ocultar)
     
     def incidencia_ulceras_presion(self, ocultar = False):
         resultado = self.limpieza()
@@ -494,7 +494,7 @@ class Programa(State):
         
         self.final(resultado, "Incidencias Úlcera por Presión UPP:Es un indicador de seguridad que mide el porcentaje " \
         "de pacientes que desarrollan lesiones en la piel o tejidos subyacentes por presión prolongada durante su estancia en " \
-        "la UCI, con el objetivo de evaluar la efectividad de las medidas de prevención y cuidados de enfermería", ocultar=ocultar)
+        "la URCCPQ, con el objetivo de evaluar la efectividad de las medidas de prevención y cuidados de enfermería.", ocultar=ocultar)
 
     def valoracion_interrupcion_sedacion(self, ocultar = False):
         resultado = self.limpieza()
@@ -541,7 +541,7 @@ class Programa(State):
         
         self.final(resultado, "Interrupción Diaria de la Sedación:Es un indicador de proceso que mide el porcentaje " \
         "de días en los que se evalúa y ejecuta la suspensión diaria de la sedación continua en pacientes con ventilación mecánica, " \
-        "con el fin de reducir la duración del soporte ventilatorio y la estancia en la UCI. " \
+        "con el fin de reducir la duración del soporte ventilatorio y la estancia en la URCCPQ. " \
         "Debido a la estructura de la base de datos, " \
         "donde la interrupción de la sedación se registra como una variable dicotómica (Sí/No) por paciente y no de forma diaria, el indicador " \
         "se ha calculado asumiendo que el cumplimiento del protocolo se extiende a la totalidad de los días de ventilación " \
@@ -640,7 +640,7 @@ class Programa(State):
             return rx.window_alert(f"Error crítico: {e}") 
         
         self.final(resultado, "Mantenimiento de Niveles de Glucemia:Es un indicador de proceso que mide el porcentaje de pacientes en " \
-        "los que se mantiene una glucemia capilar de 150, con el fin de evitar tanto la hiperglucemia como la hipoglucemia " \
+        "los que se mantiene una glucemia capilar de 180, con el fin de evitar tanto la hiperglucemia como la hipoglucemia " \
         "grave y reducir así la morbi-mortalidad asociada.", ocultar=ocultar)
 
     def resucitacion_precoz_sepsis(self, ocultar = False):
@@ -803,7 +803,7 @@ class Programa(State):
             return rx.window_alert(f"Error crítico: {e}") 
         
         self.final(resultado, "Traslado Intrahospitalario:Es un indicador de proceso que mide el porcentaje de traslados de pacientes " \
-        "críticos fuera de la UCI (a pruebas de imagen o quirófano) realizados utilizando un listado de verificación (check-list) " \
+        "críticos fuera de la URCCPQ (a pruebas de imagen o quirófano) realizados utilizando un listado de verificación (check-list) " \
         "estandarizado, con el fin de minimizar los eventos adversos y garantizar la seguridad durante el transporte.", ocultar=ocultar)
 
     def tratamiento_empirico_infeccion(self, ocultar = False):
@@ -868,8 +868,8 @@ class Programa(State):
         
         self.final(resultado, "Tratamiento Empírico Adecuado:Es un indicador de proceso que mide el porcentaje de " \
         "pacientes con sospecha de infección grave que reciben una terapia antibiótica inicial ajustada a las guías clínicas y a los " \
-        "mapas de resistencias locales en menos de una hora, con el fin de reducir drásticamente la mortalidad y la " \
-        "disfunción orgánica", ocultar=ocultar)
+        "mapas de resistencias locales, con el fin de reducir drásticamente la mortalidad y la " \
+        "disfunción orgánica.", ocultar=ocultar)
 
     def neumonia_asociada_vmi(self, ocultar = False):
         resultado = self.limpieza()
@@ -913,7 +913,7 @@ class Programa(State):
         
         self.final(resultado, "Neumonia Asociada a VMI:Es un indicador de seguridad que mide el número de episodios " \
         "de neumonía desarrollados por cada 1.000 días de ventilación mecánica, con el " \
-        "fin de evaluar la eficacia de las medidas preventivas y reducir las complicaciones infecciosas del paciente crítico", ocultar=ocultar)
+        "fin de evaluar la eficacia de las medidas preventivas y reducir las complicaciones infecciosas del paciente crítico.", ocultar=ocultar)
 
     def reintubacion(self, ocultar = False):
         resultado = self.limpieza()
@@ -1014,7 +1014,7 @@ class Programa(State):
         #Flag que nos permite identificar cuando se activa este indicador para modificar los graficos
         self.ind_especi = True
         self.final(resultado, "Especialidades con Mayores Ingresos:Identifica la especialidad médica o quirúrgica que genera " \
-        "el mayor número de ingresos en el Servicio de Medicina Intensiva (SMI). Esto es fundamental para la planificación de " \
+        "el mayor número de ingresos en la URCCPQ. Esto es fundamental para la planificación de " \
         "recursos, la formación del personal y la creación de protocolos específicos.", ocultar=ocultar)
         
     def profilaxis_ulcera_enfermos_NE(self, ocultar = False):
@@ -1207,7 +1207,7 @@ class Programa(State):
             return rx.window_alert(f"Error crítico: {e}") 
         
         self.final(resultado, "Ingresos Urgentes:Indicador de estructura y proceso que " \
-        "mide la proporción de pacientes que ingresan en el Servicio de Medicina Intensiva (SMI) de forma no programada. " \
+        "mide la proporción de pacientes que ingresan en la URCCPQ de forma no programada. " \
         "Estos ingresos suelen proceder de Urgencias, plantas de hospitalización "
         "(tras un deterioro agudo) o tras cirugías de emergencia.", ocultar=ocultar)
 
@@ -1257,7 +1257,7 @@ class Programa(State):
             return rx.window_alert(f"Error crítico: {e}") 
         
         self.final(resultado, "Eventos Adversos Durante el Traslado:Es un indicador de seguridad que mide la incidencia de " \
-        "incidentes o accidentes que ocurren durante el traslado de un paciente crítico fuera de la UCI (traslados intrahospitalarios), " \
+        "incidentes o accidentes que ocurren durante el traslado de un paciente crítico fuera de la unidad (traslados intrahospitalarios), " \
         "ya sea para pruebas diagnósticas (TAC, Resonancia) o intervenciones (Quirófano).", ocultar=ocultar)
 
     def ne_precoz(self, ocultar = False):
@@ -1415,7 +1415,7 @@ class Programa(State):
         
         self.final(resultado, "TET por Maniobras:Mide el número de episodios de salida no planificada del " \
         "tubo endotraqueal (TET) en pacientes sometidos a ventilación mecánica. Se considera una de las complicaciones más graves de " \
-        "la vía aérea en la UCI debido al riesgo de hipoxia, parada cardiorrespiratoria o trauma laríngeo", ocultar=ocultar)
+        "la vía aérea debido al riesgo de hipoxia, parada cardiorrespiratoria o trauma laríngeo.", ocultar=ocultar)
 
     def bacteriemia(self, ocultar = False):
         resultado = self.limpieza()
@@ -1462,8 +1462,8 @@ class Programa(State):
             return rx.window_alert(f"Error crítico: {e}") 
         
         self.final(resultado, "Bacteriemia relacionada a CVC:Mide los episodios de infección del torrente sanguíneo " \
-        "relacionados con el uso de catéteres venosos centrales. Es una de las complicaciones más importantes en la UCI, " \
-        "asociada a un incremento en la mortalidad y días de estancia. Estándar esperado: < 3 episodios por 1.000 días de CVC.", ocultar=ocultar)
+        "relacionados con el uso de catéteres venosos centrales. Es una de las complicaciones más importantes, " \
+        "asociada a un incremento en la mortalidad y días de estancia.", ocultar=ocultar)
 
     #Funcion que hace los calculos
     def calculos_estadisticos(self, eje_x, eje_y, individual = False):

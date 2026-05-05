@@ -42,32 +42,14 @@ def cabecera() -> rx.Component:
 
                 #Hay que ponerles as_ para que no fuerzen un salto de línea
                 rx.text(
-                    "Esta herramienta va a utilizarse para la creación de ",
-
-                    #Subtexto en color rojo
-                    rx.text(
-                        "Indicadores de calidad",
-                        color = Color.ACENTO.value,
-                        as_="span"
-                    ),
-                    ". Gracias a los archivo en formato ",
-                    rx.link(
-                        "CSV", 
-                        href = constantes.CSV, 
-                        is_external = True, 
-                        color = TextoColor.ACENTO.value
-                    ),
-                    ".",
+                    "Esta herramienta clínica permite el análisis de datos a través de dos vías: la extracción automática desde la ",
+                    rx.text("Base de Datos", weight="bold", as_="span"),
+                    " integrada, o mediante la carga tradicional de archivos locales.",
                     as_="span"
                 ),
                 rx.text(
-                    "Como se ha comentado esta herramienta se nutre de archivos CSV. Ante cualquier complicación que puediera surgir con el " \
-                    "tratamiento de dichos archivos, se dejan una serie de enlaces para dominar su uso.",
-                    as_="span"
-                ),
-                rx.text(
-                    "Para la recolección de los datos es aconsejable utilizar un archivo .xlsx o archivo Excel. Posteriormente es necesaria su conversión " \
-                    "al formato correspondiente. Se deja un enlace externo para facilitar el proceso: ",
+                    "Si opta por la carga manual, es necesario suministrar archivos en formato CSV. Si la recolección de los datos se realizó en un archivo Excel (.xlsx), " \
+                    "se requiere su conversión previa. Se facilita un enlace externo para este proceso: ",
                     rx.link(
                         "Excel a CSV", 
                         href = constantes.EXCEL_A_CSV, 
@@ -77,8 +59,7 @@ def cabecera() -> rx.Component:
                     as_="span"
                 ),
                 rx.text(
-                    "Si se dispone de un archivo CSV y el objetivo es editarlo, lo más común es usar Excel." \
-                    " Para poder visualizar correctamente un archivo CSV en Excel: ",
+                    "En caso de necesitar auditar o editar un archivo CSV histórico fuera del aplicativo, lo más común es usar Excel. Para visualizarlo correctamente: ",
                     rx.link(
                         "CSV a EXCEL", 
                         href = constantes.CSV_A_EXCEL, 

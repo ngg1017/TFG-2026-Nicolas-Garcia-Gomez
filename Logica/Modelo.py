@@ -4,7 +4,8 @@ from datetime import datetime, timezone
 from sqlmodel import Field
 
 #Al heredar de rx.Model, Reflex crea automaticamente una columna 'id' (entero, clave primaria)
-class Modelo(rx.Model, table=True):
+class Registro(rx.Model, table=True):
+    __tablename__ = "registro"
     #Identificador unico (Obligatorio)
     num_historia: str
     

@@ -17,30 +17,42 @@ def instrucciones() -> rx.Component:
             ),
 
             rx.text(
-                "* Es necesaria la subida de archivos en formato ",
+                "* El análisis comienza definiendo el origen de la información. Puede sincronizar los registros directamente desde la ",
+                rx.text(
+                        "Base de Datos ",
+                        color = Color.ACENTO.value,
+                        as_="span"
+                    ),
+                "utilizando el botón ",
+                rx.text(
+                        "'Apertura de la BBDD' ",
+                        color = Color.ACENTO.value,
+                        as_="span"
+                    ),
+                "o, de manera alternativa, arrastrando archivos en ", 
                 rx.text(
                         "formato CSV ",
                         color = Color.ACENTO.value,
                         as_="span"
                     ),
-                "a través del botón/zona de arrastre ",
+                "a la zona de ",
                 rx.text(
                         "'Carga de archivos'",
                         color = Color.ACENTO.value,
                         as_="span"
                     ),
-                ", tras lo cual aparecerá una barra de carga. Luego de su finalización estarán listos para ser procesados.",
+                ". Una vez completada la barra de progreso, los datos estarán en memoria listos para ser procesados.",
                 as_="span"
             ),
 
             rx.text(
-                    "* Posteriormente es necesario presionar el botón ",
+                    "* Posteriormente es necesario presionar el menú ",
                     rx.text(
                         "'Selección de Indicadores'",
                         color = Color.ACENTO.value,
                         as_="span"
                     ),
-                    ". Este nos permitirá seleccionar el indicador que se desee o inclusive procesar el resumen de todos ellos a través de ",
+                    ". Este nos permitirá seleccionar el indicador individual que se desee analizar o inclusive procesar el consolidado de todos ellos a través de ",
                     rx.text(
                         "'Resumen Indicadores'",
                         color = Color.ACENTO.value,
@@ -51,15 +63,15 @@ def instrucciones() -> rx.Component:
             ),
 
             rx.text(
-                "* Una vez seleccionado el indicador se podrá visualizar un gráfico de barras o de área, ambos representan la evolución temporal y la " \
+                "* Tras el cálculo, se generará una visualización interactiva (gráfico de barras o área) que representa la evolución temporal y la " \
                 "tendencia histórica de los indicadores clínicos, evaluando visualmente su estabilidad mediante márgenes de variabilidad interanual. " \
-                "Además, existe la posibilidad de descargar los cálculos relizados cada año gracias al botón de ",
+                "Además, existe la posibilidad de extraer las tablas de resultados mediante el botón ",
                 rx.text(
                         "'Descargar'",
                         color = Color.ACENTO.value,
                         as_="span"
                     ),
-                ". En caso del resumen se permitirá descargar el informe final por medio del pulsador ",
+                ". En el caso del resumen global, se habilitará la generación de un documento en PDF por medio del pulsador ",
                 rx.text(
                         "'Descargar Informe'",
                         color = Color.ACENTO.value,

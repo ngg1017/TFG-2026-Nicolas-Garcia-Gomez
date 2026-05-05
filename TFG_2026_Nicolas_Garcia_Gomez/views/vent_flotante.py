@@ -123,7 +123,7 @@ def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.
                                 rx.cond(
                                     Programa.lista_selecc.length() > 0,
                                     rx.text("Seleccione el gráfico a mostrar."),
-                                    rx.text("Seleccione un indicador para permitir la selección de gráficos.")
+                                    rx.text("Añada un indicador para permitir la selección de gráficos.")
                                 ),
                             ),
                             align="center"

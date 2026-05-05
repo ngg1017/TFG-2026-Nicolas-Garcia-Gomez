@@ -12,7 +12,7 @@ def pie() -> rx.Component:
                 ),
 
             rx.link(
-                "Creado por Nicolas Garcia Gomez un estudiante de Ingenieria de la salud",
+                "Creado por Nicolás García Gómez un estudiante de Ingeniería de la Salud",
                 size = "2",
                 color = TextoColor.TERCIARIO.value,
                 href = constantes.ING_SALUD,
@@ -29,8 +29,7 @@ def pie() -> rx.Component:
             src = "ubu.png",
             alt = "Logo de la universidad de Burgos",
             width = Size.MUYGRANDE.value
-            
         ),
-        padding_button = Size.GRANDE.value,
+        padding_bottom = Size.MEDIANO.value,
         style = estilos.max_width_estilo,
     )

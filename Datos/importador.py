@@ -11,8 +11,8 @@ engine = create_engine("postgresql://medico:secreto123@localhost:5433/hospital_d
 
 #Limpia la tabla
 with engine.begin() as conn:
-    conn.execute(text("TRUNCATE TABLE modelo RESTART IDENTITY;"))
-print("Tabla 'modelo' vaciada correctamente...")
+    conn.execute(text("TRUNCATE TABLE registro RESTART IDENTITY;"))
+print("Tabla 'registro' vaciada correctamente...")
 
 archivos_csv = glob.glob("Datos*.csv")
 
@@ -93,6 +93,6 @@ for archivo in archivos_csv:
     df = df.replace(r"^\s*$", None, regex=True)
     df = df.where(pd.notnull(df), None)
     
-    df.to_sql("modelo", engine, if_exists="append", index=False)
+    df.to_sql("registro", engine, if_exists="append", index=False)
 
 print("¡Importacion finalizada con exito total!")
