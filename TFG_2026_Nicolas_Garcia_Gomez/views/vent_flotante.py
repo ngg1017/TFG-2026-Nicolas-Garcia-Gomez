@@ -3,7 +3,7 @@ from Logica.Programa import Programa
 from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import TextoColor, Color
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.mezcla import mezcla
 from TFG_2026_Nicolas_Garcia_Gomez.componentes.tabla import tabla
-from TFG_2026_Nicolas_Garcia_Gomez.componentes.graficos import (graf_barras, graf_lineal, graf_pie, graf_ar_mezcla, area_sync, composed, graf_pie_mezcla)
+from TFG_2026_Nicolas_Garcia_Gomez.componentes.graficos import (graf_barras, graf_lineal, graf_pie, graf_ar_mezcla, area_sync, graf_barras_mezcla, graf_lineas_mezcla)
 
 #Devulve la ventana flotante
 def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.Component:
@@ -98,11 +98,10 @@ def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.
                                             )
                                         ),
                                         rx.menu.content(
-                                            rx.menu.item("Gráfico de Area", on_click=Programa.cambiar_grafico("area")),
-                                            rx.menu.item("Gráfico Compuesto Separado", on_click=Programa.cambiar_grafico("compuesto_1")),
+                                            rx.menu.item("Gráfico de Área", on_click=Programa.cambiar_grafico("area")),
+                                            rx.menu.item("Gráfico de Barras", on_click=Programa.cambiar_grafico("barras")),
+                                            rx.menu.item("Gráfico Lineal", on_click=Programa.cambiar_grafico("linea")),
                                             rx.menu.item("Gráfico Compuesto", on_click=Programa.cambiar_grafico("compuesto")),
-                                            rx.menu.item("Gráfico Tarta", on_click=Programa.cambiar_grafico("pie")),
-                                            rx.menu.item("", on_click=Programa.cambiar_grafico("compuesto")),
                                             z_index="500", 
                                             background_color=Color.ACENTO.value,
                                             color=TextoColor.SECUNDARIO.value,
@@ -115,10 +114,9 @@ def vent_flotante(texto: str, datos: list[dict], datos_tarta: list[dict]) -> rx.
                             rx.match(
                                 Programa.ind_grafico,
                                 ("area", graf_ar_mezcla(datos, Programa.lista_selecc)),
-                                ("compuesto_1", area_sync(datos, Programa.lista_selecc)),
-                                ("compuesto", composed(datos, Programa.lista_selecc)),
-                                ("pie", graf_pie_mezcla(datos, Programa.lista_selecc)),
-                                (" ", composed(datos, Programa.lista_selecc)),
+                                ("barras", graf_barras_mezcla(datos, Programa.lista_selecc)),
+                                ("linea", graf_lineas_mezcla(datos, Programa.lista_selecc)),
+                                ("compuesto", area_sync(datos, Programa.lista_selecc)),
                                 #Condicional que nos permite ajustar el mensaje ya sea para seleccionar graficos o indicadores
                                 rx.cond(
                                     Programa.lista_selecc.length() > 0,

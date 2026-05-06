@@ -47,7 +47,7 @@ class BBDD(rx.State):
 
     #Lista exclusiva para ordenar visualmente el formulario de añadir paciente
     orden_formulario: list[str] = [
-        "Nº Historia", "Fecha Ingreso", "Reingreso 48h", "Fecha Alta", "Barotrauma", 
+        "Nº Historia", "Fecha Ingreso", "Fecha Alta", "Reingreso 48h", "Barotrauma", 
         "VMI", "Días VMI", "RASS Objetivo", "RASS", "BIS Objetivo", "BIS", 
         "Episodios NAV", "Registro Intubación", "Extub. Programada", "Ventana Sedación", 
         "Extub. Maniobras", "Grados Inclinación", "UPP", "Profilaxis TVP", "TVP", 
@@ -566,6 +566,16 @@ class BBDD(rx.State):
                 return rx.toast("Error: No se ha encontrado el registro")
 
         self.modal_añadir_abierto = True
+    
+    @rx.var
+    def formulario_cabecera(self) -> list[str]:
+        #Devuelve los 3 primeros campos
+        return self.orden_formulario[:3]
+
+    @rx.var
+    def formulario_cuerpo(self) -> list[str]:
+        #Devuelve todos los campos a partir del cuarto
+        return self.orden_formulario[3:]
     
     #Metodos que cambia el estado booleano para desplegar la ventana
     def abrir_consulta(self):

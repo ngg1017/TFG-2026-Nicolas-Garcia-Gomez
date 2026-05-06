@@ -1,6 +1,7 @@
 import reflex as rx
 from Logica.Usuarios import Usuarios
 from TFG_2026_Nicolas_Garcia_Gomez.estilos.colores import Color, TextoColor
+from TFG_2026_Nicolas_Garcia_Gomez.componentes.renderizar_campo_formulario import renderizar_campo_formulario
 from Logica.BBDD import BBDD
 
 #Funcion principal que dibuja la vista de carga desde la base de datos
@@ -221,89 +222,30 @@ def vistas_bbdd() -> rx.Component:
                         #Area de relleno
                         rx.scroll_area(
                             rx.vstack(
+                                #1: Los 3 elementos de arriba (Ancho completo)
                                 rx.foreach(
-                                    BBDD.orden_formulario,
-                                    lambda campo: rx.vstack(
-                                        rx.text(campo, size="2", weight="bold"),
-                                        
-                                        #¿Es Booleano?
-                                        rx.cond(
-                                            BBDD.campos_display_booleano.contains(campo),
-                                            rx.box(
-                                                rx.select(
-                                                    ["True", "False"], 
-                                                    value=BBDD.nuevo_paciente_dict[campo].to(str).title(),
-                                                    placeholder="Seleccione (Vacío por defecto)...", 
-                                                    on_change=lambda v: BBDD.actualizar_campo_nuevo(campo, v), 
-                                                    width="100%",
-                                                    size="3",
-                                                    variant="ghost",
-                                                ),
-                                                width="100%",
-                                                background_color=Color.BOOLEANO_FONDO.value, 
-                                                border=f"1px solid #3f3f46",
-                                                border_radius="6px",
-                                                padding="0"
-                                            ),
-                                            
-                                            #¿Es Fecha Simple?
-                                            rx.cond(
-                                                BBDD.campos_display_fecha.contains(campo),
-                                                rx.input(
-                                                    value=BBDD.nuevo_paciente_dict[campo],
-                                                    placeholder="Ej. DD/MM/YYYY", 
-                                                    on_change=lambda v: BBDD.actualizar_campo_nuevo(campo, v), 
-                                                    background_color="#EF444426",
-                                                    width="100%",
-                                                    size="3"
-                                                ),
-                                                
-                                                #¿Es Fecha Multiple?
-                                                rx.cond(
-                                                    BBDD.campos_display_fecha_multiple.contains(campo),
-                                                    rx.input(
-                                                        value=BBDD.nuevo_paciente_dict[campo],
-                                                        placeholder="Ej. 14/10/2026; 18/10/2026", 
-                                                        on_change=lambda v: BBDD.actualizar_campo_nuevo(campo, v), 
-                                                        width="100%",
-                                                        background_color="#EF444426",
-                                                        size="3"
-                                                    ),
-                                                    
-                                                    #¿Es Numerico?
-                                                    rx.cond(
-                                                        BBDD.campos_display_numerico.contains(campo),
-                                                        rx.input(
-                                                            value=BBDD.nuevo_paciente_dict[campo],
-                                                            placeholder="Introduzca un número...", 
-                                                            on_change=lambda v: BBDD.actualizar_campo_nuevo(campo, v), 
-                                                            width="100%",
-                                                            background_color="#10B9811B",
-                                                            size="3"
-                                                        ),
-                                                        
-                                                        #Texto normal 
-                                                        rx.input(
-                                                            value=BBDD.nuevo_paciente_dict[campo],
-                                                            placeholder="Introduzca texto...", 
-                                                            on_change=lambda v: BBDD.actualizar_campo_nuevo(campo, v), 
-                                                            width="100%",
-                                                            background_color="#F59E0B1A",
-                                                            size="3"
-                                                        )
-                                                    )
-                                                )
-                                            )
-                                        ),
-                                        align_items="start",
-                                        width="100%",
-                                        spacing="0",
-                                        margin_bottom="19px",
-                                        margin_top="1px"
-                                    )
-                                )
+                                    BBDD.formulario_cabecera,
+                                    #Usamos una funcion auxiliar para no repetir codigo
+                                    lambda campo: renderizar_campo_formulario(campo) 
+                                ),
+                                rx.divider(margin_y="10px"),
+                                
+                                #2: El resto en 2 columnas
+                                rx.grid(
+                                    rx.foreach(
+                                        BBDD.formulario_cuerpo,
+                                        lambda campo: renderizar_campo_formulario(campo)
+                                    ),
+                                    columns="2",
+                                    #Espacio entre columnas y filas
+                                    spacing="4",
+
+                                    width="100%",
+                                ),
+                                width="100%",
                             ),
-                            height="60vh", padding_right="1em"
+                            height="60vh",
+                            padding_right="1em",
                         ),
                         #Botonera
                         rx.hstack(
