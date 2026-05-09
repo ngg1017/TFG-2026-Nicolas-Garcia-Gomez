@@ -149,7 +149,17 @@ def vistas_bbdd() -> rx.Component:
                                                     rx.table.cell(
                                                         rx.button(
                                                             rx.icon(tag="trash"), 
-                                                            on_click=BBDD.borrar_paciente(fila[0])
+                                                            on_click=BBDD.borrar_paciente(fila[0]),
+                                                            variant="ghost", 
+                                                            class_name="btn btn",
+                                                            color=TextoColor.PRIMARIO.value,
+                                                            bg=Color.OSCURO.value,
+                                                            border_radius="0.75rem",
+                                                            weight="bold",
+                                                            _hover={
+                                                                "bg": Color.ACENTO.value,
+                                                                "color": TextoColor.SECUNDARIO.value
+                                                            }
                                                         ),
                                                         width="100px", 
                                                         min_width="100px", 
@@ -159,7 +169,17 @@ def vistas_bbdd() -> rx.Component:
                                                     rx.table.cell(
                                                         rx.button(
                                                             rx.icon(tag="pen"), 
-                                                            on_click=BBDD.abrir_modal_edicion(fila[0])
+                                                            on_click=BBDD.abrir_modal_edicion(fila[0]),
+                                                            variant="ghost", 
+                                                            class_name="btn btn",
+                                                            color=TextoColor.PRIMARIO.value,
+                                                            bg=Color.OSCURO.value,
+                                                            border_radius="0.75rem",
+                                                            weight="bold",
+                                                            _hover={
+                                                                "bg": Color.ACENTO.value,
+                                                                "color": TextoColor.SECUNDARIO.value
+                                                            }
                                                         ),
                                                         width="100px", 
                                                         min_width="100px", 
