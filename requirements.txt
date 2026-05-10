@@ -1,4 +1,4 @@
-reflex
+reflex==0.8.28
 pandas
 matplotlib
 FPDF2
