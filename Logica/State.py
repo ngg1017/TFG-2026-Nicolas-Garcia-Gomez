@@ -1,8 +1,8 @@
 import reflex as rx
 import pandas as pd
+import re
 import io
 import asyncio
-
 
 class State(rx.State):
     nombres_archivos: list[str]
@@ -68,8 +68,16 @@ class State(rx.State):
         #Hacemos que tarde para que se vea la barra (asincrono para no colgar)
         await asyncio.sleep(1.5)
         self.barra = False
+
+        #Ordenamos ambas listas a la vez basadas en "nombres_archivos"
+        listas_ordenadas = sorted(zip(self.nombres_archivos, self._dataframes_memoria), key=lambda nombre: re.findall(r"\d{4}", nombre[0])[0] if re.findall(r"\d{4}", nombre[0]) else "0000")
+        #Separamos las listas ordenadas (esto nos devuelve tuplas)
+        nombres_tupla, dfs_tupla = zip(*listas_ordenadas)
+        #Las convertimos en listas antes de guardarlas en el estado de Reflex
+        self.nombres_archivos = list(nombres_tupla)
+        self._dataframes_memoria = list(dfs_tupla)
+
         yield rx.toast(f"Se cargaron: {self.cargados} archivos en memoria con éxito")
-    
     
     #Metodo que usa los botones con un rx.toast
     def borrar_datos(self):

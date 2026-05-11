@@ -4,6 +4,7 @@ import unicodedata
 from Logica.State import State 
 from Logica.Modelo import Registro
 import io
+import re
 import zipfile
 
 class BBDD(rx.State):
@@ -231,6 +232,14 @@ class BBDD(rx.State):
         #Registro auditoria
         await self.registrar_log_bbdd("ANALISIS_DATOS", f"Análisis en RAM de los años: {self.años_seleccionados}")
         self.años_seleccionados = [] 
+
+        #Ordenamos ambas listas a la vez basadas en "nombres_archivos"
+        listas_ordenadas = sorted(zip(estado_principal.nombres_archivos, estado_principal._dataframes_memoria), key=lambda nombre: re.findall(r"\d{4}", nombre[0])[0] if re.findall(r"\d{4}", nombre[0]) else "0000")
+        #Separamos las listas ordenadas (esto nos devuelve tuplas)
+        nombres_tupla, dfs_tupla = zip(*listas_ordenadas)
+        #Las convertimos en listas antes de guardarlas en el estado de Reflex
+        estado_principal.nombres_archivos = list(nombres_tupla)
+        estado_principal._dataframes_memoria = list(dfs_tupla)
         
         #Apaga la barra al terminar
         estado_principal.barra = False
