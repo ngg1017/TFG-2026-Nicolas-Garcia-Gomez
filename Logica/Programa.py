@@ -1801,6 +1801,7 @@ class Programa(State):
     def generar_pdf_final(self):
         #Preparamos el PDF vacio
         pdf = PDF()
+        pdf.add_font("Roboto", "", "TFG_2026_Nicolas_Garcia_Gomez/estilos/Roboto-Regular.ttf")
         pdf.set_title("Indicadores REA")
         pdf.set_author("Nicolás García Gómez")
         pdf.primera_pagina()

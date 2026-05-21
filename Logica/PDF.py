@@ -32,7 +32,7 @@ class PDF(FPDF):
 
     #Texto del capitulo
     def cuerpo_capitulo(self, descripcion, datos, titulo, ind_especialidades=False):
-        self.set_font("Times", size=11)
+        self.set_font("Roboto", size=11)
         self.multi_cell(0, 5, descripcion)
         self.ln(5)
         
@@ -68,7 +68,10 @@ class PDF(FPDF):
             
             for i, docu in enumerate(datos_lista):
                 #Texto a añadir
-                texto = f"Año {docu["name"]}: {docu["valor"]}%"
+                if titulo in ["Incidencia de Barotrauma", "Neumonia Asociada a VMI", "TET por Maniobras", "Bacteriemia relacionada a CVC"]: 
+                    texto = f"Año {docu["name"]}: {docu["valor"]}‰"
+                else:
+                    texto = f"Año {docu["name"]}: {docu["valor"]}%"
                 #Creamos la celda con su texto, ancho y altura
                 self.cell(ancho_col, altura_fila, texto, align="C")
                 
