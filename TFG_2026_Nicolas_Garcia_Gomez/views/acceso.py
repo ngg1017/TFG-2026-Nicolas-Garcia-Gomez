@@ -110,7 +110,7 @@ def vista_gestion_usuarios() -> rx.Component:
                             #2. Content: El menu desplegable que se abre
                             rx.select.content(
                                 rx.foreach(
-                                    ["1", "2", "3"],
+                                    ["Visitante", "Medico/Editor", "Administrador"],
                                     lambda rol: rx.select.item(
                                         rol, 
                                         value=rol,
@@ -124,7 +124,6 @@ def vista_gestion_usuarios() -> rx.Component:
                                 style={"background_color": Color.ACENTO.value}
                             ),
                             #3. Logica de enlace de datos
-                            value=Usuarios.nuevo_rol,
                             on_change=Usuarios.set_nuevo_rol,
                         ),
                         rx.button(
@@ -155,8 +154,16 @@ def vista_gestion_usuarios() -> rx.Component:
                                 Usuarios.lista_usuarios_tabla,
                                 lambda usr: rx.table.row(
                                     rx.table.cell(usr[0]), 
-                                    rx.table.cell(usr[1]), 
-                                    rx.table.cell(usr[2]), 
+                                    rx.table.cell(usr[1]),
+                                    rx.cond(
+                                        usr[2] == "3",
+                                        rx.table.cell("Administrador"),
+                                        rx.cond(
+                                            usr[2] == "2",
+                                            rx.table.cell("Medico/Editor"),
+                                            rx.table.cell("Visitante"),
+                                        )
+                                    ), 
                                     rx.table.cell(
                                         rx.button(
                                             rx.icon(tag="trash"),

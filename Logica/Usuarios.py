@@ -272,7 +272,12 @@ class Usuarios(rx.State):
         self.nueva_password = valor
 
     def set_nuevo_rol(self, valor: str):
-        self.nuevo_rol = valor
+        if valor == "Visitante":
+            self.nuevo_rol = "1"
+        elif valor == "Medico/Editor":
+            self.nuevo_rol = "2"
+        elif valor == "Administrador":
+            self.nuevo_rol = "3"
 
     def set_email_admin_confirmacion(self, valor: str):
         self.email_admin_confirmacion = valor
