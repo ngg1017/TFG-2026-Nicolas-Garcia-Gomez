@@ -1,6 +1,66 @@
 \capitulo{6}{Discusión}
+Los resultados obtenidos en este Trabajo de Fin de Grado representan una innovación significativa respecto a los métodos tradicionales de gestión clínica en la unidad de Reanimación (\textit{URCCPQ}). Uno de los mayores avances es la automatización integral del procesamiento de datos mediante una interfaz \textit{web} especializada, diseñada específicamente para aislar al personal sanitario de la complejidad técnica subyacente. A diferencia de los registros estáticos o las hojas de cálculo manuales, la plataforma transforma grandes volúmenes de datos brutos en visualizaciones gráficas y estadísticas comprensibles e interactivas. Esta característica diferenciadora sitúa a la herramienta no solo como un repositorio digital, sino como un sistema de apoyo activo para la toma de decisiones informadas, permitiendo a la dirección médica evaluar la evolución clínica basándose en los estándares oficiales de la \textit{SEMICYUC}.
 
-\section{Discusión de los resultados}
+Dada la criticidad del entorno hospitalario al que va dirigido, la evaluación del éxito de este proyecto trasciende las métricas convencionales de usabilidad de \textit{software}. Para confirmar la solidez del sistema y el cumplimiento íntegro de los objetivos planteados, es necesario analizar el producto desde una perspectiva multidimensional que abarque tanto su integración física en la unidad como la exactitud de sus procesos internos. Por consiguiente, a continuación se detallan los resultados del proyecto estructurados en dos ejes fundamentales: el rigor analítico de su motor algorítmico y su valor traslacional a la práctica médica diaria.
 
-Se realizará un análisis crítico de los resultados, interpretando su significado y, cuando sea pertinente, 
-comparándolos con los resultados de trabajos previos.
+\section{Validación y Explicación Matemática}
+\subsection{Justificación Metodológica del Cálculo de Variabilidad y Error Estadístico}
+
+\begin{itemize}
+    \item \textbf{Agregación de datos y tamaño muestral:} En el presente proyecto, el cálculo de los indicadores se realiza mediante la agregación anual de los datos brutos extraídos del sistema de información hospitalaria. Esto significa que la totalidad de los episodios clínicos de un año natural se consolida en un único valor final. En consecuencia, para cada año y especialidad evaluada, el tamaño de la muestra temporal es de un único punto de datos $(N=1)$.
+
+    \item \textbf{Imposibilidad matemática del cálculo de dispersión intra-anual:} Debido a esta arquitectura de datos, resulta matemáticamente imposible calcular una medida de dispersión estadística interna (como la varianza o la desviación estándar) para un año aislado. La fórmula estadística de la varianza muestral requiere dividir la suma de las diferencias al cuadrado entre los grados de libertad $(N-1)$:
+    
+    \begin{equation}
+    S^2 = \frac{\sum_{i=1}^{N} (x_i - \bar{x})^2}{N - 1}
+    \end{equation}
+    
+    Al trabajar con indicadores consolidados anualmente $(N=1)$, el denominador de la ecuación resulta en cero $(1-1=0)$, generando una indeterminación matemática. Para calcular un error específico por año, sería metodológicamente necesario fraccionar la variable temporal (por ejemplo, en cortes mensuales). Sin embargo, esto desviaría el objetivo de la herramienta, la cual está diseñada para evaluar tendencias de gestión hospitalaria a nivel macro (anual) y no para analizar la estacionalidad o el ``ruido'' estadístico a corto plazo.
+
+    \item \textbf{Aplicación del Error Típico de la Estimación Histórica:} Para solventar esta limitación y dotar a la visualización gráfica de rigor analítico, la métrica de variabilidad (representada visualmente como una franja sombreada o ``pasillo de confianza'' continuo) implementada en el panel no refleja la desviación estándar interna de un año en concreto, sino el Error Típico de la Estimación derivado del modelo de tendencia general de la serie histórica completa.
+    
+    Este enfoque metodológico permite hacer una estimación visual. Si el valor real de un indicador en un año determinado excede los límites de esta franja, el sistema evidencia que dicha fluctuación es estadísticamente significativa y escapa al comportamiento histórico normal del servicio. Esta aproximación resulta de alto valor clínico y de gestión, ya que permite identificar rápidamente anomalías reales frente a fluctuaciones habituales.
+\end{itemize}
+
+\subsection{Tratamiento de Microfluctuaciones y Criterio de Estabilidad Tendencial}
+
+\begin{itemize}
+    \item \textbf{Diferenciación entre Ruido Estadístico y Tendencia Real:} En el análisis de series temporales de indicadores de gestión hospitalaria, es habitual encontrar variables que presentan fluctuaciones interanuales mínimas. Desde un punto de vista puramente matemático, cualquier regresión lineal forzará el cálculo de una pendiente $(m\neq0)$ adaptándose a estas variaciones, por minúsculas que sean. Sin embargo, desde una perspectiva clínica y de gestión, variaciones centesimales entre años representan mero ``ruido estadístico'' inherente al funcionamiento del hospital, y no un cambio estructural en el servicio.
+
+    \item \textbf{Implementación del Criterio de Amplitud Mínima:} Para evitar la generación de ``falsas tendencias'' visuales que puedan inducir a error en la toma de decisiones, el algoritmo de este proyecto implementa un filtro de significancia basado en la amplitud del rango histórico. Se calcula la diferencia neta entre el valor máximo y el valor mínimo registrado en la serie de tiempo para cada indicador:
+
+    \begin{equation}
+    \Delta = \text{Valor}_{\text{max}} - \text{Valor}_{\text{min}}
+    \end{equation}
+
+    Si esta amplitud $(\Delta)$ no supera un umbral clínico predefinido (es decir, la variación es estadísticamente y clínicamente irrelevante), el sistema descarta el modelo de regresión inclinada.
+
+    \item \textbf{Aplicación del Modelo de Pendiente Nula (Sistema Estable):} Cuando se detecta que el indicador carece de variabilidad significativa, el algoritmo proyecta una línea de tendencia totalmente horizontal, matemáticamente equivalente a la media histórica del periodo $(y=\bar{x})$.
+    
+    Esta decisión metodológica aporta un alto valor al cuadro de mando, comunicando visualmente al usuario que el servicio se encuentra en un estado de ``estabilidad y control'', evitando que los gestores sobrerreaccionen ante pendientes visuales que, en la realidad del volumen hospitalario, representan fluctuaciones de impacto nulo.
+\end{itemize}
+
+\section{Impacto de la Herramienta}
+El cálculo, monitorización y análisis de estos indicadores resultan de vital importancia para el correcto funcionamiento de la Unidad y el beneficio directo de los pacientes, fundamentándose en los siguientes puntos clave:
+
+\begin{itemize}
+    \item \textbf{Impacto directo en la Seguridad del Paciente (Principio de No Maleficencia):} La extracción y evaluación de estos indicadores permite la detección temprana de eventos adversos, complicaciones o desviaciones en los protocolos clínicos. Al disponer de una herramienta que automatiza este análisis, la Unidad puede identificar áreas de mejora de forma ágil, reduciendo drásticamente los riesgos asociados a la práctica clínica y previniendo futuros incidentes.
+
+    \item \textbf{Mejora Continua de la Calidad Asistencial (Principio de Beneficencia):} El uso de métricas objetivas (alineadas con los estándares de sociedades científicas como la \textit{SEMICYUC}) es el único método validado para auditar la calidad del servicio. Transformar los datos crudos almacenados en el sistema \textit{ICCA} en información estructurada dota a los facultativos de una retroalimentación real sobre la eficacia de los tratamientos aplicados, permitiendo optimizar las guías de práctica clínica.
+
+    \item \textbf{Optimización de Recursos Críticos (Justicia Distributiva):} Las unidades de críticos y de alta complejidad son entornos donde los recursos (camas, aparataje, personal especializado) son finitos y de altísimo coste. Analizar estos indicadores permite comprender los flujos de pacientes, predecir tiempos de estancia y optimizar las altas, garantizando que los recursos del hospital estén siempre disponibles para los pacientes que más lo necesitan.
+
+    \item \textbf{Toma de Decisiones Basada en la Evidencia:} Históricamente, el análisis retrospectivo de datos en la unidad ha supuesto una carga burocrática inasumible, limitando la capacidad de investigación. La sistematización de estos indicadores mediante la presente herramienta de software permite a los clínicos tomar decisiones estratégicas basadas en la evidencia empírica de su propia unidad, y no únicamente en la intuición o en estudios externos.
+    
+\end{itemize}
+
+\subsection{Aspectos clave de la Herramienta:}
+\begin{enumerate}
+        \item \textbf{Hiper-especialización:} Esta \textit{app} no es un \textit{Excel} genérico, es un software que tiene embebida la lógica médica clínica española (\textit{SEMICYUC}). Sabe exactamente qué es un reingreso no programada o cómo normalizar las especialidades de un hospital.
+        \item \textbf{Automatización del trabajo sucio:} Cubre el hueco exacto que los grandes programas ignoran: el paso intermedio. El \textit{ICCA} facilita datos incomprensible que mi aplicación se encarga de trasformar en gráficos y tablas de auditoria con un solo clic.
+        \item \textbf{Independencia y bajo coste:} Es una solución de código abierto construida con \textit{Reflex} y \textit{Pandas}. No requiere de licencias de miles de euros y se despliega eficientemente mediante contenedores \textit{Docker} en la \textit{intranet} del \textit{HUBU}. Esta arquitectura asegura que los datos sensibles nunca salgan a internet, garantizando el aislamiento total de la información clínica y el cumplimiento estricto de la normativa de seguridad del centro.
+        \item \textbf{Trazabilidad y Control de Accesos:} El sistema integra un motor de persistencia mediante una base de datos relacional (\textit{PostgreSQL}) que gestiona de forma segura la autenticación de los facultativos. Además, incorpora un registro de auditoría inalterable que documenta cada acción, modificación o extracción de datos realizada, garantizando la trazabilidad absoluta de las operaciones y protegiendo legalmente al centro ante el estricto cumplimiento de la \textit{LOPD}.
+\end{enumerate}
+		
+En conclusión, el acceso y tratamiento de estos datos (protegidos en todo momento mediante el despliegue de una arquitectura estrictamente local) no responde a un mero ejercicio estadístico, sino a una necesidad imperativa para garantizar una atención médica más segura, eficiente, ética y de la más alta calidad para los futuros pacientes.
+

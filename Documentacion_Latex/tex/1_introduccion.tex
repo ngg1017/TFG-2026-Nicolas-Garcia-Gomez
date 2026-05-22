@@ -1,13 +1,42 @@
 \capitulo{1}{Introducción}
 
+Uno de los principales desafíos en la gestión de la Unidad de Reanimación y Cuidados Críticos Postquirúrgicos del Servicio de Anestesiología y Reanimación (\textit{URCCPQ}) del Hospital Universitario de Burgos (\textit{HUBU}) radica en la evaluación periódica de sus actuaciones clínicas. Hasta la fecha, la Dra. Cristina Arlanzón Pérez, jefa de la unidad y tutora clínica de este proyecto, realizaba anualmente un análisis transversal de los pacientes, calculando los indicadores de forma estrictamente manual.
 
-En este capítulo se presenta el trabajo realizado y se contextualiza el problema abordado. 
-Se debe indicar el ámbito en el que se enmarca el Trabajo Fin de Grado, la motivación del mismo 
-y la relevancia del problema tratado. 
-Asimismo, se describirá brevemente la estructura de la memoria, indicando el contenido de cada capítulo.
+Debido al alto volumen de pacientes que recibe la \textit{URCCPQ} (cerca de mil seiscientos ingresos anuales), resultaba operativamente inviable para una única persona recolectar, procesar y calcular todos los indicadores exigidos por la Sociedad Española de Medicina Intensiva, Crítica y Unidades Coronarias (\textit{SEMICYUC}) \cite{semicyuc} necesarios para la auditoría de la unidad. Por consiguiente, se recurría a un muestreo transversal, siendo esta la única solución viable por su rapidez y bajo coste operativo. No obstante, este enfoque metodológico presenta limitaciones intrínsecas: se restringe a descripciones estáticas y correlaciones puntuales, imposibilitando el análisis de la secuencia temporal y la evolución longitudinal de los eventos clínicos.
 
-La extensión máxima del Trabajo Fin de Grado será de \textbf{50 páginas}, contabilizadas como el total resultante de la suma de todos los capítulos de la memoria comprendidos entre los apartados \textbf{Introducción, Metodología, Resultados, Discusión, Conclusiones y Lineas futuras}. 
-Este límite no incluye los anexos, que se entregarán en documentos independientes.
+Ante estas limitaciones metodológicas, y motivada por la urgencia de una inminente auditoría para la certificación del punto 9.3.1 de la norma \textit{ISO 9001/2015} \cite{iso} en el mes de marzo, la dirección médica solicitó la colaboración de la Universidad de Burgos (\textit{UBU}). El objetivo inicial fue incorporar a un estudiante en prácticas del grado de Ingeniería de la Salud para desarrollar una solución informática capaz de solventar estas carencias analíticas.
+
+El resultado de esa fase inicial fue un programa robusto construido íntegramente en \textit{Python}. Este \textit{script}, ejecutado mediante consola, contaba con un núcleo de procesamiento y cálculo de datos preciso, funcional y debidamente documentado. Sin embargo, carecía de un acabado profesional orientado al usuario final. Su manejo requería conocimientos técnicos específicos, lo cual suponía una barrera de entrada para el personal clínico, y su salida de datos se limitaba a la generación de archivos \textit{CSV} y resultados aislados por consola.
+
+El presente Trabajo Fin de Grado (\textit{TFG}) tiene como motivación principal expandir y profesionalizar esa base algorítmica inicial, desarrollando una solución tecnológica integral que combina \textit{hardware} y \textit{software}. El objetivo es generar una aplicación web profesional, dotada de una interfaz clínica intuitiva y lista para ser utilizada por cualquier profesional sanitario, independientemente de su nivel de conocimientos informáticos, desarrollada a través de \textit{Reflex} un \textit{framework}\footnote{Conjuntos de herramientas y reglas que agilizan el desarrollo de software} de código abierto para \textit{Python} que permite crear aplicaciones \textit{web full-stack}\footnote{\textit{frontend} y \textit{backend}}. Esta plataforma \textit{web full-stack} garantiza la seguridad y persistencia de la información mediante una base de datos \textit{PostgreSQL} gestionada a través de \textit{SQLModel}, lo que permite una administración robusta de usuarios y registros de auditoría. El despliegue  de la aplicación se realizará en la \textit{intranet} del Hospital Universitario de Burgos utilizando la tecnología de contenedores \textit{Docker}. Esta transición hacia un entorno virtualizado y centralizado no solo optimiza la escalabilidad del sistema, sino que refuerza el cumplimiento de la \textit{LOPD} \cite{boe2018/3} al operar dentro de la infraestructura tecnológica protegida del propio centro hospitalario.
+
+La herramienta es capaz de calcular veintiún indicadores de calidad en rangos configurables de uno a diez años e incorpora un motor estadístico que evalúa la evolución del servicio mediante el análisis de tendencias, el cálculo del error típico interanual y la validación de la adherencia a modelos lineales mediante el coeficiente de determinación ($R^2$).
+
+Adicionalmente, el proyecto ha expandido la accesibilidad de la herramienta en dos vertientes:
+\begin{itemize}
+    \item Despliegue automatizado mediante contenedores \textit{Docker} en la \textit{intranet} del \textit{HUBU}, integrándose directamente con su servidor \textit{PostgreSQL} para la persistencia de la base de datos.
+    \item Desarrollo paralelo de un terminal físico portátil (denominado internamente ``\textit{tablet médica}''), constituido por una arquitectura \textit{Raspberry Pi} y una pantalla táctil, que dota al personal clínico de movilidad para utilizar la aplicación fuera del hospital.
+\end{itemize}
+
+Cabe señalar que la numeración total alcanza las 56 páginas. Sin embargo, 5 de ellas corresponden a separadores de sección u hojas en blanco introducidas para facilitar la legibilidad del lector. Por tanto, la extensión real de contenido técnico se sitúa en 51 páginas, habiéndose realizado un importante esfuerzo de síntesis para ajustarse lo máximo posible al límite de 50 páginas sin comprometer la claridad de la exposición.
+
+\section{Estructura de la Memoria}
+
+El presente documento detalla el proceso integral de diseño y desarrollo del sistema. Para facilitar su lectura, la memoria se ha estructurado en los siguientes capítulos:
+
+\begin{itemize}
+    \item \textbf{Capítulo 2. Objetivos:} Define el propósito principal del \textit{TFG} y los objetivos específicos técnicos y funcionales a alcanzar.
+    \item \textbf{Capítulo 3. Fundamentos Teóricos y Estado del Arte:} Proporciona el marco clínico y tecnológico necesario para comprender el proyecto, incluyendo un análisis de soluciones alternativas existentes.
+    \item \textbf{Capítulo 4. Metodología:} Detalla las herramientas de \textit{software} y \textit{hardware} empleadas, así como el flujo de trabajo seguido durante el ciclo de vida del desarrollo.
+    \item \textbf{Capítulo 5. Resultado e Implementación:} Relata los resultado obtenidos del proyecto.
+    \item \textbf{Capítulo 6. Discusión:} Evalúa la efectividad del producto final frente a los objetivos iniciales y su impacto en la gestión de la unidad.
+    \item \textbf{Capítulo 7. Conclusiones:} Sintetiza los logros del proyecto y detalla algunos de los aspectos mas relevantes del proyecto. 
+    \item \textbf{Capítulo 8. Lineas Futuras:} Propone posibles líneas de expansión y mejora.
+\end{itemize}
+
+Finalmente, el documento incluye una sección de \textbf{Anexos} (Apéndices A-I) que complementa la memoria con documentación técnica, manuales de usuario y programador, planes de pruebas, un análisis de sostenibilidad y la trazabilidad de las herramientas utilizadas durante el desarrollo.
+
+
 
 
 

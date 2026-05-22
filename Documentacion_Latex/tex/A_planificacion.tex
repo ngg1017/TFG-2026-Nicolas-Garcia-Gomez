@@ -1,27 +1,256 @@
 \apendice{Plan de Proyecto}
-
 \section{Introducción}
-
-En este apartado se describe de forma breve el propósito general del proyecto, su contexto y el alcance del trabajo realizado, indicando qué problema se aborda y qué se pretende conseguir con el TFG.
-
-
-\section{Metodología de ingeniería del software}
-Si procede.
-Se debe describir la metodología seguida durante el desarrollo del proyecto. En caso de existir desarrollo software, se indicará la metodología utilizada (por ejemplo, cascada, ágil o experimental)
-En cada apartado de los apéndices (A hasta el G) se deberá indicar que tarea o fase de la metodología utilizada se está realizando, o bien en este nuevo apéndice deberá quedar reflejado con detalle las tareas y fases que se han ido realizando.
-Si el TFG no contiene  todo el ciclo de vida de la metodología utilizada, deberá indicarse las fases y tareas que han quedado pendientes.
-Si el TFG no está centrado el desarrollo software, pero puede servir para un posterior desarrollo software, se deberá indicar qué metodología de desarrollo se recomienda y argumentar los motivos.
-
+Antes de abordar la fase de ejecución, es fundamental dimensionar el proyecto en términos temporales, viabilidad económica y cumplimiento normativo. Una planificación estratégica adecuada es vital para mitigar riesgos tempranos, administrar los recursos de forma eficiente, y certificar la adecuación del sistema al marco jurídico actual.
 
 \section{Planificación temporal}
+Para la gestión integral y el seguimiento temporal del desarrollo se empleó la plataforma \textit{GitHub} \cite{github}. La metodología de trabajo dentro del repositorio se estructuró mediante la definición de tareas o incidencias (\textit{issues}), las cuales fueron agrupadas lógicamente en hitos de progreso (\textit{milestones}) con el objetivo de optimizar la trazabilidad de los avances.
 
-Se presentará la planificación temporal del proyecto, preferiblemente mediante un cronograma o diagrama de Gantt, donde se reflejen las principales tareas, fases y su duración aproximada.
+A continuación, se presenta el desglose detallado de los hitos y tareas definidos para la consecución del proyecto:
 
-\subsection{Planificación económica}
+\begin{enumerate}
+	\item Botón de subida.
+	\begin{itemize}
+		\item Creación del botón físico de subida.
+		\item Conexión del botón con los datos.
+		\item Implementación lógica FIFO.
+	\end{itemize}
+	\item Lista desplegable de indicadores de calidad.
+	\begin{itemize}
+		\item Desplegable físico en la aplicación.
+		\item Conexión de cada opción de los indicadores con su método.
+		\item Mostrar los resultados correctamente.
+		\item Creación de gráficos.
+	\end{itemize}
+	\item \textit{Backend} de la aplicación.
+	\begin{itemize}
+		\item Normalización de los nombres de las columnas.
+		\item Método de cálculo de cada indicador.
+		\item Resumen de todos los indicadores.
+		\item Exportación del proyecto.
+		\item Tendencia de cada indicador.
+		\item Informe final.
+		\item Método de combinación de indicadores.
+	\end{itemize}
+	\item \textit{Tablet} Médica.
+	\begin{itemize}
+		\item Montaje de los componentes.
+		\item Introducción del SO.
+		\item Funcionamiento de la herramienta en el dispositivo/arranque automático.
+	\end{itemize}
+	\item Diseño \textit{web}.
+	\begin{itemize}
+		\item Adecuado diseño del botón de subida. 
+		\item Correcto diseño de la barra desplegable.
+		\item Colocación del texto explicativo.
+		\item Posicionamiento de las imágenes.
+		\item Ordenación de los elementos gráficos.
+	\end{itemize}
+	\item Creación de la memoria y los anexos.
+	\begin{itemize}
+		\item Elaboración escrito comité de ética.
+		\item 1. Introducción.
+		\item 2. Objetivos.
+		\item 3. Teóricos.
+		\item 4. Metodología.
+		\item 5. Resultados.
+		\item 6. Discusión.
+		\item 7. Conclusiones.
+		\item 8. Lineas Futuras.
+		
+		\item A. Planificación.
+		\item B. Diseño.
+		\item C. Requisitos.
+		\item D. Manual Usuario.
+		\item E. Manual Programador.
+		\item F. Datos.
+		\item G. Experimental.
+		\item H. \textit{ODS}.
+		\item I. \textit{Prompts}.
+	\end{itemize}
+	\item BBDD
+	\begin{itemize}
+		\item Creación de botones sensibles al rol.
+		\item Interfaz de carga de datos.
+		\item Interfaz de edición de los registros.
+		\item Exportación anónima de los registros en formato \textit{CSV}.
+	\end{itemize}
+	\item Control de Acceso
+	\begin{itemize}
+		\item Inicio de sesión.
+		\item Cambio de contraseña.
+		\item Interfaz que permita la gestión de usuarios.
+		\item Conexión de las funcionalidades a las web y \textit{PostgreSQL} con la creación de un servicio de logs. 
+	\end{itemize}
+\end{enumerate}
 
-\subsection{Viabilidad legal}
+\subsection{Diagrama de \textit{Gantt}}
+Para la planificación temporal del proyecto, se elaboró un diagrama de \textit{Gantt}. Esta herramienta permite visualizar los hitos del proyecto y su duración en el tiempo.
 
-Si corresponde, incluir aquí el documento de aprovación por parte de la Comisión de Bioética.
+El cronograma preliminar del proyecto se detalla en la Figura \ref{fig:gantt1}. Sin embargo, a medida que avanzaba el ciclo de vida del desarrollo, se identificaron desviaciones en las estimaciones temporales que evidenciaron la necesidad de reajustar los plazos. Estas desviaciones se atribuyen principalmente a la curva de aprendizaje inherente a la adopción de nuevas tecnologías y a la resolución de incidencias técnicas imprevistas. Como medida correctora para garantizar la viabilidad del sistema, se procedió a elaborar una replanificación ajustada a la realidad del proyecto, la cual se ilustra en la Figura \ref{fig:gantt2}.
 
-Ojo \footnote{Los anexos deben de tener su propia bibliografía, eso es tan fácil como utilizar referencias igual que en la memoria \cite{bortolot2005}}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.2\textwidth]{img/gantt_antes.png}
+    \caption{Diagrama de \textit{Gantt} inicial.}
+    \label{fig:gantt1}
+\end{figure}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.2\textwidth]{img/gantt_final.png}
+    \caption{Diagrama de \textit{Gantt} final.}
+    \label{fig:gantt2}
+\end{figure}
+
+\section{Planificación económica}
+Para llevar a cabo un análisis de viabilidad económica riguroso, es imperativo cuantificar la totalidad de los costes directos e indirectos asociados a la ejecución del proyecto. Esta estimación debe abarcar desde la valoración de licencias de \textit{software} y la amortización de equipos informáticos, hasta la adquisición de componentes físicos y los honorarios correspondientes al capital humano involucrado.
+
+En el presente apartado se desglosa el presupuesto detallado de la solución tecnológica desarrollada, contemplando de forma integral tanto los costes derivados de la ingeniería de \textit{software} para la plataforma clínica \textit{web}, como los recursos \textit{hardware} requeridos para el ensamblaje del terminal portátil.
+
+\subsection{Coste de Personal}
+El diseño, desarrollo y despliegue integral de la plataforma han sido ejecutados por un único integrante. A efectos de la estimación presupuestaria, este rol se ha asimilado al perfil de un Ingeniero de la Salud o Ingeniero Biomédico en categoría junior (recién graduado). Según los datos salariales del sector publicados por la Universidad Alfonso X el Sabio (\textit{UAX}) \cite{sueldo}, la retribución media en España para este perfil oscila entre los 22.000 y 28.000 euros brutos anuales. Para el presente análisis de viabilidad, se ha adoptado una base conservadora de 25.000€ anuales.
+
+Considerando que la carga temporal del proyecto equivale a un contrato de duración determinada de cuatro meses a jornada completa, el devengo salarial bruto del empleado asciende a 8.333,33€. A este importe es imperativo añadirle las cotizaciones sociales de carácter obligatorio que asume la empresa contratante. El cálculo de dichas partidas, basado en los tipos impositivos vigentes estipulados por el Régimen General de la Seguridad Social, se desglosa al detalle en la Tabla \ref{tab:costes_contratacion}.
+
+\begin{table}[hbt!]
+\centering
+\begin{tabular}{lr}
+\hline
+\textbf{Concepto} & \textbf{Importe (€)} \\ \hline
+\textbf{Sueldo bruto mensual} & \textbf{2.083,33} \\ 
+\multicolumn{2}{l}{\textit{Costes del Régimen General de la Seguridad Social (Empresa)}} \\
+Contingencias Comunes (23,60\,\%) & 491,67 \\
+Desempleo - Duración determinada (6,70\,\%) & 139,58 \\
+FOGASA (0,20\,\%) & 4,17 \\
+Formación Profesional (0,60\,\%) & 12,50 \\ \hline
+\textbf{Coste total mensual} & \textbf{2.731,25} \\ \hline
+\textbf{Coste total del proyecto (4 meses)} & \textbf{10.925,01} \\ \hline
+\end{tabular}
+\caption{Desglose de costes de contratación y cotizaciones sociales actualizado.}
+\label{tab:costes_contratacion}
+\end{table}
+
+\subsection{Coste de \textit{Software}}
+Un aspecto fundamental en la viabilidad económica de este proyecto ha sido la adopción de un ecosistema tecnológico basado íntegramente en \textit{software} libre y de código abierto (\textit{Open Source}\footnote{Es software cuyo código fuente es accesible, modificable y distribuible libremente por cualquiera}). Esta decisión estratégica ha permitido anular por completo los costes derivados de la adquisición de licencias comerciales o suscripciones de uso. Entre las tecnologías que han conformado este entorno de desarrollo gratuito destacan el lenguaje \textit{Python} como núcleo del sistema, el \textit{framework Reflex} para la orquestación de la plataforma clínica, \textit{PostgreSQL} para la gestion de la base de datos relacional, librerías avanzadas de análisis y exportación de datos (\textit{Pandas, Scikit-Learn, FPDF2}), así como la plataforma \textit{GitHub} para el control de versiones y el entorno \textit{Texmaker} para la composición en \textit{LaTeX} de la presente memoria.
+
+\subsection{Amortización de Equipos Informáticos}
+
+Para el desarrollo de la arquitectura de \textit{software} ha sido indispensable el uso de equipamiento informático propio durante los cuatro meses que ha durado la ejecución del proyecto. Específicamente, el trabajo de programación se ha dividido en dos fases y plataformas: durante los dos primeros meses se empleó un ordenador portátil de la marca \textit{MSI} (modelo \textit{GL62 6QF}), cuyo precio de compra aproximado fue de 1.100€; mientras que durante los dos meses restantes el desarrollo se trasladó a un equipo informático de sobremesa valorado en 1.400€.
+
+En el análisis presupuestario de un proyecto de ingeniería no se debe imputar el coste total de adquisición de las herramientas físicas, sino únicamente la fracción de su valor que se ha depreciado durante el tiempo efectivo de uso. Asumiendo una vida útil estimada de 5 años, que es el estándar contable habitual para equipos informáticos \cite{ing}, la depreciación se calcula mediante la fórmula de amortización lineal expresada en la Ecuación \ref{eq:amortizacion}:
+
+\begin{equation}
+\text{Amortización del Periodo} = \left( \frac{\text{Precio de Compra}}{\text{Vida Útil en Años}} \right) \times \left( \frac{\text{Meses de Uso}}{12} \right)
+\label{eq:amortizacion}
+\end{equation}
+
+Aplicando este modelo matemático al \textit{hardware} utilizado, se desglosan los siguientes costes de desgaste imputables directamente al presupuesto del proyecto:
+
+\begin{itemize}
+    \item \textbf{Amortización Portátil \textit{MSI}:} $(1.100 / 5) \times (2 / 12) = 36,67\,\text{€}$
+    \item \textbf{Amortización PC Sobremesa:} $(1.400 / 5) \times (2 / 12) = 46,67\,\text{€}$
+\end{itemize}
+
+En consecuencia, el coste total derivado de la amortización de las herramientas de desarrollo físico asciende a la cantidad de \textbf{83,34€}.
+
+\subsection{Costes de \textit{Hardware} y Ensamblaje Físico}
+Para la materialización del terminal clínico portátil ha sido necesaria la adquisición de diversos componentes físicos y periféricos. Dada la naturaleza del proyecto y su destino en un entorno hospitalario, se priorizó la fiabilidad, la originalidad de los componentes y los tiempos de entrega. Por ello, se descartó la importación a través de distribuidores internacionales de bajo coste con logísticas inestables, optando exclusivamente por proveedores oficiales y plataformas de comercio electrónico con garantías operativas en España como \textit{Amazon} \cite{amazon} o distribuidores autorizados de \textit{Raspberry Pi} \cite{raspshop}.
+
+Cabe destacar un aspecto fundamental en la reducción de costes estructurales: en lugar de adquirir una carcasa comercial genérica o un chasis industrial (cuyo precio suele ser elevado), se optó por el diseño y la fabricación aditiva del encapsulado. Utilizando filamento de impresión \textit{3D}, se ha logrado construir una carcasa completamente a medida que integra a la perfección la placa base y la pantalla táctil, garantizando la ergonomía necesaria para su uso en la unidad de Reanimación (\textit{URCCPQ}). 
+
+El desglose presupuestario de los elementos físicos que conforman el dispositivo se detalla en la Tabla \ref{tab:costes_hardware}:
+
+\begin{table}[hbt!]
+\centering
+\begin{tabular}{lr}
+\hline
+\textbf{Componente} & \textbf{Coste (€)} \\ \hline
+Placa base \textit{Raspberry Pi 3 Model B} & 38,50 \\
+Pantalla Oficial \textit{Raspberry Pi LCD 7'' Táctil} & 75,00 \\
+Tarjeta de memoria \textit{SanDisk MicroSD Ultra} 32GB & 8,50 \\
+Set de cables puente (hembra-hembra) & 3,00 \\
+Interruptor \textit{SPST} & 5,50 \\
+Batería de 6000 \textit{mAH} a 3,7\textit{v} & 22,99 \\
+\textit{Adafruit PowerBoost 1000C} & 28,65 \\
+Bobina de filamento de impresión 3D (para carcasa) & 15,00 \\ \hline
+\textbf{Coste Total del Terminal Portátil} & \textbf{197,14} \\ \hline
+\end{tabular}
+\caption{Desglose de costes de los componentes físicos del terminal.}
+\label{tab:costes_hardware}
+\end{table}
+
+\section{Viabilidad legal}
+Todo desarrollo tecnológico exige un análisis exhaustivo de su encaje legal para asegurar la protección de los activos intangibles y el acatamiento de las regulaciones actuales. La legislación aplicable a esta índole de proyectos debe abarcar los estándares de uso y la protección integral de los datos del usuario. La adecuación a estos preceptos jurídicos es indispensable para certificar la seguridad clínica del producto final. En consecuencia, tomando como base la jerarquía normativa europea y estatal, este apartado expone las directivas fundamentales que condicionan la viabilidad del presente trabajo.
+
+\subsection{Protección de datos personales y respeto de la privacidad}
+El proceso de seudonimización se llevará a cabo de forma estricta en origen y de manera exclusiva por el propio personal clínico responsable de la atención a los pacientes. Durante la fase de recolección y exportación de la información desde el sistema de la unidad, serán los propios facultativos quienes descarten y eliminen cualquier variable directa de identificación (tales como nombre, apellidos, DNI) antes de introducir la información en la base de datos implementada. De este modo, el software y el equipo investigador recibirán y procesarán únicamente un conjunto de datos completamente ciego, garantizando la privacidad absoluta desde el primer eslabón de la cadena. 
+
+Los registros clínicos seudonimizados son procesados exclusivamente dentro de la infraestructura segura de la \textit{intranet} del hospital, garantizando que la información nunca sea transferida a redes externas. Tras la finalización del estudio, los datos permanecen almacenados como respaldo persistente en los servidores del centro, protegidos mediante estrictos protocolos de control de acceso y claves cifradas. Este sistema de almacenamiento asegura la disponibilidad histórica de la información para futuras auditorías médicas, manteniendo en todo momento la integridad y confidencialidad exigidas por la \textit{LOPD} (Ley Orgánica 3/2018) \cite{boe2018/3} y en cumplimiento con el \textit{RGPD} (Reglamento 2016/679 del Parlamento europeo) \cite{boe2016/679}.
+
+Se respetarán los principios de la Declaración de \textit{Helsinki} de 2024 de la Asociación Médica Mundial sobre principios éticos para las investigaciones en seres humanos. También se respetará la Ley 14/2007, de 3 de julio, de Investigación Biomédica que compete al tratarse de un estudio observacional sin medicamentos ni productos sanitarios, \cite{boe2007/14} así como la Ley 41/2002, de 14 de noviembre, básica reguladora de la autonomía del paciente y de derechos y obligaciones en materia de información y documentación clínica \cite{boe2002/41}.
+
+También compete en este caso el Decreto 1093/2010, por el que se regula el uso y acceso a la historia clínica electrónica \cite{boe2010/1093}. El investigador principal garantizará que no se produzcan incumplimientos ni modificaciones del protocolo sin la aprobación por escrito del Comité de Ética de la Investigación con medicamentos (\textit{CEIm}). Además, el investigador principal asegurará que todo el personal que intervenga en la realización de este estudio sea informado de la obligación del cumplimiento de los citados compromisos.
+
+\subsection{Consentimiento Informado}
+Por último, en cuanto al Consentimiento Informado, se hará la exención de éste, fundamentada tanto en la relación beneficio/riesgo como en los siguientes aspectos: 
+\begin{enumerate}
+    \item \textbf{Uso de datos seudonimizados:} Los registros almacenados en \textit{PostgreSQL} serán proporcionados en formato seudonimizado, garantizando que no contengan datos de filiación, lo que elimina cualquier riesgo de reidentificación durante el estudio. Los autores se comprometen al cumplimiento estricto de la ley de protección de datos \textit{LOPD}, así como con el \textit{RGPD} y garantizan su seguridad y confidencialidad.
+    \item \textbf{Ausencia de impacto directo en los pacientes:} El desarrollo y validación de la herramienta se realizará únicamente sobre informes clínicos históricos existentes, lo que no provocará ninguna intervención sobre el cuidado médico de los pacientes ni modificación de sus datos. Es un estudio observacional.
+    \item \textbf{Imposibilidad Numérica:} Dificultad  existente para recabar el consentimiento informado debido al amplio número de pacientes.
+\end{enumerate} 
+
+\subsection{Clasificación como Producto Sanitario y Comercialización}
+
+Dada la alta sensibilidad del entorno clínico en el que opera el terminal portátil, la plataforma debe someterse a estrictos controles que garanticen su seguridad, eficacia y fiabilidad. A nivel comunitario, el proyecto se enmarca dentro del \textbf{Reglamento 2017/745} sobre los productos sanitarios \cite{boe2017/745}. Esta normativa establece que los programas informáticos (\textit{software}) pueden ser catalogados como productos sanitarios si están destinados a fines de diagnóstico, prevención, seguimiento o tratamiento de enfermedades. Dado que el sistema desarrollado automatiza el cálculo de indicadores \textit{SEMICYUC} para el apoyo en la toma de decisiones médicas, su futura comercialización exigiría su certificación bajo este reglamento.
+
+La obtención de esta conformidad se materializa a través del \textbf{Marcado CE}\footnote{Etiqueta obligatoria que indica que un producto cumple con los requisitos de seguridad, salud y protección medioambiental de la Unión Europea}, requisito indispensable para la libre circulación y venta del dispositivo en la Unión Europea. A nivel nacional, la transposición de estas directivas se refleja en el \textbf{Real Decreto 192/2023} \cite{boe2023/192}, el cual otorga a la Agencia Española de Medicamentos y Productos Sanitarios (\textit{AEMPS}) la potestad y responsabilidad de evaluar la clasificación del producto, así como de conceder o revocar las licencias de comercialización pertinentes.
+
+\subsection{Propiedad Intelectual y Derechos de Autor}
+
+La protección de los activos intangibles generados durante el desarrollo del \textit{software} constituye un aspecto fundamental del marco normativo. Tanto la jurisdicción española como las directivas comunitarias europeas establecen un marco jurídico robusto para salvaguardar la autoría y los derechos de explotación del código fuente desarrollado:
+
+\begin{itemize}
+    \item \textbf{Directiva (UE) 2009/24/CE:} Relativa a la protección jurídica de programas de ordenador \cite{boe2009/24/CE}. Esta normativa consagra que el \textit{software}, independientemente de su forma de expresión o de si se encuentra integrado en un componente \textit{hardware}, goza de protección íntegra mediante derechos de autor. Asimismo, estipula los criterios de originalidad requeridos para su amparo legal.
+    \item \textbf{Real Decreto Legislativo 1/1996:} Por el que se aprueba el texto refundido de la Ley de Propiedad Intelectual (\textit{LPI}) \cite{boe1/1996}. Constituye la norma central a nivel estatal en esta materia, tipificando las bases legales que regulan la autoría, los derechos morales inalienables y las condiciones de explotación patrimonial o cesión de los programas de ordenador desarrollados en territorio nacional.
+\end{itemize}
+
+\subsection{Licencias de \textit{Software} de Terceros}
+
+Una licencia de \textit{software} es un instrumento jurídico que establece los derechos, restricciones y obligaciones que el autor original de un programa otorga a los usuarios que desean utilizar, modificar o distribuir su código. En el ámbito de la ingeniería informática, comprender la compatibilidad entre licencias es fundamental para garantizar que el ensamblaje de distintas librerías no vulnere la propiedad intelectual de sus creadores.
+
+Como se ha justificado en apartados anteriores, la totalidad de la arquitectura de este proyecto se sostiene sobre un ecosistema de código abierto (\textit{Open Source}). En la Tabla \ref{tab:licencias_software} se detallan las herramientas, librerías y \textit{frameworks} que conforman la plataforma clínica, junto con la licencia bajo la cual operan y han sido integradas.
+
+\begin{table}[hbt!]\centering\begin{tabular}{lll}
+\hline
+\textbf{Categoría} & \textbf{Herramienta / Paquete} & \textbf{Tipo de Licencia} \\ \hline
+\textbf{Entorno del Sistema} & \textit{Raspberry Pi OS} & GPL / Debian Free Software \\ 
+\textbf{Lenguaje Base} & \textit{Python 3.x} & PSF License \\ \hline
+\textbf{Infraestructura} & \textit{Docker} / \textit{Docker Compose} & Apache License 2.0 \\ \hline
+\multirow{2}{*}{\textbf{\textit{Frameworks} y Servidor}} & \textit{Reflex} & Apache License 2.0 \\
+ & \textit{FastAPI} / \textit{Uvicorn} & MIT License \\ \hline
+\multirow{2}{*}{\textbf{Ciencia de Datos y \textit{ML}}} & \textit{Pandas}, \textit{NumPy} & BSD License \\
+ & \textit{Scikit-Learn} & BSD License \\ \hline
+\multirow{2}{*}{\textbf{Gráficos e Informes}} & \textit{Matplotlib} & PSF / BSD-like \\
+ & \textit{FPDF2} & GNU LGPL v3 \\ \hline
+\multirow{4}{*}{\textbf{Persistencia y Seguridad}} & \textit{PostgreSQL} & PostgreSQL License \\
+ & \textit{Psycopg2-Binary} & LGPL v3 \\
+ & \textit{Alembic} & MIT License \\
+ & \textit{Bcrypt} & Apache License 2.0 \\ \hline
+\multirow{2}{*}{\textbf{Desarrollo y Redacción}} & \textit{Visual Studio Code} & MIT License \\
+ & \textit{Texmaker} (\textit{LaTeX}) & GNU GPL v2 \\ \hline
+\end{tabular}
+\caption{Desglose de herramientas \textit{software} empleadas y sus respectivas licencias.}
+\label{tab:licencias_software}
+\end{table}
+
+\subsection{Licenciamiento del Proyecto Desarrollado}
+
+La elección de la licencia para el \textit{software} resultante de este Trabajo de Fin de Grado debe responder a dos premisas fundamentales: permitir su libre utilización y evolución por parte del Hospital Universitario de Burgos (\textit{HUBU}), y proteger al desarrollador original frente a posibles contingencias médico-legales.
+
+Bajo este contexto, se ha determinado liberar el código fuente de la plataforma bajo la \textbf{\textit{Apache License 2.0}} \cite{apache}. Las razones que justifican esta decisión son las siguientes:
+
+\begin{itemize}
+    \item \textbf{Carácter permisivo y fomento de la innovación:} Permite al hospital y a la comunidad científica utilizar, modificar y distribuir el \textit{software} con total libertad, sin obligar a que futuras integraciones (por ejemplo, con el sistema privado \textit{ICCA}) tengan que ser necesariamente de código abierto.
+    \item \textbf{Limitación explícita de responsabilidad:} El ámbito de la unidad de Reanimación (\textit{URCCPQ}) es altamente crítico. La licencia \textit{Apache 2.0} incluye una cláusula robusta que exime al autor de cualquier responsabilidad por daños derivados del uso de la herramienta, aclarando que el \textit{software} se proporciona ``tal cual'' (\textit{as is}) y sirve como apoyo estadístico, no sustituyendo el criterio médico del facultativo.
+    \item \textbf{Protección contra litigios de patentes:} A diferencia de licencias más sencillas como la \textit{MIT}, la directiva \textit{Apache} protege a los contribuyentes frente a posibles reclamaciones de patentes en el sector del \textit{software} médico, garantizando un marco seguro para la transferencia tecnológica.
+\end{itemize}

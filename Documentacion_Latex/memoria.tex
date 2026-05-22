@@ -143,13 +143,13 @@
   }
 \makeatother
 
-\newcommand{\nombre}{Nombre Alumno/a}
-\newcommand{\nombreTutor}{Nombre Tutor/a 1} 
-\newcommand{\nombreTutorb}{Nombre Tutor/a 2} 
-\newcommand{\dni}{123456A} 
+\newcommand{\nombre}{Nicolás José García Gómez}
+\newcommand{\nombreTutor}{David García García} 
+\newcommand{\nombreTutorb}{Cristina Arlanzón Pérez} 
+\newcommand{\dni}{71707732B} 
 
 % Datos de portada
-\title{Título del trabajo}
+\title{Aplicación web de cálculo de indicadores en la URCCPQ}
 \author{\nombre}
 \tutor{\nombreTutor}
 \tutorb{\nombreTutorb}
@@ -168,14 +168,14 @@
 
 \noindent\includegraphics[width=\textwidth]{CabeceraEPS.png}\vspace{1cm}
 
-\noindent D. \nombreTutor, profesor/a del departamento de departamento, área de área.
-\noindent D. \nombreTutorb, profesor/a del departamento de departamento, área de área.
+\noindent D. \nombreTutor, profesor del departamento de Ingeniería Informática del área de Lenguajes y Sistemas Informáticos.
+\noindent D. \nombreTutorb, Jefa de la Unidad de Reanimación y Cuidados Críticos postquirúrgicos del Servicio de Anestesiología y Reanimación del Hospital Universitario de Burgos.
 
 \noindent Expone/n:
 
-\noindent Que el/la alumno/a D. \nombre, con DNI \dni, ha realizado el Trabajo final de Grado en Ingeniería de la Salud titulado título del trabajo. 
+\noindent Que el/la alumno D. \nombre, con DNI \dni, ha realizado el Trabajo final de Grado en Ingeniería de la Salud titulado Aplicación web de cálculo de indicadores en la URCCPQ. 
 
-\noindent Y que dicho trabajo ha sido realizado por el/la alumno/a bajo la dirección del/los que suscribe/n.
+\noindent Y que dicho trabajo ha sido realizado por el alumno bajo la dirección los que suscriben,en virtud de lo cual se autoriza su presentación y defensa.
 
 \begin{center} %\large
 En Burgos, a {\large \today}
@@ -217,12 +217,18 @@ D. \nombreTutorb
 % Abstract en castellano
 \renewcommand*\abstractname{Resumen}
 \begin{abstract}
-En este primer apartado se hace una \textbf{breve} presentación del tema que se aborda en el proyecto.
+Uno de los principales desafíos en la gestión de la Unidad de Reanimación y Cuidados Críticos Postquirúrgicos del Servicio de Anestesiología y Reanimación (\textit{URCCPQ}) del Hospital Universitario de Burgos (\textit{HUBU}) radicaba en la evaluación periódica de sus actuaciones clínicas. Hasta la fecha, la jefatura de la unidad realizaba anualmente un análisis transversal de los pacientes, calculando los indicadores de forma estrictamente manual. 
+
+Aunque el muestreo transversal de los más de mil seiscientos pacientes anuales que recibe el servicio resultaba la única solución viable por su rapidez y bajo coste operativo, este enfoque metodológico presenta limitaciones intrínsecas: se restringe a descripciones estáticas y correlaciones puntuales, imposibilitando el análisis de la secuencia temporal y la evolución longitudinal de los eventos.
+
+Para dar respuesta a esta limitación metodológica, este proyecto presenta el desarrollo de una herramienta/aplicación de software diseñada para el procesamiento y análisis automatizado de los datos clínicos. La aplicación es capaz de calcular veintiún indicadores de calidad en rangos configurables de uno a diez años. Además, incorpora un motor estadístico que evalúa la evolución del servicio mediante el análisis de tendencias, el cálculo del error típico interanual y la obtención del coeficiente de determinación ($R^2$) para validar la adherencia a modelos lineales.
+
+La implementación de esta herramienta supone un salto cualitativo en la auditoría clínica de la unidad. Lo que previamente constituía un procedimiento estadístico laborioso y susceptible a errores humanos, se ha transformado en un flujo de trabajo automatizado. Ahora, la dirección médica puede obtener una evaluación integral e histórica del servicio con un solo \textit{clic}, facilitando la toma de decisiones basada en datos y optimizando significativamente la gestión de los recursos en la \textit{URCCPQ}.
 \end{abstract}
 
 \renewcommand*\abstractname{Descriptores}
 \begin{abstract}
-Palabras separadas por comas que identifiquen el contenido del proyecto Ej: servidor web, buscador de vuelos, android \ldots
+Indicadores de calidad, \textit{URCCPQ}, \textit{HUBU}, aplicación web, software, Semicyuc, innovación tecnológica, bases de datos.
 \end{abstract}
 
 \clearpage
@@ -230,12 +236,18 @@ Palabras separadas por comas que identifiquen el contenido del proyecto Ej: serv
 % Abstract en inglés
 \renewcommand*\abstractname{Abstract}
 \begin{abstract}
-A \textbf{brief} presentation of the topic addressed in the project.
+One of the main challenges in the management of the Post-Surgical Resuscitation and Critical Care Unit of the Anesthesiology and Resuscitation Service (\textit{URCCPQ}) at the University Hospital of Burgos (\textit{HUBU}) lay in the periodic evaluation of its clinical performance. To date, the unit's management conducted an annual cross-sectional analysis of the patients, calculating the indicators in a strictly manual manner. 
+
+Although the cross-sectional sampling of the more than 1,600 patients the service receives annually was the only viable solution due to its speed and low operational cost, this methodological approach presents intrinsic limitations: it is restricted to static descriptions and point correlations, precluding the analysis of the temporal sequence and the longitudinal evolution of events.
+
+To address this methodological limitation, this project presents the development of a software application designed for the automated processing and analysis of clinical data. The application is capable of calculating twenty-one quality indicators within configurable ranges from one to ten years. Furthermore, it incorporates a statistical engine that evaluates the service's evolution through trend analysis, the calculation of the interannual standard error, and the determination of the coefficient of determination ($R^2$) to validate adherence to linear models.
+
+The implementation of this tool represents a qualitative leap in the unit's clinical auditing. What previously constituted a laborious statistical procedure susceptible to human error has been transformed into an automated workflow. Now, the medical direction can obtain a comprehensive and historical evaluation of the service with a single \textit{click}, facilitating data-driven decision-making and significantly optimizing resource management in the \textit{URCCPQ}.
 \end{abstract}
 
 \renewcommand*\abstractname{Keywords}
 \begin{abstract}
-keywords separated by commas.
+Quality indicators, \textit{URCCPQ}, \textit{HUBU}, web application, software, SEMICYUC, technological innovation, databases.
 \end{abstract}
 
 \clearpage

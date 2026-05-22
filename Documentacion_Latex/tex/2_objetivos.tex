@@ -1,15 +1,42 @@
-\capitulo{2}{Objetivos}
+\capitulo{2}{Objetivos} \label{ch:objetivos}
+Este proyecto busca proporcionar una herramienta para la mejora del calculo de indicadores clínicos, mediante la aplicación de tecnologías avanzadas de análisis de datos. La idea surge de la necesidad de ampliación
+de un trabajo previo realizado en las practicas curriculares, centrado en la obtención de los indicadores y su cálculo.
 
-Objetivos del trabajo realizado.
+A continuación, se enumeran y explican de forma detallada los objetivos que se persiguen con la realización de este proyecto.
 
-En este apartado se definen de forma clara y concisa los objetivos del Trabajo Fin de Grado. 
-Es recomendable distinguir entre:
-\begin{itemize}
-    \item Un objetivo general que describa el propósito principal del trabajo.
-    \item Objetivos específicos de carácter técnico, experimental o clínico, derivados de los requisitos del proyecto.
-    \item Objetivos marcados por los requisitos del software/hardware/análisis a desarrollar.
-    \item Objetivos de aprendizaje, relacionados con los conocimientos y competencias adquiridas.
-\end{itemize}
+\section{Objetivo Generales}
+Este proyecto consta de un objetivo principal claro y de gran importancia debido a su relevancia en la unidad de Reanimación y Cuidados Críticos postquirúrgicos del Servicio de Anestesiología y Reanimación de Burgos; ademas cuenta con diversas problemáticas secundarias que a continuación se comentaran.
+
+Nuestro proyecto propone el desarrollo y validación de una herramienta que permita generar un análisis del desempeño de la unidad con su consiguiente informe de los datos clínicos por parte de los médicos implicados \cite{semicyuc}. Esta herramienta, facilitará el cálculo de estos indicadores clínicos específicos y mejorará la eficiencia de los flujos de trabajo, contribuyendo así en la mejora de la calidad de los informes clínicos. 
+
+Al automatizar el cálculo y el posterior análisis, se espera reducir significativamente el tiempo dedicado a 
+estas tareas, logrando así una mayor eficiencia en el entorno clínico.
+
+\section{Objetivos de la integración y funcionalidad del sistema}
+Una de las mayores problemáticas fue la integración de este sistema dentro de los ordenadores del \textit{HUBU}. Era de vital importancia que los datos recopilados sean unicamente accesibles para el personal del hospital, imposibilitando la creación de una \textit{web online} con \textit{IP} pública. Este proceso paso a ser primordial ya que debíamos encontrar una solución que permitiese utilizar la herramienta \textit{web} sin comprometer los datos privados de los pacientes, para ello:
+
+\begin{enumerate}
+    \item \textbf{Exportación del proyecto:} Como ya hemos comentado, es de vital importancia que estos datos (aun siendo anonimizados o seudonimización) no salgan del hospital o de los dispositivos destinados para su uso. Por lo que uno de los objetivos mas complejos, era no utilizar el servicio de \textit{Reflex Cloud} para publicar la aplicación, dado que estos datos transitarían por servidores externos. Fue necesario realizar un despliegue local de la aplicación, a través de la \textit{intranet} del hospital.
+
+    \item \textbf{Recolección Semiautomática y Seudonimización:} Ante la imposibilidad de extraer datos automáticamente desde \textit{ICCA}, se diseñó un método de recolección semiautomática. Los facultativos recopilan de forma seudonimizada las variables definidas en un documento de especificación técnica, estos datos se almacenan de forma persistente en la base de datos \textit{PostgreSQL} del hospital para su posterior análisis clínico y auditoría.
+\end{enumerate}
+
+\section{Objetivos del desarrollo web}
+Están relacionados con el diseño y la implementación de una interfaz web con funcionalidades específicas.
+
+\begin{enumerate}
+    \item \textbf{Permitir la carga y procesamiento de archivos \textit{CSV}:} Incluyendo una zona que permita la subida con sus posteriores método de eliminación. Garantizando en todo momento el control total sobre los archivos cargados y el tiempo que permanecen en la memoria del equipo.
+    
+    \item \textbf{Carga y procesamiento de archivos desde la \textit{BBDD}:} Para el análisis, el sistema extrae los registros directamente desde el servidor \textit{PostgreSQL} del hospital. Mediante \textit{SQLModel}, los datos se inyectan en \textit{DataFrames} de \textit{Pandas} a través de \textit{buffers}\footnote{Espacio de almacenamiento efímero en la memoria \textit{RAM} que retiene datos durante su transferencia entre procesos, evitando el uso del disco duro.} en la memoria \textit{RAM} (arquitectura \textit{Zero-Disk}\footnote{Arquitectura o metodología de desarrollo donde las aplicaciones y sistemas operativos están diseñados para funcionar sin depender de un disco duro local (\textit{HDD} o \textit{SSD}) para el almacenamiento de datos persistentes o la ejecución de archivos del sistema durante su operación.}), evitando la escritura de archivos físicos en el disco duro. Este flujo garantiza que la información clínica se procese a velocidad nativa y sea eliminada por el \textit{Garbage Collector}\footnote{Mecanismo automático de gestión de memoria que elimina objetos que ya no se utilizan en el programa, liberando espacio en la memoria RAM.} al finalizar la sesión, cumpliendo estrictamente con la \textit{LOPD}. 
+
+    \item \textbf{Diseñar una interfaz que garantice la accesibilidad:} El personal clínico al que está destinado el producto final de este proyecto tendrán distintos niveles de competencia tecnológica, por lo que un diseño sencillo, intuitivo y la gestión eficaz de la información son de vital importancia para una experiencia de usuario satisfactoria.
+\end{enumerate}
+
+\section{Objetivos de desarrollo hardware}
+En un inicio nació con el objetivo de la creación de un servidor local gracias a la aquitectura \textit{Raspberry Pi}, a través del cual, los ordenadores de la unidad pudieran establecer una conexión. Esta idea fue descartada virando hacia el desarrollo de un terminal físico portátil (denominado internamente ``\textit{tablet médica}''), que dota al personal clínico de movilidad para utilizar la aplicación fuera del hospital, permitiendo la descarga de registros desde la propia aplicación en formato \textit{CSV} de forma totalmente anonimizada.
+\begin{enumerate}
+    \item \textbf{Mejora y optimización del prototipo \textit{hardware}:} Para ello se realizan mejoras en el prototipo inicial. Buscando perfeccionar el diseño para facilitar su uso portátil, desembocando en un diseño más cómodo y minimizando las restricciones que puedan afectar al usuario durante su uso.
+\end{enumerate}
 
 
 

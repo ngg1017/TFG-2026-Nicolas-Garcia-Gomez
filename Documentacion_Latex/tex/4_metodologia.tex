@@ -1,23 +1,372 @@
 \capitulo{4}{Metodología}
+\section{Desarrollo del proyecto}
+El desarrollo del proyecto consta de varias fases de colaboración entre el servicio de la \textit{URCCPQ} y el Grado de Ingeniería de la Salud de la \textit{UBU}, las cuales a continuación se detallaran:
+\begin{itemize}
+    \item \textbf{1ª Fase:} Seudonimización por parte de los clínicos. Datos como la presión arterial media, los días en ventilación mecánica o el uso de corticoides. Todos estos datos se recogerán e incluirán en la base de datos de forma seudonimizada. Para facilitar su visualización y comprensión, el diccionario de variables se ha fragmentado en dos bloques lógicos. La Tabla \ref{tab:variables_clinicas_1} detalla los datos de ingreso, soporte respiratorio y monitorización hemodinámica; mientras que la Tabla \ref{tab:variables_clinicas_2} recoge los parámetros de infectología, sedación, nutrición y seguridad. Se tendrán en cuenta los siguientes criterios de inclusión/exclusión:
+    \begin{itemize}
+        \item \textbf{Inclusión:} Se recogen los datos necesarios de todos los pacientes que hayan estado ingresados en el servicio de la \textit{URCCPQ}. 
+        \item \textbf{Exclusión:} Pacientes que pasan al servicio de la \textit{URCCPQ} debido a que el área de \textbf{Unidad de Recuperación Postanestésica (\textit{URPA})} permanece cerrada, perteneciendo originalmente a la \textit{URPA}. 
+    \end{itemize}
+
+\begin{table}[hbt!]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lll}
+\hline
+\textbf{Variable Clínica} & \textbf{Tipo de Dato} & \textbf{Descripción / Formato} \\ \hline
+\multicolumn{3}{c}{\textbf{A. Datos Generales y Fechas}} \\ \hline
+Fecha Ingreso & Fecha & Fecha del ingreso en \textit{UCI} (\textit{dd/mm/aaaa}). \\
+Fecha Alta & Fecha & Fecha de salida de la \textit{UCI}. \\
+Reingreso 48 & Booleano & \textit{True / False}. \\
+Especialidad de Ingreso & Texto & Área médica de procedencia (Ej: Cardiología). \\
+Ingreso por Urgencia & Booleano & \textit{True / False}. \\
+Fallecimiento & Booleano & \textit{True / False}. \\
+APACHE & Entero & Puntuación de gravedad al ingreso. \\ \hline
+\multicolumn{3}{c}{\textbf{B. Ventilación Mecánica y Respiratorio}} \\ \hline
+VMI & Booleano & Indica si el paciente requirió Ventilación Mecánica Invasiva. \\
+Días VMI & Numérico & Días totales de soporte respiratorio. \\
+Barotrauma & Booleano & \textit{True / False}. \\
+Grados Inclinación & Entero & Rango posicional de 0 a 90 grados. \\
+Episodios NAV & Booleano & \textit{True / False}. \\
+Registro Intubaciones & Texto & Fechas separadas por comas (Ej: ``14/10/2025, 18/10...''). \\
+Extubación Programada & Booleano & \textit{True / False}. \\
+Extubación por Maniobras & Booleano & Retirada accidental del soporte respiratorio. \\ \hline
+\multicolumn{3}{c}{\textbf{C. Sepsis y Monitorización Hemodinámica}} \\ \hline
+Sepsis & Booleano & \textit{True / False}. \\
+Shock Séptico & Booleano & \textit{True / False}. \\
+PAM (Ingreso / 6h / 24h) & Entero & Presión Arterial Media (\textit{mmHg}) en dichos periodos. \\
+Diuresis (Ingreso / 6h / 24h) & Decimal & Volumen urinario (\textit{ml/kg/h}) en dichos periodos. \\
+Lactato (Ingreso / 6h / 24h) & Decimal & Nivel de ácido láctico (\textit{mmol/L}) en dichos periodos. \\ \hline
+\end{tabular}
+}
+\caption{Diccionario de variables (Parte 1): Datos generales, respiratorios y hemodinámica.}
+\label{tab:variables_clinicas_1}
+\end{table}
+
+\begin{table}[hbt!]
+\centering
+\resizebox{\textwidth}{!}{
+\begin{tabular}{lll}
+\hline
+\textbf{Variable Clínica} & \textbf{Tipo de Dato} & \textbf{Descripción / Formato} \\ \hline
+\multicolumn{3}{c}{\textbf{D. Infectología y Antibióticos}} \\ \hline
+Tratamiento adecuado & Booleano & \textit{True / False}. \\
+Cobertura empírica & Booleano & \textit{True / False}. \\
+Resistencia antibióticos & Booleano & \textit{True / False}. \\ 
+Número Episodios Bacteriemia & Numérico & Total de episodios sufridos. \\
+Número total de días CVC & Numérico & Total de días con catéteres venosos centrales. \\ \hline
+\multicolumn{3}{c}{\textbf{E. Sedación y Monitorización Neurológica}} \\ \hline
+RASS / RASS objetivo & Entero & Escala de agitación/sedación (-5 a +4) real y prescrita. \\
+BIS / BIS objetivo & Entero & Índice biespectral (0 a 100) real y prescrito. \\
+Ventana de sedación & Numérico & Días de interrupción diaria programada de sedación. \\ \hline
+\multicolumn{3}{c}{\textbf{F. Nutrición y Riesgos Gastrointestinales}} \\ \hline
+Fecha Inicio NE & Fecha & Inicio de Nutrición Enteral (\textit{dd/mm/aaaa}). \\
+Omeprazol & Booleano & Recepción de profilaxis gástrica. \\
+Tratamiento Corticoides & Booleano & \textit{True / False}. \\
+Antecedentes Hemorragia & Booleano & \textit{True / False}. \\
+Coagulopatía & Booleano & \textit{True / False}. \\
+Insuficiencia Renal & Booleano & \textit{True / False}. \\
+Insuficiencia Hepática & Booleano & \textit{True / False}. \\ \hline
+\multicolumn{3}{c}{\textbf{G. Seguridad y Otros Cuidados}} \\ \hline
+UPP & Booleano & Presencia constatada de Úlceras por Presión. \\
+Profilaxis TVP & Booleano & \textit{True / False}. \\
+TVP & Booleano & Trombosis Venosa Profunda confirmada. \\
+Glucemia & Numérico & Nivel de glucosa en sangre (\textit{mg/dl}). \\
+Tratamiento Insulina & Booleano & \textit{True / False}. \\
+Traslado Intrahospitalario & Booleano & \textit{True / False}. \\
+Listado verificación & Booleano & \textit{Check-list} de seguridad cumplimentado en traslado. \\
+Eventos Adversos Traslado & Booleano & \textit{True / False}. \\
+Actos Transfusionales & Booleano & \textit{True / False}. \\
+Sangrado Activo & Booleano & \textit{True / False}. \\
+Cantidad Transfusión & Entero & Número diario de concentrados de hematíes administrados. \\ \hline
+\end{tabular}
+}
+\caption{Diccionario de variables (Parte 2): Infectología, sedación, nutrición y seguridad.}
+\label{tab:variables_clinicas_2}
+\end{table}
+
+    \item \textbf{2ª Fase:} Desarrollo de la herramienta con datos incluidos de manera aleatoria.
+
+    \item \textbf{3ª Fase:} Privacidad y Cumplimiento de la \textit{LOPD}. La plataforma implementa medidas arquitectónicas estrictas para garantizar que los datos clínicos permanezcan aislados y sean efímeros:
+    \begin{enumerate}
+        \item \textbf{Aislamiento de Red:} El sistema opera de forma cautiva dentro de la \textit{intranet} del \textit{HUBU} a través de contenedores \textit{Docker}. Al no requerir conexión a internet pública, se elimina el riesgo de exfiltración de la información hacia el exterior.
+        \item \textbf{Arquitectura \textit{Zero-Disk}:} El sistema elude cualquier tipo de escritura de archivos temporales en el disco duro. Los registros clínicos se manejan exclusivamente a través de \textit{buffers} en la memoria \textit{RAM}.
+        \item \textbf{Destrucción Volátil:} Se ha superado la necesidad de utilizar \textit{scripts} de limpieza secundarios o \textit{watchdogs}. Al interrumpirse la conexión (\textit{WebSocket}) por el cierre del navegador o al finalizar la sesión, el \textit{Garbage Collector} de \textit{Python} purga instantáneamente la memoria, asegurando que no quede ningún remanente físico o lógico de los datos.
+    \end{enumerate}
+
+    \item \textbf{4ª Fase:} Validación de la herramienta. 
+\end{itemize}
 
 \section{Descripción de los datos.}
-Se describirán los datos utilizados en el proyecto, indicando su origen, tipo, formato y características principales. 
-Cuando el tratamiento de datos sea extenso, se hará referencia al anexo correspondiente.
+Este proyecto se cimenta sobre los datos de miles de personas, extraídos de sus Historias Clínica del Sistema Nacional de Salud(\textit{HCDSNS}) \cite{hcdsns}. Estos datos ocupan el lugar mas elevado en cuanto a la protección y privacidad. Dichos datos pueden revelar ideología, afiliación sindical, religión, creencias, origen racial, haciendo que ante una filtración, se podría generar una discriminación laboral, problemas con seguros o daños psicológicos.
 
-\section{Técnicas y herramientas.}
+El programa anteriormente descrito (\textit{ICCA}) tiene una clara falta de exportación de estos datos. Debido a la sensibilidad de los mismo, \textit{ICCA} impide su utilización directa. El primer acceso a los datos que se propuso en el proyecto fue redactando un escrito a la dirección del centro, detallando y solicitando la concesión de los datos totalmente anonimizados. Tras la ausencia de respuesta por parte del centro, la jefatura de la unidad propuso una método de recolección semiautomático y seudonimización.
 
-Se presentarán las técnicas metodológicas y las herramientas empleadas durante el desarrollo del proyecto. 
-Se deben justificar las elecciones realizadas frente a otras posibles alternativas.
+En lugar de emplear archivos de texto externos, la definición de las variables clínicas y sus tipos se ha integrado directamente en el formulario de adición de registros de la aplicación \textit{Reflex}. Los facultativos generalmente médicos residentes\footnote{Aquellos profesionales que desean especializarse en un área específica del cuidado de la salud y colaboran en la recolección de datos clínica.} introducen la información de forma seudonimizada a través de esta interfaz digital optimizada. Este método agiliza la ingesta de datos, elimina errores de formato y garantiza el cumplimiento de la \textit{LOPD} al canalizar la información directamente hacia la base de datos \textit{PostgreSQL} del hospital, profesionalizando un proceso que anteriormente resultaba lento y manual.
 
-Esta parte de la memoria tiene como objetivo presentar las técnicas metodológicas y las herramientas de desarrollo que se han utilizado para llevar a cabo el proyecto. Si se han estudiado diferentes alternativas de metodologías, herramientas, bibliotecas se puede hacer un resumen de los aspectos más destacados de cada alternativa, incluyendo comparativas entre las distintas opciones y una justificación de las elecciones realizadas. 
-No se pretende que este apartado se convierta en un capítulo de un libro dedicado a cada una de las alternativas, sino comentar los aspectos más destacados de cada opción, con un repaso somero a los fundamentos esenciales y referencias bibliográficas para que el lector pueda ampliar su conocimiento sobre el tema.
+El objetivo principal era publicar esta herramienta en los servidores de \textit{Reflex} especializados, facilitando la distribución del proyecto; no obstante, para asegurar la confidencialidad, integridad y privacidad de los datos, el proyecto tuvo que virar hacia un enfoque local. Ya que si la web funcionaba en los servidores de \textit{Reflex Cloud}\footnote{Servicio de despliegue en la nube del \textit{framework Reflex}} por óptimos que resultasen implementados los métodos de borrado, los archivos en algún momento, por mínimo que fuese se encontrarían físicamente en sus servidores; desembocando en el despliegue mediante contenedores \textit{Docker} en la \textit{intranet} del \textit{HUBU}. Para garantizar la limpieza absoluta del servidor y la protección de datos, se ha implementado una arquitectura \textit{Zero-Disk} que elimina la necesidad de vigilar carpetas locales o programar el borrado de archivos. En este modelo, la información clínica procesada reside exclusivamente de forma volátil en la memoria \textit{RAM}, siendo purgada automáticamente por el \textit{Garbage Collector} de \textit{Python} al cierre de la sesión, asegurando que no quede ningún rastro físico de datos sensibles en el almacenamiento del centro.
 
+\subsection{Variables y Estudio Estadístico}
+Se utilizarán las variables clínicas y los indicadores de calidad establecidos (como los definidos por la \textit{SEMICYUC}) con el objetivo de realizar la validación técnica y funcional de la herramienta web de forma adecuada. 
+
+Para cumplir los objetivos planteados en el proyecto, la evaluación de la aplicación se centrará en: 
+
+\subsubsection{Precisión y Fiabilidad del cálculo automatizado}
+Validar la exactitud matemática y algorítmica de la herramienta desarrollada en \textit{Python} para el cálculo de los indicadores de calidad. Es necesario indicar que la validación se realizará mediante la comparativa directa entre los resultados arrojados por la herramienta y el \textit{“Gold Standard”}. En este contexto, el \textit{Gold Standard} corresponde al cálculo manual exhaustivo de dichos indicadores realizado por el personal clínico.
+
+\subsubsection{Robustez y Concordancia en el procesamiento de datos}
+Es fundamental evaluar la capacidad de la herramienta para gestionar la limpieza de datos (valores nulos, formatos de fecha inconsistentes o errores de tipografía) sin alterar la integridad de los resultados clínicos. Para garantizar la fiabilidad de la información antes de su inserción en la base de datos \textit{PostgreSQL}, el formulario interactivo desarrollado en \textit{Reflex} implementa una validación exhaustiva en la entrada de datos. Este módulo controla el tipado estricto de las variables e impone la integridad estructural de los campos temporales. Asimismo, incorpora reglas lógicas que evalúan la coherencia cronológica impidiendo, por ejemplo, registrar una fecha de alta anterior a la de ingreso y establece umbrales numéricos de seguridad que restringen los valores introducidos a rangos médicamente posibles. Esta primera línea de defensa mitiga el error humano y asegura la calidad del análisis estadístico posterior.
 
 \section{Metodología de Ingeniería del Software}
+Para la conceptualización y desarrollo de esta herramienta \textit{web}, se ha optado por implementar una \textbf{Metodología Ágil de carácter iterativo e incremental}. \cite{sommerville2015}. 
 
-En caso de que el TFG incluya desarrollo software, se indicará la metodología de ingeniería del software seguida y se describirá cómo se han organizado las fases y tareas del proyecto.
+En el ámbito de la Ingeniería de la Salud y la informática clínica, la rigidez metodológica suele ser contraproducente. Por este motivo, se descartaron metodologías tradicionales o secuenciales, como el modelo en Cascada (\textit{Waterfall}). Este tipo de enfoques exigen que los requisitos del sistema estén completamente definidos, documentados y cerrados desde la primera fase del proyecto. Dada la naturaleza clínica de los datos y la necesidad de validar empíricamente los cálculos de los indicadores de la \textit{SEMICYUC}, resultaba inviable establecer unos requisitos inamovibles. El proyecto requería un marco de trabajo flexible que permitiera la adaptación rápida a los cambios, la corrección de cálculos médicos sobre la marcha y la integración continua de nuevas funcionalidades sin paralizar el desarrollo global.
 
-Resumir la metodología adoptada y la referencia al anexo correspondiente.
+\subsection{Justificación Basada en el Desarrollo Real}
+La elección de esta estrategia ágil se fundamenta directamente en las necesidades prácticas surgidas durante el proceso de creación de la aplicación \textit{web}:
+
+\begin{itemize}
+    \item \textbf{Comunicación continua con el \textit{Product Owner}:} La supervisora clínica del proyecto (la doctora responsable de la unidad de la \textit{URCCPQ}) actuó como \textit{Product Owner}. Gracias al enfoque iterativo, se pudieron realizar demostraciones de versiones preliminares del sistema (desde el \textit{script} base hasta la interfaz \textit{web} inicial), obteniendo \textit{feedback} inmediato. Esto permitió descubrir requerimientos no contemplados inicialmente, como la inclusión de nuevas variables.
+    \item \textbf{Desarrollo iterativo y prototipado con \textit{Reflex}:} El sistema no se construyó de manera monolítica. Se implementó mediante iteraciones funcionales: primero se consolidó un \textit{backend} robusto para la limpieza y procesamiento de los datos utilizando la librería \textit{Pandas}; posteriormente, se integró el \textit{frontend} utilizando el \textit{framework Reflex}; a continuación, se realizó la conexión con la base de datos; y, por último, se añadieron los módulos de visualización gráfica e interactividad.
+    \item \textbf{Gestión de incidencias y trazabilidad mediante \textit{GitHub}:} El flujo de trabajo se gestionó a través de repositorios, documentando errores (\textit{bugs}), refactorizaciones (como la optimización de bucles por operaciones vectorizadas para evitar la saturación de memoria) y propuestas futuras de mejora mediante el sistema de \textit{Issues}, garantizando así el control de versiones y la planificación del \textit{Product Backlog}.
+\end{itemize}
+
+\subsection{Fases del Ciclo de Vida del Software}
+El ciclo de vida de la aplicación se estructuró en cinco fases iterativas principales, mostrando cuatro de ellas en la Figura \ref{fig:desarrollo} y descritas a continuación:
+
+\begin{enumerate}
+    \item \textbf{Toma de Requisitos e Investigación:} Análisis exhaustivo de las fórmulas de calidad asistencial de la \textit{SEMICYUC}, evaluación de viabilidad de tecnologías (descarte inicial de herramientas como \textit{PySpark} en favor de \textit{Python} nativo para optimizar el rendimiento local) y estudio de la estructura de los datos proporcionados por el hospital.
+    \item \textbf{Desarrollo del \textit{Backend} y Lógica de Datos:} Programación de los algoritmos de carga, sistemas de validación estructurada (\textit{First In, First Out} - \textit{FIFO}), limpieza de datos atípicos, homogeneización de formatos mediante expresiones regulares, carga y adición de los datos en \textit{PostgreSQL} y programación del núcleo matemático.
+    \item \textbf{Desarrollo del \textit{Frontend} e Interfaz de Usuario (\textit{UI}):} Creación de la arquitectura web utilizando Reflex. Implementación de una interfaz gráfica intuitiva alineada con los estándares visuales de la institución (\textit{Sacyl}), diseño de ventanas dinámicas y menús de navegación.
+    \item \textbf{Integración y Visualización Analítica:} Conexión de la lógica con la base de datos y el componente visual. Generación algorítmica de gráficos interactivos (sectores, barras, áreas) y desarrollo de módulos de exportación estructurada para la auditoría manual de los resultados.
+    \item \textbf{Validación Clínica y Despliegue:} Pruebas de campo con un corte transversal real de datos (enero de 2026), implementación de protocolos de seguridad basados en arquitectura \textit{Zero-Disk} (purga automática de datos confidenciales en \textit{RAM} mediante \textit{Garbage Collection}) y despliegue seguro en la \textit{intranet} del hospital utilizando contenedores \textit{Docker}.
+\end{enumerate}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{img/Desarrollo_Iteractivo.png}
+    \caption{Desarrollo interactivo. \textit{Elaboración propia}}
+    \label{fig:desarrollo}
+\end{figure}
+
+\subsection{Programación funcional y arquitectura modular}
+La arquitectura del \textit{software} desarrollado para este proyecto se fundamenta en el paradigma de la programación funcional. Bajo este enfoque, la resolución de las distintas tareas se articula mediante la composición y el encadenamiento de funciones. Esta metodología no solo maximiza la reutilización del código, sino que resulta clave para garantizar la inmutabilidad de los datos de entrada. En su gran mayoría, el sistema se apoya en funciones puras; es decir, rutinas cuyo valor de retorno depende exclusivamente de los parámetros suministrados, evitando generar efectos secundarios o alteraciones no deseadas en las estructuras de datos originales.
+
+Esta filosofía funcional se ha integrado estrechamente con un diseño modular, permitiendo abordar la complejidad del sistema mediante una estrategia descendente o enfoque \textit{top-down}\footnote{La estrategia \textit{top-down} es un paradigma de resolución que consiste en la segmentación sistemática de un problema complejo en fracciones menores y más manejables. En el ámbito de la ingeniería de \textit{software}, esta técnica se traduce en la descomposición de un programa estructurado en módulos jerárquicos de alto nivel.}. De este modo, el desafío principal se ha fragmentado en subproblemas más abarcables que se resuelven a través de módulos autónomos. Es la combinación y sinergia de los resultados de cada una de estas unidades lógicas lo que permite alcanzar el objetivo global de la aplicación.
+
+La adopción de esta modularidad trasciende la simple reutilización algorítmica, aportando un grado de mantenibilidad crítico para el ciclo de vida del programa. Al compartimentar el sistema en unidades independientes, se simplifica drásticamente su lectura, actualización y soporte técnico. Cualquier modificación requerida en una funcionalidad concreta queda acotada a su módulo correspondiente, asegurando que el resto de la infraestructura no se vea afectada. Asimismo, esta separación estructural resulta vital durante las fases de prueba y depuración (\textit{testing} y \textit{debugging}), ya que permite aislar cada componente para auditarlo individualmente, agilizando enormemente la detección y corrección de errores.
+
+\section{Técnicas y herramientas.}
+El problema planteado por la dirección de la unidad era el clásico problema de análisis de datos, en el grado de Ingeniería de la Salud se han realizado y buscado soluciones en infinidad de asignaturas. Una de ellas \textit{Big Data}, por lo que la primera opción fue utilizar \textit{Spark SQL}\footnote{Módulo para el procesamiento de datos estructurados que permite consultar información utilizando SQL}. Dicha asignatura mostró la utilidad y la facilidad de implementarlo en el proyecto. 
+
+En \textit{Big Data} no se instaló \textit{Spark SQL}, se gestionaba a través de los \textit{Google notebooks} los cuales, corren \textit{Ubuntu}\footnote{Sistema operativo (SO) libre, gratuito y de código abierto basado en Linux} en su \textit{backend}, por lo que al instalar \textit{Spark SQL} en \textit{Windows} desembocó en infinidad de problemas:
+\begin{itemize}
+    \item Problemas de controladores \textit{USB} 
+    \item Necesidad de la instalación de \textit{Java}
+    \item Incompatibilidad con \textit{Windows} de 64 \textit{bits}
+    \item Comandos que se habían utilizado en el \textit{notebook} ya no funcionaban
+\end{itemize}
+Después de todos estos problemas se llegó a la conclusión de abandonar \textit{Spark SQL}. Como el objetivo era usar \textit{PostgreSQL} para guardar los datos de la unidad y después tener la opción de cargarlo en la herramienta final, se optó por usar \textit{pandas}.
+
+Después de solucionar el dilema de \textit{Spark SQL} se necesitaba crear alguna herramienta o aplicación que permita a los facultativos subir sus datos y muestrar los resultados de manera sencilla. El proyecto disponia de: \textit{Reflex} o \textit{Streamlit}, otro \textit{framework} de código abierto para \textit{Python}, diseñado para crear aplicaciones \textit{web} interactivas y visualizaciones de datos de forma rápida y sencilla. Como se ha ido relatando, la decisión final fue utilizar \textit{Reflex}. 
+\begin{enumerate}
+    \item \textbf{Rendimiento y gestión del estado:} \textit{Streamlit} recarga el código completo tras cada interacción del usuario. Por el contrario, \textit{Reflex} emplea \textit{WebSockets} para actualizar de forma instantánea y asíncrona únicamente las variables modificadas, optimizando la fluidez del sistema al manejar grandes volúmenes de datos históricos.
+    \item \textbf{Personalización visual y ergonomía:} Mientras que \textit{Streamlit} impone una interfaz gráfica rígida y genérica, \textit{Reflex} transcompila el código a \textit{React}. Esto ha permitido diseñar una interfaz clínica profesional, completamente a medida y adaptada ergonómicamente para su uso en la pantalla táctil de la \textit{tablet} médica.
+    \item \textbf{Arquitectura real y escalabilidad:} \textit{Streamlit} opera bajo la lógica de un \textit{script} secuencial. \textit{Reflex}, en cambio, implementa una separación estructural auténtica entre el \textit{frontend} y un servidor \textit{backend} de alto rendimiento (\textit{FastAPI}), garantizando que la aplicación tenga grado de producción y sea fácilmente integrable con los sistemas de bases de datos del hospital.
+\end{enumerate}
+
+\subsection{Herramientas \textit{Software}}
+La figura \ref{fig:programas} muestra un gráfico que contiene los programas/lenguajes más importante del proyecto.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{img/programas.png}
+    \caption{Programas/Lenguajes usados. \textit{Elaboración propia}}
+    \label{fig:programas}
+\end{figure}
+
+\subsubsection{Entornos de programación y programas}
+\begin{itemize}
+    \item \textbf{V\textit{isual Studio Code} (1.113.0):} Avanzado editor de código fuente disponible para \textit{Windows}, \textit{macOS} y \textit{Linux}. Destaca por ser ligero y potente, ofreciendo soporte para \textit{JavaScript}, \textit{C++} o \textit{Python}. \cite{vscode}
+    
+    \item \textbf{\textit{PostgreSQL} (15):} Potente sistema de gestión de bases de datos relacionales de código abierto. Destaca por su alta robustez, seguridad avanzada y cumplimiento estricto del estándar \textit{SQL}, garantizando la persistencia e integridad de datos críticos en entornos institucionales. \cite{postgresql}
+    
+    \item \textbf{\textit{Docker Desktop} (4.71.0):} Aplicación con interfaz gráfica que empaqueta todas las herramientas necesarias para construir, gestionar y ejecutar contenedores de forma rápida e intuitiva en cualquier ordenador local. \cite{dockerdesktop}
+    
+    \item \textbf{\textit{Gemini}:} Herramienta de inteligencia artificial utilizada de apoyo en el desarrollo de código implementado para el funcionamiento del proyecto. \cite{gemini} 
+
+    \item \textbf{\textit{Lucidchart}:} Herramienta en linea para la creación de diagramas y gráficos. \cite{lucidchart}
+
+    \item \textbf{\textit{GitHub}:} Repositorio en línea de código fuente que facilita el control de versiones y la colaboración en proyectos software mediante el sistema \textit{Git}\footnote{Sistema de control de versiones distribuido, que registra los cambios en el código fuente de un proyecto a lo largo del tiempo.}. \cite{github}
+
+    \item \textbf{\textit{GitHub Desktop} (3.5.6):}. Aplicación de escritorio que facilita el uso de \textit{Git} y el trabajo con código almacenado en \textit{GitHub}, mediante una interfaz gráfica de usuario. \cite{desktop}
+
+    \item \textbf{\textit{TexMaker}:} Es un editor de \textit{LaTeX}, gratuito y  colaborativo, que permite redactar, editar y publicar documentos técnicos o científicos sin necesidad comprar licencias de uso. \cite{texmaker}
+
+    \item \textbf{\textit{Microsoft Exel}:} Es una aplicación de hoja de cálculo desarrollada por \textit{Microsoft} que permite organizar, analizar, calcular y visualizar datos numéricos y de texto en filas y columnas. Es parte de la suite \textit{Microsoft Office} y es fundamental para gestionar presupuestos, crear gráficos, realizar tareas contables y automatizar procesos con macros. \cite{excel}
+\end{itemize}
+
+\subsubsection{Lenguajes de programación}
+En esta sección se describirán los lenguajes utilizados para la obtención de los resultados:
+
+\begin{itemize}
+    \item \textbf{\textit{Python} (3.12.9):} Lenguaje de programación interpretado, de alto nivel, de propósito general, con una sintaxis legible y de tipado dinámico\footnote{No es necesario especificar los tipos de datos de las variables en el momento de la declaración}. Se ha seleccionado \textit{Python} como lenguaje de programación, no solo por las características descritas, sino también porque cuenta con una amplia biblioteca que incluye módulos para una variedad de tareas. Para su instalación \cite{python} y es necesario añadir la extensión \textit{Python} de \textit{Microsoft} en \textit{VSCode}.
+    
+    \item \textbf{\textit{SQL} (\textit{Structured Query Language}):} Lenguaje de dominio específico estandarizado diseñado para la gestión, consulta y manipulación de bases de datos relacionales. Proporciona una sintaxis universal y declarativa para interactuar con la información persistente, permitiendo definir estructuras, controlar accesos y recuperar registros clínicos de forma eficiente. \cite{sql}
+    
+    \item \textbf{\textit{YAML} y \textit{Dockerfile} (\textit{Docker}):} Lenguajes de serialización de datos y configuración declarativa\footnote{Paradigma de programación en el que se describe el estado o resultado final que se desea obtener, en lugar de detallar paso a paso cómo lograrlo.} utilizados para la orquestación y contenedorización del sistema. La sintaxis nativa de \textit{Dockerfile} se emplea para definir las instrucciones de construcción y empaquetado de la aplicación, mientras que \textit{YAML} (\textit{YAML Ain't Markup Language}) se utiliza en el archivo \texttt{docker-compose.yml} para configurar, interconectar y levantar simultáneamente los múltiples servicios del proyecto (el servidor \textit{web} y la base de datos). \cite{yaml}
+
+    \item \textbf{\textit{Shell Script} (\textit{Bash 5.0}):} Lenguaje de \textit{scripting}\footnote{Secuencia de comandos} nativo de sistemas basados en \textit{Unix} (\textit{Linux}, \textit{macOS} y \textit{Raspberry Pi OS}). Es el lenguaje utilizado para la creación del archivo \textit{.sh} necesario para automatizar el despliegue de la aplicación y el arranque del sistema en la ``\textit{tablet} médica''. \cite{shell}
+\end{itemize}
+
+\subsubsection{Lenguajes de programación secundarios}
+Aunque el desarrollo íntegro de la lógica y la interfaz gráfica de la aplicación se ha realizado en \textit{Python}, resulta imperativo definir las tecnologías web estándar que componen el producto final desplegado. Los navegadores web carecen de la capacidad nativa para interpretar código \textit{Python}; por ello, el \textit{framework Reflex} actúa como un motor de compilación (\textit{transpilador}), convirtiendo automáticamente el código fuente a la tríada fundamental del desarrollo web:
+
+\begin{itemize}
+    \item \textbf{\textit{HTML5} (\textit{HyperText Markup Language}):} Lenguaje de marcado que define el esqueleto y la estructura semántica de la interfaz clínica (tales como la disposición de las tablas de pacientes, botones y contenedores). \cite{html}
+    \item \textbf{\textit{CSS3} (\textit{Cascading Style Sheets}):} Lenguaje de hojas de estilo responsable de la capa visual y del diseño adaptable (\textit{responsive design}). Garantiza que la herramienta médica se visualice correctamente tanto en los monitores estándar de la unidad como en la pantalla táctil del terminal \textit{Raspberry Pi}. \cite{css}
+    \item \textbf{\textit{JavaScript}:} Lenguaje de programación del lado del cliente que dota a la interfaz de interactividad y gestiona la apertura de los \textit{WebSockets} para comunicarse en tiempo real con el servidor \textit{FastAPI}. \cite{JavaScript}
+\end{itemize}
+
+\subsubsection{Frameworks y Librerías}
+El desarrollo de la aplicación se ha apoyado en diversas herramientas de terceros instaladas mediante el gestor de paquetes \textit{pip}, las cuales se dividen conceptualmente según su peso en la arquitectura del sistema:
+
+\begin{itemize}
+    \item \textbf{\textit{Reflex} (0.8.28):} Constituye el \textit{framework full-stack} central del proyecto. A diferencia de una librería convencional, \textit{Reflex} define la arquitectura completa de la aplicación, orquestando de manera transparente la creación del \textit{frontend} (\textit{React/Vite}) y del servidor \textit{backend} (\textit{FastAPI}). Toda la lógica de negocio y el diseño de la interfaz médica se han estructurado bajo los paradigmas de este \textit{framework}. \cite{reflex}
+    
+    \item \textbf{\textit{Git}:} Se ha empleado \textit{Git} como sistema de control de versiones distribuido para mantener un registro histórico de los cambios en el código fuente. El repositorio central se ha alojado en la plataforma \textit{GitHub} ya mencionada, garantizando la seguridad del código y facilitando su accesibilidad. \cite{git}
+
+    \item \textbf{\textit{LaTeX} y \textit{BibTeX}:} Lenguaje de composición de textos empleado para la redacción académica de la presente memoria, garantizando un formato tipográfico de alta calidad técnica. \cite{latex}
+\end{itemize}
+
+Para garantizar la reproducibilidad del entorno de desarrollo y documentar con precisión la arquitectura subyacente del sistema, la Tabla \ref{tab:versiones_frontend} detalla las versiones exactas de las librerías principales de \textit{JavaScript} y \textit{CSS} empleadas por el motor de compilación \textit{Vite} \cite{vite} durante el despliegue de la aplicación. 
+
+% Ha sido generada con \url{https://www.tablesgenerator.com/}
+\begin{table}[hbt!]
+\centering
+\begin{tabular}{llp{8cm}}
+\hline
+\textbf{Tecnología / Librería} & \textbf{Versión} & \textbf{Función en la Arquitectura} \\ \hline
+\textit{React} \& \textit{React DOM} & 19.2.3 & Renderizado del árbol de componentes de la interfaz de usuario (\textit{UI}). \\ 
+\textit{React Router} & 7.13.0 & Gestión del enrutamiento interno y estructura de navegación (\textit{SPA}). \\ 
+\textit{Socket.IO Client} & 4.8.3 & Implementación del protocolo \textit{WebSockets} para la comunicación asíncrona bidireccional con \textit{FastAPI}. \\ 
+\textit{Recharts} & 3.7.0 & Generación y renderizado dinámico de las gráficas estadísticas y líneas de tendencia. \\ 
+\textit{Tailwind CSS} & 4.1.18 & Motor de generación de estilos en cascada (\textit{CSS}) para el diseño adaptable (\textit{responsive}). \\ 
+\textit{Radix UI Themes} & 3.3.0 & Base de componentes accesibles para la interacción del usuario clínico. \\ \hline
+\end{tabular}
+\caption{Desglose de versiones del ecosistema \textit{Frontend} autogenerado por \textit{Reflex}.}
+\label{tab:versiones_frontend}
+\end{table}
+
+De forma análoga al entorno cliente, el núcleo de procesamiento de datos (\textit{backend}) requiere una declaración exhaustiva de sus dependencias. Cabe destacar que gran parte de las operaciones se han resuelto utilizando la biblioteca estándar nativa de \textit{Python}, minimizando así la dependencia de paquetes de terceros y optimizando el rendimiento del sistema. En la Tabla \ref{tab:versiones_backend} se detallan las versiones exactas del \textit{stack} de \textit{Python} empleado para el cálculo de los indicadores clínicos y estadísticos.
+
+\begin{table}[hbt!]
+\centering
+\begin{tabular}{llp{8cm}}
+\hline
+\textbf{Paquete / Librería} & \textbf{Versión} & \textbf{Función en la Arquitectura} \\ \hline
+\textit{Paquetes base} & 3.12.9 & Librerías nativas (\textit{asyncio, re, io, tempfile, time, glob, unicodedata}). \cite{bibpython}\\ 
+\textit{Pandas} & 3.0.0 & Ingesta de archivos \textit{CSV}, limpieza de datos y estructuración en \textit{DataFrames} para el cálculo de los indicadores \textit{SEMICYUC}. \cite{pandas}\\ 
+\textit{NumPy} & 2.4.2 & Soporte para operaciones matriciales y vectorización matemática \cite{numpy}\\ 
+\textit{Scikit-Learn} (\textit{sklearn}) & 1.8.0 & Motor estadístico y de \textit{Machine Learning} empleado para las regresiones lineales y la obtención del coeficiente $R^2$. \cite{SKlearn}\\ 
+\textit{Matplotlib} & 3.10.8 & Motor de renderizado gráfico secundario para operaciones en el servidor. \cite{Matplotlib}\\ 
+\textit{FPDF2} & 2.8.7 & Generación programática y exportación de informes clínicos en formato \textit{PDF}. \cite{Fpdf2}\\
+\textit{Psycopg2-Binary} & 2.9.11 & Adaptador a bajo nivel encargado de la comunicación física y ejecución de transacciones con el servidor \textit{PostgreSQL}. \cite{psycopg2}\\
+\textit{Alembic} & 1.18.4 & Se encarga de traducir las modificaciones de los modelos de datos en \textit{Python} a código \textit{DDL} y delega en \textit{Psycopg2} su ejecución física para alterar la estructura de las tablas en \textit{PostgreSQL}. \cite{alembic}\\
+\textit{Bcrypt} & 5.0.0 & Implementación de funciones de derivación de claves criptográficas (\textit{hashing}) para el almacenamiento seguro de contraseñas. \cite{bcrypt}\\ \hline 
+\end{tabular}
+\caption{Desglose de versiones del ecosistema \textit{Backend} (Entorno \textit{Python}).}
+\label{tab:versiones_backend}
+\end{table}
+
+\subsection{Herramientas \textit{Hardware}}
+El dispositivo físico portátil, diseñado para otorgar movilidad al personal médico, opera bajo un ecosistema \textit{software} distinto al de los equipos ofimáticos convencionales de la unidad. Como sistema operativo principal se ha implementado \textit{Raspberry Pi OS (64-bit)} \cite{raspberryOS}, una distribución oficial basada en el núcleo \textit{Linux} (arquitectura \textit{Debian}).
+
+La elección de este sistema operativo se fundamenta en su alta estabilidad, su optimización nativa para procesadores \textit{ARM} y su eficiencia en la gestión de recursos limitados. A nivel de ingeniería de despliegue, la naturaleza multiplataforma de \textit{Python} y \textit{Reflex} ha permitido que el mismo código fuente se ejecute sin alteraciones en este entorno (solamente la aplicación en \textit{Reflex}, sin una conexión a \textit{PostgreSQL}). 
+
+La automatización del arranque en la \textit{tablet} médica se gestiona mediante un \textit{script} nativo de \textit{Bash} (\textit{.sh}) \cite{Bash}. Esto permite que, al encender el dispositivo, el servidor \textit{FastAPI} y la interfaz gráfica se inicialicen de forma autónoma, ofreciendo al facultativo un acceso directo a la herramienta clínica sin requerir interacción previa con el sistema operativo subyacente.
+
+En este apartado se incluye una breve descripción de todos los componentes \textit{hardware} utilizados.
+
+\begin{itemize}
+    \item \textbf{\textit{Raspberry Pi 3 model B}:} (Figura \ref{fig:raspberrypi}) Es un ordenador de placa única (\textit{SBC}) de bajo coste y tamaño reducido (como una tarjeta de crédito), creado por la \textit{Raspberry Pi Foundation} en 2012 para promover la enseñanza de la informática. Ejecuta \textit{Linux}, cuenta con puertos \textit{USB}, \textit{HDMI}, \textit{Wi-Fi} y pines \textit{GPIO} perfectos para este tipo de proyectos.
+    
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.7\textwidth]{img/raspberrypi.jpg}
+        \caption{Raspberry Pi 3 model B. \cite{raspberryC}}
+        \label{fig:raspberrypi}
+    \end{figure}
+    
+    \item \textbf{\textit{Pantalla Raspberry Pi LCD 7'' Táctil}:} (Figura \ref{fig:pantalla}) Es un dispositivo de \textbf{800 x 480} con el que convertir una \textit{Raspberry Pi} en una \textit{tablet} generando en un sistema totalmente interactivo. Esta pantalla táctil utiliza \textit{drivers} que funcionan con toques de diez dedos, y también puede mostrar un teclado en pantalla.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.7\textwidth]{img/pantalla.jpg}
+        \caption{Pantalla Raspberry Pi LCD 7'' Táctil. \cite{pantalla}}
+        \label{fig:pantalla}
+    \end{figure}
+    
+    \item \textbf{\textit{Sandisk MicroSD Ultra 32GB}:} (Figura \ref{fig:sd}) Es un dispositivo de almacenamiento de datos portátil y extremadamente pequeño basado en tecnología \textit{flash}, utilizado para almacenar el \textit{SO} de la \textit{RaspBerry Pi}.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.3\textwidth]{img/sd.jpg}
+        \caption{MicroSD 32GB. \cite{sd}}
+        \label{fig:sd}
+    \end{figure}
+
+    \item \textbf{Cables:} El cableado necesario para realizar las conexiones pertinentes.
+
+    \item \textbf{Caja para prototipos:} (Figura \ref{fig:caja}) Almacena todo el \textit{hardware} necesario para el funcionamiento del prototipo. Fabricada mediante la impresión \textit{3D}\footnote{Es un proceso que crea objetos tridimensionales sólidos capa por capa a partir de un modelo digital.} resistente que protegerá el microprocesador y las conexiones entre todos los componentes.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.5\textwidth]{img/carcasa.png}
+        \caption{Caja de componentes. \cite{carcasa}}
+        \label{fig:caja}
+    \end{figure}
+    
+    \item \textbf{\textit{Adafruit PowerBoost 1000C}:} (Figura \ref{fig:adafruit}) Es un módulo versátil de gestión de energía (convertidor \textit{DC/DC boost}) con cargador integrado, diseñado para alimentar proyectos portátiles. Convierte el voltaje de baterías \textit{LiIon/LiPoly} de 3,7\textit{V} a una salida estable de 5,2\textit{V} \textit{DC}, ideal para dispositivos como \textit{Arduino} o \textit{Raspberry Pi}, permitiendo la carga de la batería y la alimentación del proyecto simultáneamente.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.3\textwidth]{img/adafruit.png}
+        \caption{\textit{Adafruit PowerBoost 1000C}. \cite{adafruit}}
+        \label{fig:adafruit}
+    \end{figure}
+    
+    \item \textbf{Batería de 6000\textit{mAH} a 3,7\textit{V}:} (Figura \ref{fig:bateria}) Almacena la energía en forma química para posteriormente convertirla en energía eléctrica para el suministro de corriente a diversos equipos y sistemas.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.3\textwidth]{img/bateria.jpg}
+        \caption{Batería de 6000 \textit{mAH} a 3,7\textit{V}. \cite{bateria}}
+        \label{fig:bateria}
+    \end{figure}
+    
+    \item \textbf{Interruptor \textit{SPDT}:} (Figura \ref{fig:interruptor}) Es un componente eléctrico con tres terminales: uno común (entrada) y dos de salida. Permite dirigir la corriente entre dos trayectorias distintas, en este proyecto solo se necesita una de las trayectorias; sin embargo, en el proveedor de compra los interruptores  \textit{SPST}\footnote{Es el tipo más básico de interruptor eléctrico, diseñado para abrir o cerrar un único circuito} no se encontraban disponibles.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.2\textwidth]{img/interruptor.jpg}
+        \caption{Interruptor \textit{SPDT}. \cite{interruptor}}
+        \label{fig:interruptor}
+    \end{figure}
+\end{itemize}
+
+La elección de la \textit{Raspberry Pi} frente a otros sistemas informáticos convencionales o terminales industriales para el diseño del dispositivo físico se justifica en los siguientes factores:
+
+\begin{enumerate}
+    \item \textbf{Disipación térmica pasiva (Asepsia clínica):} Al utilizar un \textit{SoC} altamente eficiente, la placa carece de ventiladores mecánicos para su refrigeración. Este atributo de \textit{hardware} es crítico en un entorno de aislamiento como la \textit{URCCPQ}, ya que elimina la generación de corrientes de aire que podrían dispersar polvo o patógenos aerógenos, contribuyendo a la esterilidad del área.
+    \item \textbf{Eficiencia energética y autonomía:} Su arquitectura \textit{ARM} presenta un consumo eléctrico drásticamente inferior al de los procesadores \textit{x86/x64} convencionales. Esto permite que el terminal sea alimentado de forma estable y prolongada mediante baterías externas estándar, un requisito físico indispensable para garantizar la portabilidad de la ``\textit{tablet} médica''.
+    \item \textbf{Factor de forma y empaquetado (\textit{SBC}):} Al tratarse de un ordenador de placa única (\textit{Single Board Computer}), concentra la \textit{CPU}, memoria e interfaces de red en dimensiones muy reducidas (formato tarjeta de crédito). Esto ha permitido integrarla de forma compacta en la carcasa del dispositivo portátil sin comprometer la ergonomía.
+    \item \textbf{Interfaces físicas nativas:} La placa incorpora de fábrica conectividad directa para pantallas táctiles (mediante puertos \textit{DSI} o \textit{micro-HDMI}) y pines de entrada/salida (\textit{GPIO}), lo que facilita el ensamblaje directo de la pantalla interactiva sin requerir tarjetas controladoras adicionales ni cableado voluminoso.
+\end{enumerate}
+
+
+
+
 
 
 

@@ -8,6 +8,7 @@
 \usepackage{lmodern} % scalable font
 \usepackage{microtype}
 \usepackage{placeins}
+\usepackage{longtable}
 
 \RequirePackage{booktabs}
 \RequirePackage[table]{xcolor}
@@ -46,6 +47,7 @@
 
 % Imagenes
 \usepackage{graphicx}
+\usepackage{float}
 \newcommand{\imagen}[2]{
 	\begin{figure}[!h]
 		\centering
@@ -142,10 +144,10 @@
 
 
 % Datos de portada
-\title{título del TFG \\Documentación Técnica}
-\author{Nombre Alumno/a}
-\tutor{Nombre Tutor/a}
-\tutorb{Nombre Tutor/a 2}
+\title{Aplicación web de cálculo de indicadores en la URCCPQ}
+\author{Nicolás José García Gómez}
+\tutor{David García García}
+\tutorb{ Cristina Arlanzón Pérez}
 \date{\today}
 
 \begin{document}
@@ -197,7 +199,12 @@
 \include{./tex/H_ODS}
 \include{./tex/I_Prompts}
 
-
+%El asterisco quita la letra
+\chapter*{Diccionario de Variables Clínicas}
+%Hay que meterlo manualmente en el índice
+\addcontentsline{toc}{chapter}{Diccionario de Variables Clínicas}
+%Absorbe la tabla gigante de los datos
+\input{./tex/anexos_datos}
 
 \bibliographystyle{apalike}
 \bibliography{bibliografiaAnexos}

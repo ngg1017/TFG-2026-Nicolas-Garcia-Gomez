@@ -1,69 +1,196 @@
 \capitulo{3}{Conceptos teóricos}
 
+\section{SEMICYUC}
+Para comprender la magnitud e importancia de la evaluación clínica en la \textit{URCCPQ}, es imprescindible fundamentar las métricas utilizadas en estándares científicos reconocidos. En el ámbito nacional, el organismo de referencia es la Sociedad Española de Medicina Intensiva, Crítica y Unidades Coronarias (\textit{SEMICYUC}). 
 
-Explicación de los conceptos teóricos básicos necesarios para que cualquier miembro del tribunal pueda entender el trabajo realizado.
-Se describirán los conceptos, modelos, técnicas o tecnologías fundamentales para el desarrollo del TFG, apoyándose en referencias bibliográficas adecuadas y actualizadas.
+La \textit{SEMICYUC} tiene como objetivo prioritario la mejora continua de la calidad asistencial y la seguridad del paciente crítico. Para ello, la sociedad desarrolla y actualiza periódicamente el manual de ``Indicadores de Calidad en el Enfermo Crítico'' \cite{semicyuc}. Este documento define un conjunto de variables objetivas y cuantificables que abarcan todas las dimensiones de la asistencia como la estructura, los procesos y sus resultados. Cada indicador incluye su justificación clínica, la fórmula matemática exacta para su cálculo, la población de exclusión e inclusión, y el estándar de calidad (el umbral porcentual que se considera aceptable o de excelencia).
 
-Esta sección puede contener el número de subsecciones que sean necesarias.
-
-\section{Sección}
-
-\subsection{Subsección}
-
-\subsubsection{Sub Subsección}
-
-En esta sección y el resto de secciones de la memoria puede ser necesario incluir listas de items.
+\subsection{Relevancia en el desarrollo del proyecto}
+La integración de las directrices de la \textit{SEMICYUC} constituye el núcleo funcional y la justificación clínica de la aplicación de \textit{software} desarrollada en este \textit{TFG}. La relevancia de este organismo en el proyecto se articula en torno a los siguientes puntos:
 
 \begin{itemize}
-    \item item1
-    \item item2
-    \item item3
-    \item item4
+    \item \textbf{Estandarización y Rigor Científico:} Los veintiún indicadores calculados por la herramienta no son métricas arbitrarias, sino que responden estrictamente a las fórmulas y criterios de inclusión dictados por la \textit{SEMICYUC}. Esto garantiza que los resultados obtenidos por el \textit{software} tengan validez médica real.
+    \item \textbf{Certificación y Auditoría:} La evaluación periódica de estos indicadores es un requisito indispensable para que el Hospital Universitario de Burgos (\textit{HUBU}) pueda someterse a auditorías externas y mantener certificaciones de calidad internacionales, como la norma \textit{ISO}. La automatización de este proceso elimina el sesgo del cálculo manual y asegura la trazabilidad de los datos.
+    \item \textbf{Toma de Decisiones Basada en la Evidencia:} Al sistematizar el cálculo de los indicadores de la \textit{SEMICYUC}, la dirección médica de la unidad dispone de un cuadro de mando objetivo que permite detectar desviaciones de seguridad, evaluar la eficacia de los protocolos de actuación y optimizar los recursos hospitalarios basándose en evidencias tangibles.
 \end{itemize}
 
-Listas enumeradas.
+\section{\textit{ICCA}}
+En la Unidad de Reanimación y Cuidados Críticos postquirúrgicos del Servicio de 
+Anestesiología y Reanimación (\textit{}{URCCPQ}) del Hospital Universitario de Burgos (\textit{}{HUBU}) se 
+emplea el software de gestión de datos clínicos de Philips, denominado \textit{IntelliSpace 
+Critical Care and Anesthesia} (\textit{ICCA}). 
+
+Este sistema avanzado, diseñado específicamente 
+para entornos de cuidados intensivos, busca aportar a los profesionales sanitarios un 
+rápido acceso a datos completos y actualizados mediante la organización y 
+centralización de la información del paciente (documentos de admisión, signos vitales, 
+notas de consulta, resultados de laboratorio…), permitiendo desarrollar y almacenar 
+historias clínicas, evolutivos, así como pautar tratamientos.
+
+\subsection{Ventajas del \textit{ICCA}}
+El \textit{ICCA}, por tanto, ofrece un apoyo en la toma de decisiones clínicas, al permitir 
+la transformación de los datos en información procesable y proporcionar una 
+documentación estructurada y estandarizada \cite{philipsPhilipsIntelliSpace}.
+
+Además, múltiples dispositivos (sistemas de monitorización, respiradores…) y 
+otros sistemas de información hospitalaria (laboratorio, farmacia…) se integran con el 
+\textit{ICCA} lo que facilita enormemente la obtención de datos y su sincronización con toda la 
+información del paciente, permitiendo lograr una monitorización de éste mucho más 
+eficiente y de mejor calidad, así como generar un repositorio de datos para desarrollar 
+proyectos de investigación \cite{philipsIntelliSpaceCritical}. 
+
+\subsection{Limitaciones de los datos}
+No obstante, existen grandes dificultades en el análisis de esos datos, ya que 
+el software no ofrece ningún tipo de herramienta para el análisis profundo, más allá 
+de gráficos individuales. 
+
+Actualmente, se están implementado herramientas de indicadores que facilitan 
+el cálculo de estos. Dichas herramientas utilizan técnicas avanzadas para procesar los 
+datos médicos y extraen conceptos de una forma eficiente; sin embargo, 
+desafortunadamente estas herramientas no cumplían con las necesidades específicas 
+de la unidad.
+
+\subsection{Integración del \textit{ICCA} en el proyecto}
+La unidad lleva utilizando el \textit{ICCA} desde el año 2024, el 
+cual a lo largo de estos años se ha actualizado en varias ocasiones para disponer de la última versión del programa. 
+
+Este proyecto aborda una necesidad existente en el cálculo de 
+indicadores de calidad en el enfermo crítico, aportando una solución de ingeniería 
+informática que mejore la calidad y eficiencia en la gestión y procesamiento de la 
+información clínica, facilitando la generación de un informe del desempeño de la unidad a 
+lo largo del año.
+
+\section{Desarrollo web}
+Para el proceso de desarrollo de una aplicación web, o cualquier otro proyecto software, es imprescindible conocer y diferenciar los conceptos de \textit{front-end} y \textit{back-end}. Cada uno de estos ámbitos emplea diferentes lenguajes de programación, y una conexión e interacción eficaz entre ambos es esencial para obtener un software funcional \cite{UniEuro}.
+
+\begin{itemize}
+    \item \textbf{\textit{Front-end}:} Se refiere a la codificación o diseño de la interfaz de usuario. Este aspecto considera elementos como la accesibilidad, estructura de navegación, capacidad de respuesta y animaciones. Utiliza lenguajes como \textit{CSS}, \textit{HTML} y \textit{JavaScript}, pero también puede incluir \textit{frameworks} como \textit{Bootstrap}. \cite{Hubspot} \cite{UniEuro}
+
+    \item \textbf{\textit{Back-end}:} Este campo esta centrado en la funcionalidad, se programa con el objetivo de lograr eficazmente las acciones disponibles para el usuario desde el \textit{front-end}. Gestiona los recursos, implementa la lógica del sistema e integra componentes como servidores \textit{web}, \textit{APIs} y bases de datos. Entre los lenguajes de programación empleados están \textit{Java} y \textit{Python}. \cite{Hubspot} \cite{UniEuro}
+\end{itemize}
+
+\section{Arquitectura \textit{Raspberry Pi} y Dispositivo Físico}
+Para dotar al personal médico de movilidad y facilitar el uso de la herramienta analítica fuera de sus áreas de trabajo, se ha desarrollado un terminal clínico portátil basado en la arquitectura \textit{Raspberry Pi}.
+
+\subsection{Fundamentos de la Arquitectura \textit{SBC} y \textit{ARM}}
+Una \textit{Raspberry Pi} es un ordenador de placa reducida o \textit{SBC} (\textit{Single Board Computer}).  \cite{wiki:SBC} A diferencia de los ordenadores tradicionales, que distribuyen sus componentes en una placa base de gran tamaño, un \textit{SBC} integra todos los elementos esenciales (procesador, memoria \textit{RAM}, controladores de entrada/salida y conectividad de red) en una única placa de circuito impreso de dimensiones mínimas.
+
+El núcleo de esta arquitectura se basa en un \textit{SoC} (\textit{System on a Chip}), que agrupa la Unidad Central de Procesamiento (\textit{CPU}) y la Unidad de Procesamiento Gráfico (\textit{GPU}) en un solo circuito integrado. Estos procesadores utilizan la arquitectura \textit{ARM} (\textit{Advanced RISC Machine}), caracterizada por implementar un conjunto reducido de instrucciones (\textit{RISC}). Esta eficiencia computacional permite obtener un alto rendimiento con un consumo energético drásticamente inferior al de los procesadores convencionales, generando a su vez una mínima disipación térmica. \cite{profesionalreview}
+
+\section{El \textit{Framework} Reflex y su Arquitectura de Comunicación}
+Para el desarrollo de la aplicación web de este proyecto, se ha empleado \textit{Reflex}, un \textit{framework web full-stack} de código abierto que permite construir aplicaciones web interactivas utilizando íntegramente el lenguaje \textit{Python}. La principal innovación de esta herramienta radica en su capacidad para abstraer la complejidad de programar la interfaz visual (\textit{frontend}) y la lógica del servidor (\textit{backend}) por separado. \cite{reflex} 
+
+Durante el proceso de compilación y ejecución, \textit{Reflex} divide el sistema en dos entornos independientes pero altamente coordinados:
+\begin{itemize}
+    \item \textbf{\textit{Frontend}:} Una interfaz de usuario moderna y reactiva basada en \textit{React} y \textit{Next.js}.
+    \item \textbf{\textit{Backend}:} Un servidor de alto rendimiento basado en \textit{FastAPI} que aloja la lógica de negocio\footnote{Conjunto de reglas, algoritmos y procesos de una organización que definen cómo se crean, almacenan y transforman los datos en un sistema informático} y los cálculos matemáticos.
+\end{itemize}
+
+Para que estos dos entornos se comuniquen de manera eficiente y proporcionen una experiencia de usuario fluida, la arquitectura subyacente de \textit{Reflex} hace uso de dos protocolos de comunicación de red fundamentales: la \textit{API REST} y los \textit{WebSockets}.
+
+Es fundamental comprender que \textit{FastAPI} no es excluyente con el uso de \textit{WebSockets}, sino que actúa como el motor principal que gestiona ambos protocolos simultáneamente. 
+
+Mientras que el protocolo \textit{WebSocket} se reserva de manera exclusiva para mantener la sincronización del estado (\textit{State Management}) y la interactividad en tiempo real de la interfaz gráfica, \textit{Reflex} sigue utilizando el estándar \textit{API REST} provisto por \textit{FastAPI} para operaciones estructurales.
+
+\subsection{El modelo de petición-respuesta: \textit{API REST}}
+\textit{REST} (\textit{Representational State Transfer}) es un protocolo de comunicación estándar basado en un modelo cliente-servidor sin estado (\textit{stateless}). En este paradigma, el cliente (el navegador \textit{web}) envía una petición \textit{HTTP} al servidor solicitando una acción o un recurso. El servidor procesa la solicitud, devuelve la respuesta correspondiente y, acto seguido, finaliza la conexión.
+
+En el contexto de una interfaz clínica moderna, depender exclusivamente de \textit{REST} presentaría limitaciones operativas. Por ejemplo, cada vez que el personal médico seleccionase un gráfico diferente o solicitase el cálculo de un indicador, el navegador se vería forzado a recargar la página \textit{web} por completo para mostrar la gráfica actualizada. No obstante, dado que el \textit{backend} de \textit{Reflex} está construido sobre \textit{FastAPI}, la aplicación dispone de la capacidad nativa de exponer rutas \textit{REST} tradicionales. Esto resulta de gran utilidad para operaciones estáticas, como la carga inicial masiva de bases de datos de pacientes, o para permitir futuras integraciones automatizadas con los sistemas de información del \textit{HUBU}. \cite{api}
+
+\subsection{Comunicación en tiempo real: \textit{WebSockets}}
+Para superar las limitaciones del modelo tradicional y dotar a la herramienta de interactividad en tiempo real, \textit{Reflex} fundamenta su gestión de estado (\textit{State Management}) en el protocolo \textit{WebSockets}. A diferencia de \textit{REST}, un \textit{WebSocket} establece un canal de comunicación bidireccional y persistente entre el navegador y el servidor. Una vez establecida la conexión, esta permanece abierta, permitiendo a ambas partes enviar y recibir información de forma asíncrona en cualquier momento sin necesidad de reabrir el canal constantemente.
+
+Esta tecnología es el verdadero motor dinámico de la aplicación desarrollada para la \textit{URCCPQ}. Esta arquitectura garantiza que el personal médico disponga de una herramienta de auditoría ágil y robusta, capaz de manejar grandes volúmenes de datos históricos sin comprometer el rendimiento visual de la aplicación. \cite{WebSocket}
+
+\section{Despliegue automatizado: Contenedores \textit{Docker} y \textit{scripts} de automatización (\textit{.sh})}
+Para garantizar que la herramienta sea accesible en el \textit{HUBU} por personal sin formación técnica, el despliegue se centraliza en la \textit{intranet} hospitalaria mediante contenedores \textit{Docker} \cite{docker}. Esta solución permite integrar la aplicación con el servidor \textit{PostgreSQL} institucional, asegurando un entorno robusto y el cumplimiento estricto de la \textit{LOPD}.
+
+\textit{Docker} es una tecnología de virtualización de nivel de sistema operativo que empaqueta el \textit{software} y sus dependencias en unidades estandarizadas. Para el terminal portátil basado en \textit{Raspberry Pi}, se ha desarrollado un \textit{script} de automatización (\textit{.sh}), el cual se ejecuta automáticamente en el arranque del dispositivo. Permitiendo el análisis de los datos tras su extracción anónima a través de la aplicación.
+
+Esta arquitectura de ingeniería elimina la barrera tecnológica para el facultativo, transformando un sistema de alta seguridad y procesamiento en memoria en una solución \textit{plug and play} perfectamente integrada en la infraestructura del \textit{HUBU}.
+
+\section{Gestión de Datos Persistentes: Bases de Datos Relacionales y \textit{PostgreSQL}}
+Para complementar la arquitectura de procesamiento clínico en memoria (\textit{Zero-Disk}) y cumplir estrictamente con los requisitos de trazabilidad de la \textit{LOPD}, el sistema requiere un almacenamiento persistente y seguro para el control de accesos. Para ello, se ha implementado una base de datos relacional. \cite{relacional}
+
+Una base de datos relacional organiza la información en tablas bidimensionales (filas y columnas) vinculadas entre sí mediante identificadores únicos, garantizando la consistencia e integridad de la información. Para interactuar con esta arquitectura se emplea \textit{SQL} (\textit{Structured Query Language}) \cite{sql}, el lenguaje de programación estándar diseñado para administrar y consultar este tipo de sistemas.
+
+En el contexto de este \textit{TFG}, se ha desplegado \textit{PostgreSQL} en los servidores del \textit{HUBU}. Se trata de un potente Sistema de Gestión de Bases de Datos Relacionales (\textit{RDBMS}) de código abierto, reconocido por su robustez empresarial y sus avanzados protocolos de seguridad. Para la gestión de la base de datos, el sistema emplea una arquitectura estructurada de forma modular. A nivel de abstracción lógica, se utiliza \textit{SQLModel} como \textit{ORM\footnote{Técnica y herramienta de \textit{software} en informática que actúa como un puente entre la programación orientada a objetos (clases, objetos) y las bases de datos relacionales (tablas, filas, columnas).}} (\textit{Object-Relational Mapper}), lo que permite interactuar con los datos mediante paradigmas orientados a objetos en \textit{Python}, agilizando el desarrollo y previniendo inyecciones \textit{SQL}. El control de versiones y la evolución del esquema estructural recaen sobre \textit{Alembic}, la herramienta encargada de traducir cualquier modificación en los modelos a sentencias \textit{DDL\footnote{Conjunto de comandos en informática utilizados para definir, modificar y eliminar la estructura de los objetos dentro de una base de datos.}} (\textit{Data Definition Language}) para actualizar las tablas de forma segura e incremental sin pérdida de información. Finalmente, a nivel de red, la comunicación física con el motor \textit{PostgreSQL} y la ejecución de todas estas transacciones a bajo nivel se delegan en \textit{psycopg2}, el adaptador de bases de datos estándar y de alto rendimiento. La base de datos a parte de almacenar los registros de los pacientes cumple dos funciones críticas:
 
 \begin{enumerate}
-    \item item1
-    \item item2
-    \item item3
+    \item \textbf{Autenticación Segura (\texttt{UsuarioDb}):} Almacena los perfiles de los facultativos sin guardar credenciales en texto plano. Utiliza funciones de derivación de claves criptográficas (\textit{hashing}) unidireccionales mediante \textit{Bcrypt}, blindando el sistema contra la ingeniería inversa.
+    \item \textbf{Auditoría y Trazabilidad (\texttt{Auditoria}):} Registra de forma silenciosa e inalterable cada acción crítica realizada en la plataforma (inicios de sesión, extracción o análisis de datos). Este registro vincula la identidad del médico con una marca de tiempo exacta, proporcionando la trazabilidad exigida en el ámbito sanitario.
 \end{enumerate}
 
-Figuras, como la figura \ref{fig:escudo} que aparece en la página \pageref{fig:escudo}. 
-
-Puedes aprender más de las figuras en la dirección \url{https://es.overleaf.com/learn/latex/Inserting_Images}
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.6\textwidth]{img/Logo_GIS.png}
-    \caption{Pie de la figura de figura (debe incluir autoría y referencia)}
-    \label{fig:escudo}
-\end{figure}
+Esta infraestructura permite que los registros de los pacientes, el control de acceso y la auditoría legal quedan respaldados de forma permanente y segura en la base de datos \textit{PostgreSQL}. Sin embargo, fiel a la arquitectura \textit{Zero-Disk}, el sistema asegura que estos datos se mantengan y procesen exclusivamente en la memoria \textit{RAM} de la aplicación durante el tiempo de ejecución. De esta manera, el almacenamiento persistente en la base de datos sirve como respaldo robusto, mientras que la volatilidad en la \textit{RAM} garantiza que no queden rastros físicos de información sensible en el servidor al finalizar la sesión.
 
 
-También se pueden insertar tablas como \ref{tab:my-table}, que ha sido generada con \url{https://www.tablesgenerator.com/}.
+\section{Análisis Estadístico}
+El motor estadístico integrado en la herramienta permite trascender la mera descripción estática de los datos, aportando un enfoque predictivo y de control de calidad continuo mediante tres pilares fundamentales:
 
-\begin{table}[]
-\begin{tabular}{lll}
-a & b & c \\
-1 & 2 & 3 \\
-4 & 5 & 6
-\end{tabular}
-\caption{}
-\label{tab:my-table}
-\end{table}
+\begin{itemize}
+    \item \textbf{Análisis de tendencias:} Evalúa la evolución histórica de los indicadores clínicos a lo largo del tiempo, identificando patrones direccionales (incrementos o decrementos) que permiten a la dirección médica anticipar escenarios y evaluar el impacto a largo plazo de las nuevas guías clínicas. \cite{tendencia}
+    \item \textbf{Cálculo del error típico interanual:} Cuantifica la dispersión estadística de los datos reales respecto a la línea de tendencia central. Proporciona a los facultativos una medida objetiva de la estabilidad de la unidad, indicando cuánto fluctúa habitualmente una métrica de un año a otro. \cite{errro_tipico}
+    \item \textbf{Coeficiente de determinación ($R^2$):} Actúa como validador matemático del modelo predictivo. Este parámetro, acotado entre 0 y 1, mide la proporción de la varianza explicada por el modelo; un valor de $R^2$ cercano a 1 confirma que la evolución del indicador se adhiere fielmente a una progresión lineal, garantizando que las tendencias observadas son estadísticamente significativas y no fruto de la aleatoriedad. \cite{r2}
+\end{itemize}
 
-Es necesario que todas las figuras y tablas aparezca referenciadas en el texto, como estos ejemplos.
+\section{Estado del arte y trabajos relacionados}
+El termino estado del arte (\textit{state of the art}) hace referencia a una \textbf{revisión sistemática} que recopila, analiza y sintetiza el conocimiento y resultados mas recientes sobre un tema especifico en un momento dado.
+Permite que los investigadores adopten una postura más crítica sobre los aspectos limitantes o problemáticas ya resueltas de un tema.
 
-Todos los conceptos teóricos deben de estar correctamente referenciados en la bibliografía. Por ejemplo, aquí estoy citando la página de \LaTeX{} de Wikipedia \cite{wiki:latex}.
+Por lo que en esta sección se comentaran todas aquellas herramientas que existen, que existirán y sus posibles implementaciones.
+\subsection{Estado actual}
+Si bien existen diversas herramientas de análisis clínico en la actualidad, no se dispone de una solución comercial o de código abierto lo suficientemente adaptada a los indicadores \textit{SEMICYUC} y accesible para su despliegue directo en la unidad.
 
-También puede ser necesario utilizar notas al pie \footnote{como por ejemplo esta}, para aclarar algunos conceptos.
+Actualmente, el cálculo de estos indicadores en las \textit{UCIs} españolas se resuelve utilizando tres grandes grupos de herramientas.
+
+\begin{enumerate}
+    \item \textbf{Módulos de informes de los propios fabricantes (\textit{Philips ICCA}):} El propio programa usado en la unidad (\textit{IntelliSpace Critical Care and Anesthesia} - \textit{ICCA} de \textit{Philips}) tiene un módulo llamado \textbf{\textit{DAR}} (\textit{Data Analysis and Reporting}).
+    \begin{enumerate}
+        \item Este es un \textit{software} privativo, que está integrado directamente en la base de datos del hospital.
+        \item Presenta una gran rigidez debido al uso de plantillas genéricas internacionales. Adaptarlas para que calculen específicamente las fórmulas de la Sociedad Española (\textit{SEMICYUC}) requiere contratar técnicos especialistas de \textit{Philips}, lo cual necesita una gran inversion de tiempo y dinero.\cite{M_I_V_E_2023}
+        \item A estos inconvenientes se suma su baja portabilidad ya que no es una aplicación ligera, la cual un médico pueda ejecutar en cualquier ordenador para cargar archivos; es un sistema pesado y de acceso restringido.
+    \end{enumerate}
+
+    \item \textbf{Herramientas de Business Intelligence (\textit{Power BI, Tableau, QlikView}):} Muchos hospitales modernos exportan los datos a un \textit{Data Warehouse} y usan herramientas de \textit{BI} como \textit{Micorsoft Power BI} para la realización de cuadros de mando
+    \begin{enumerate}
+        \item Son herramientas gráficas ultra potentes y multipropósito
+        \item \textit{Power BI} es un lienzo en blanco. El personal clínico tendría que aprender a programar en lenguaje \textit{DAX} o \textit{SQL} para limpiar los nulos, parsear las fechas y escribir las fórmulas matemáticas requeridas.\cite{faddour2019bi}
+        \item  La aplicación desarrollada en \textit{Python} limpia automáticamente los ``datos sucios'' (los típicos errores al exportar archivos, palabras excluidas, etc...). \textit{Power BI} sufre mucho si los datos de origen cambia de formato o viene mal tabulado. El \textit{backend} desarrollado en este proyecto está hecho a medida para sobrevivir a estos errores.
+    \end{enumerate}
+
+    \item \textbf{Plataformas de Registros Nacionales (\textit{REDCap, ENVIN, RETRAUCI}):} Existen multitud de plataformas web institucionales (algunas de la propia \textit{SEMICYUC}) donde los médicos introducen datos para calcular ciertos riegos (como la herramienta \textit{RETRASCORE} para traumas) o llevar registros de infecciones.
+    \begin{enumerate}
+        \item Son bases de datos académicas estandarizadas a nivel nacional.
+        \item El mayor inconveniente de estas plataformas radica en la \textbf{obligación al facultativo de introducir los datos manualmente} paciente por paciente. La herramienta propuesta elimina esto por completo puesto que procesa los registros desde la base de datos de manera inmediata, automatizando meses de trabajo en segundos.\cite{tahmasbian2020redcap} 
+    \end{enumerate}
+
+    Resumiendo, en internet hay calculadoras médicas simples y hay gigantescos sistemas de datos de hospital. Este \textit{software} es el \textbf{puente perfecto} entre ambos mundos: tiene la potencia matemática para procesar \textit{big data}, pero la interfaz sencilla de una web orientada al usuario final.
+\end{enumerate}
+
+\subsection{Uso de la \textit{IA}}
+Actualmente la Inteligencia artificial \textit{IA} esta tomando un papel de suma importancia en el desarrollo de software clínico.
+La inteligencia artificial puede ser un grandísimo compañero y ayudante a la hora de implementar estas nuevas necesidades; sin embargo su uso indiscriminado puede conllevar graves problemas:
+
+\begin{enumerate}
+    \item \textbf{Plagio de código humano:} Como ya hemos comentado anteriormente, existen algunas herramientas que cumplen un rol parecido al cubierto por este proyecto, por lo que el uso de la \textit{IA} en alguna solución parecida (como la aquí presente) podría suponer un grave riesgo de plagio hacia otros compañeros del sector.
+
+    Empresas como \textit{Philips} o \textit{Google} ya mencionadas invierten una gran parte de su presupuesto en equipos de abogados del mas alto nivel. Por lo que el uso de código ilegal/copiado extraído directamente de la inteligencia artificial, podría acarrear demandas o multas imposibles de asumir por parte de los desarrolladores de este proyecto.
+
+    \item \textbf{Calidad del Código:} A pesar de que el uso de la \textit{IA} pueda servir de gran ayuda, las evidencias delatan que el simple uso de copiar y pegar el código, todavía no es una gran idea. Varios estudios \cite{munoz2024estudio} aclaran que aunque sus resultados cada vez son mas profesionales y rigurosas, las \textit{IAs} generativas están lejos de los resultados óptimos; necesitando de una persona profesional que se encargue de corregir cierto errores y comprobando la calidad del código entregado.
+
+    Por lo que el uso a ciegas de estas herramientas no es precisamente útil. Precisan de una persona competente que sepa estructurar y dirigir el proyecto.
+    
+    \item \textbf{Privacidad de los datos:} La privacidad de los datos en el ámbito clínico es un aspecto muy importante a tener en cuenta. Este mismo proyecto se ha visto limitado en diferentes ocasiones debido al tratamiento de datos sensibles.
+        
+    Este tipo de herramientas utilizan todos los datos y consultas que hacemos con ellos para desarrollarse y aprender. Por lo que en un ámbito sanitario en el que nos encontramos, tenemos que tener claro que tipo de consultas e información le facilitamos a la \textit{IA}.
+\end{enumerate}
+
+La integración de la Inteligencia Artificial en el desarrollo de software clínico representa una herramienta de doble filo. Por un lado, su principal fortaleza radica en su papel como un excelente asistente tecnológico, capaz de agilizar la implementación de nuevas funcionalidades, resolver bloqueos técnicos y ofrecer propuestas de código cada vez más rigurosas que aceleran el ciclo de desarrollo. Por otro lado, su uso indiscriminado o a ciegas conlleva riesgos inasumibles en un entorno tan crítico como el hospitalario.
+
+En definitiva, la Inteligencia Artificial en la ingeniería de la salud no debe entenderse como un sustituto del desarrollador, sino como un copiloto. Su aprovechamiento real exige un uso ético, un filtrado estricto de la información que se le proporciona y una validación humana constante para garantizar la seguridad técnica, clínica y legal del proyecto.
 
 
-\section{Estado del arte y trabajos relacionados.}
 
-Se realizará una revisión crítica de los trabajos previos relevantes, tanto en el ámbito académico como en el industrial, relacionados con el problema abordado. 
-Se debe poner de manifiesto la contribución del TFG respecto a las soluciones existentes.
-Enumeración y resumen de todos los trabajos relacionados de interés.
+
 
 
