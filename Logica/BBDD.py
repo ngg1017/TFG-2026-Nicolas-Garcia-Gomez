@@ -3,6 +3,7 @@ import pandas as pd
 import unicodedata
 from Logica.State import State 
 from Logica.Modelo import Registro
+from datetime import datetime
 import io
 import re
 import zipfile
@@ -134,12 +135,22 @@ class BBDD(rx.State):
                 #Si el buscador esta vacio, muestra unicamente el primer paciente de la base de datos
                 if len(pacientes_db) > 0:
                     pacientes_filtrados = [pacientes_db[0]] if pacientes_db else []
+                    pacientes_filtrados = sorted(
+                        pacientes_filtrados, 
+                        key=lambda p: datetime.strptime(p.fecha_ingreso, "%d/%m/%Y"),
+                        reverse=True
+                    )
             else:
                 #Si hay texto, busca todos los ingresos asociados a ese numero de historia
                 pacientes_filtrados = [p for p in pacientes_db if p.num_historia and p.num_historia.upper() == busqueda_limpia]
                 if pacientes_filtrados == []:
                     return rx.toast(f"El numero de historia {self.termino_busqueda} buscado no existe.")
             
+            pacientes_filtrados = sorted(
+                pacientes_filtrados, 
+                key=lambda p: datetime.strptime(p.fecha_ingreso, "%d/%m/%Y"),
+                reverse=True
+            )
             #3. Prepara las 54 columnas solo de los pacientes filtrados
             for p in pacientes_filtrados:
                 #Insertamos el id como primer elemento(lo usamos al borrar)
@@ -396,9 +407,9 @@ class BBDD(rx.State):
                 #Conversion a tipos seguros
                 if valor_str == "":
                     datos_limpios[clave_db] = None
-                elif valor_str == "True":
+                elif valor_str.lower() == "true":
                     datos_limpios[clave_db] = True
-                elif valor_str == "False":
+                elif valor_str.lower() == "false":
                     datos_limpios[clave_db] = False
                 elif clave_display in self.campos_display_numerico or clave_display in self.campos_display_fecha or clave_display in self.campos_display_fecha_multiple:
                     #Los numeros y fechas se guardan tal cual para no romperlos
