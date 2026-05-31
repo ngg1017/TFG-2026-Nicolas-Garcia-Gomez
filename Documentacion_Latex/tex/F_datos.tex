@@ -1,11 +1,96 @@
 \apendice{Descripción de adquisición y tratamiento de datos}
+\section{Descripción Formal de los Datos}
+A diferencia de las versiones preliminares del proyecto basadas en procesamiento efímero y archivos temporales, la arquitectura definitiva implementa un modelo de gestión transaccional (\textit{OLTP}\footnote{Sistema de gestión de bases de datos diseñado para procesar un alto volumen de transacciones cortas, rápidas y simultáneas en tiempo real.}) respaldado por una base de datos relacional persistente (\textit{PostgreSQL}). 
 
+La plataforma actúa como un repositorio centralizado de ciclo continuo: la información clínica reside de forma segura en el servidor y solo se vuelca a la memoria \textit{RAM} (\textit{In-Memory Analytics}\footnote{Técnica que permite procesar y analizar grandes volúmenes de datos directamente en la memoria principal (\textit{RAM}) del sistema, en lugar de depender de los discos duros o unidades de almacenamiento tradicionales.}) el volumen exacto de datos que el facultativo solicita para su análisis estadístico. En lugar de destruir los archivos al finalizar la sesión, el sistema garantiza el estricto cumplimiento de la normativa de protección de datos (\textit{LOPD}) mediante dos capas de seguridad: un \textbf{Control de Acceso Basado en Roles (\textit{RBAC})} que restringe la visualización y edición, y un \textbf{algoritmo de anonimización} automática que purga los identificadores personales (como el \textit{Nº de Historia}) siempre que el Nivel 3 autorice una exportación externa.
 
-\section{Descripción formal de los datos}
+A continuación, se detalla el ciclo de vida de los datos y su estructura de almacenamiento.
 
-Se describirá el tipo de datos utilizados, su formato, origen, volumen y características principales.
-Tablas, imágenes, señales, secuencias de ADN…
+\subsection{Origen y Gestión de la Información}
+\begin{itemize}
+    \item \textbf{Origen Híbrido:} Los datos que alimentan el sistema provienen de dos vías complementarias. Por un lado, la carga manual de archivos \textit{CSV} proporcionados por la dirección o de exportaciones previas. Por otro, la recolección activa mediante la inserción y edición manual de nuevos pacientes por parte de los médicos (Nivel 2) directamente a través del formulario de la plataforma web.
+    \item \textbf{Volumen y Escalabilidad:} La base de datos relacional está diseñada para centralizar múltiples ejercicios clínicos, gestionando un volumen aproximado de 1600 registros (filas) por año. La arquitectura permite escalar el almacenamiento histórico sin degradar el rendimiento del motor analítico de \textit{Python}.
+    \item \textbf{Formato y Nomenclatura:} Mientras que el almacenamiento interno se gestiona mediante esquemas relacionales (\textit{SQLModel}), el sistema sigue generando archivos en formato estandarizado \textit{.csv} para las exportaciones anonimizadas (uso en modo portátil). Estas operaciones exigen una concordancia algorítmica estricta en las cabeceras para el correcto mapeo de la información.
+\end{itemize}
+
+Para optimizar el procesamiento analítico y la estructuración en la base de datos, las 54 variables clínicas monitorizadas se han tipificado rigurosamente (fechas, booleanos, números enteros y decimales) y organizado en categorías principales. La descripción técnica detallada de estas 54 variables, incluyendo sus restricciones algorítmicas, se encuentra disponible para su consulta en el Anexo \ref{tab:variables_clinicas}.
+
+\subsection{Estructura y Tipología de las Variables Clínicas}
+Cada registro de paciente consta de un máximo de 54 variables clínicas. Durante la fase de ingesta, el motor de \textit{Python} (mediante la librería \textit{Pandas}) tipifica (\textit{casting}\footnote{Proceso de convertir un tipo de dato en otro.}) automáticamente estas variables en cuatro formatos computacionales principales: \textit{Strings} (Texto Plano o Lista) \textit{Booleans} (True/False), \textit{DateTimes} (dd/mm/aaaa) y Numéricos (Enteros y Flotantes). 
+
+Para el manejo de valores nulos (pacientes a los que no aplica una métrica), el sistema está programado para interpretar las celdas vacías como variables \texttt{NaN} (\textit{Not a Number}), evitando sesgos matemáticos que ocurrirían si se rellenaran con ceros.
+
+El conjunto de datos (\textit{Dataset}) se divide en siete dimensiones clínicas:
+
+\begin{enumerate}
+    \item \textbf{Datos Generales y Fechas:} Control del flujo de estancias, incluyendo Fecha de Ingreso, Alta, Reingreso, Especialidad, estado de Fallecimiento y puntuación de gravedad \textit{APACHE}.
+    \item \textbf{Ventilación Mecánica y Soporte Respiratorio:} Cuantificación de días de \textit{VMI}, episodios de Barotrauma, Neumonía Asociada a Ventilación Mecánica (\textit{NAV}) y registros de extubación programada o accidental.
+    \item \textbf{Sepsis y Monitorización Hemodinámica:} Variables evolutivas críticas registradas al ingreso, a las 6 horas y a las 24 horas, incluyendo la Presión Arterial Media (\textit{PAM}), volumen de Diuresis y niveles de Lactato.
+    \item \textbf{Infectología:} Control del tratamiento antibiótico empírico, su adecuación, la aparición de resistencias, episodios de bacteriemia y dias con catéter venoso central.
+    \item \textbf{Sedación y Neurología:} Comparativa entre las escalas neurológicas prescritas por el facultativo (\textit{RASS} objetivo, \textit{BIS} objetivo) y las métricas reales, así como la interrupción diaria de la sedación.
+    \item \textbf{Nutrición y Cuidados Gastrointestinales:} Fechas de inicio de nutrición enteral y control de complicaciones como hemorragias e insuficiencias orgánicas.
+    \item \textbf{Seguridad y Otros Cuidados:} Chequeos de seguridad orientados a la calidad asistencial, abarcando profilaxis de trombosis (\textit{TVP}), aparición de úlceras (\textit{UPP}), control de glucemia y seguridad en los traslados intrahospitalarios.
+\end{enumerate}
+
+\subsection{Datos de Salida (Exportación y Persistencia)}
+
+Aunque el sistema garantiza el almacenamiento persistente y centralizado de los registros en la base de datos, su verdadero valor analítico reside en la transformación de esta información bruta en conocimiento clínico aplicable y transportable. Dependiendo de los requerimientos de la sesión y del nivel de acceso del usuario, la plataforma proporciona cuatro vías de exportación estructurada:
+
+\begin{itemize}
+    \item \textbf{Exportación A (Resultados Analíticos):} Un archivo \textit{.csv} que contiene exclusivamente los datos que el algoritmo ha filtrado y utilizado para un cálculo específico, junto con los resultados numéricos de las tasas \textit{SEMICYUC}. Ideal para auditorías internas de un indicador concreto.
     
-\section{Descripción clínica de los datos.}
+    \item \textbf{Exportación B (Resumen de Cohorte):} Un archivo \textit{.csv} tabular que condensa las métricas agregadas de todos los registros o años cargados en la sesión actual, ofreciendo una vista panorámica del rendimiento de la unidad.
+    
+    \item \textbf{Exportación C (Informe Visual Integral):} Un documento empaquetado en formato \textit{.pdf}. Constituye el reporte final, integrando la consolidación de los datos analizados junto con la renderización de los gráficos interactivos (lineal y de barras) generados en la interfaz de usuario, listo para ser adjuntado a las actas del hospital.
+    
+    \item \textbf{Exportación D (Extracción Histórica Anonimizada):} Generación de un archivo comprimido (\textit{.zip}) que agrupa el histórico clínico en formato \textit{.csv} clasificado por años. Durante la extracción, el motor purga automáticamente los identificadores personales (\textit{Nº de Historia Clínica}). Esta función es exclusiva del nivel de administración (Nivel 3) y está diseñada específicamente para volcar datos seguros que serán analizados de forma descentralizada y autónoma mediante el dispositivo portátil (\textit{Raspberry Pi}), garantizando el cumplimiento normativo fuera de la \textit{intranet}.
+\end{itemize}
+    
+\section{Descripción Clínica de los Datos}
+En el entorno de los cuidados críticos y la reanimación, los datos monitorizados trascienden la simple lectura de constantes vitales; constituyen un reflejo directo del estado fisiológico del paciente, de la agresividad de los tratamientos de soporte vital y, fundamentalmente, de la calidad y seguridad de la asistencia prestada.
 
-Descripción y explicaciones clinicas del significado o interpretación de los datos.
+\subsection{Significado clínico de las variables estructuradas}
+
+La información procesada por la plataforma no se analiza de forma aislada, sino que conforma la base para el cálculo de los I\textbf{ndicadores de Calidad de la Sociedad Española de Medicina Intensiva, Crítica y Unidades Coronarias} (\textit{SEMICYUC}). A continuación, se enumeran los 22 indicadores clínicos y de gestión procesados por el motor analítico de la herramienta, fundamentados en los estándares de calidad y seguridad de la \textit{SEMICYUC} \cite{semicyuc}
+
+\begin{itemize}
+    \item \textbf{Mortalidad Estandarizada}
+    \item \textbf{Reingresos no programados}
+    \item \textbf{Incidencia de barotrauma}
+    \item \textbf{Posición semiincorporada con VMI}
+    \item \textbf{Incidencias de úlcera por presión (UPP)}
+    \item \textbf{Valoración diaria de la interrupción de la sedación}
+    \item \textbf{Prevención de la enfermedad tromboembólica}
+    \item \textbf{Mantenimiento de niveles de glucemia}
+    \item \textbf{Resucitación precoz de la sepsis}
+    \item \textbf{Traslado intrahospitalario}
+    \item \textbf{Tratamiento empírico adecuado en infección}
+    \item \textbf{Neumonía asociada a ventilación mecánica}
+    \item \textbf{Reintubación}
+    \item \textbf{Especialidades con mayores ingresos}
+    \item \textbf{Profilaxis de la úlcera por estrés en enfermos con NE}
+    \item \textbf{Sedación adecuada}
+    \item \textbf{Ingresos urgentes}
+    \item \textbf{Eventos adversos durante el traslado intrahospitalario}
+    \item \textbf{Nutrición enteral precoz}
+    \item \textbf{Sobretransfusión de concentrados de hematíes}
+    \item \textbf{Retirada accidental del tubo endotraqueal}
+    \item \textbf{Bacteriemia relacionada a CVC}
+\end{itemize}
+ 
+Clínicamente, las dimensiones de datos empleadas tienen el siguiente significado:
+
+\begin{itemize}
+    \item \textbf{Soporte Respiratorio (\textit{VMI} y \textit{NAV}):} La necesidad de ventilación mecánica invasiva (\textit{VMI}) es uno de los factores que mayor riesgo de morbimortalidad\footnote{Indicador sanitario que combina las tasas de morbilidad (enfermedad) y mortalidad (muerte) en una población durante un periodo determinado.} aporta \cite{BOSCH_COSTAFREDA2014}. El registro de los días de ventilación y de episodios como la neumonía asociada a la ventilación (\textit{NAV}) o los barotraumas permite evaluar la eficacia de los protocolos de ``destete'' (\textit{weaning}\footnote{Procesos estandarizados para retirar la ventilación mecánica (\textit{VM}) de forma segura y progresiva, evaluando la estabilidad hemodinámica, respiratoria y neurológica del paciente.}) y la protección pulmonar del paciente.
+    \item \textbf{Hemodinámica y Sepsis (Lactato y \textit{PAM}):} Variables evolutivas como la presión arterial media (\textit{PAM}) o el aclaramiento de lactato a las 6 y 24 horas son marcadores biológicos y hemodinámicos críticos. Un descenso adecuado del lactato indica que la reanimación con fluidos y fármacos vasoactivos está revirtiendo el shock y evitando el fallo multiorgánico. \cite{pam}
+    \item \textbf{Neuromonitorización (\textit{RASS} y \textit{BIS}):} El ajuste fino de la sedación es vital. Los datos comparan el nivel de sedación prescrito (objetivo) con el real. Una sobresedación prolonga innecesariamente la estancia y la ventilación mecánica, mientras que una infrasedación eleva el riesgo de extubaciones accidentales (retiro del tubo por el propio paciente) y estrés postraumático. \cite{sedacion}
+    \item \textbf{Seguridad del Paciente (\textit{UPP} y \textit{TVP}):} El registro de úlceras por presión (\textit{UPP}) o trombosis venosa profunda (\textit{TVP}) actúa como un ``termómetro'' de la calidad de los cuidados preventivos de enfermería y la adecuada profilaxis farmacológica durante la inmovilización prolongada en la cama de reanimación. \cite{termometro}
+\end{itemize}
+
+\subsection{Relación con intervenciones terapéuticas y gestión de la unidad}
+Mientras que en el seguimiento en planta los datos se utilizan principalmente para ajustar tratamientos a largo plazo, en la \textit{URCCPQ} la recopilación sistemática de esta información tiene un doble impacto inmediato. Tras el análisis de las necesidades del servicio en el \textbf{Hospital Universitario de Burgos} (\textit{HUBU}), se confirma que la explotación de estos datos incide positivamente en:
+
+\begin{enumerate}
+    \item \textbf{Auditoría Clínica y Mejora Continua:} Los indicadores agregados permiten a la jefatura de servicio evaluar objetivamente si la unidad cumple con los estándares nacionales de excelencia. Por ejemplo, detectar un aumento en la tasa de infecciones por catéter o una baja adecuación en el tratamiento antibiótico empírico dispara automáticamente la revisión de los protocolos de asepsia o las guías de infectología.
+    \item \textbf{Optimización de Recursos y Morbimortalidad:} La visualización de las tasas de reingreso (pacientes que son dados de alta a planta pero empeoran y deben volver a la unidad) o el análisis cruzado de la escala \textit{APACHE} (gravedad al ingreso) con la mortalidad final, proporciona a los facultativos la justificación basada en datos (\textit{Data-Driven}\footnote{Situar los datos en el centro de la toma de decisiones estratégicas, operativas y de diseño, superando la intuición.}) necesaria para modificar los criterios de alta o ajustar la ratio de personal sanitario por cama.
+\end{enumerate}
