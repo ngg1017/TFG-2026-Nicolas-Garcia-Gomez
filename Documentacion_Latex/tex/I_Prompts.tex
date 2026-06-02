@@ -1,32 +1,62 @@
 \apendice{Registro de interacciones con sistemas de IA}
 
 \section{Registro de interacciones con sistemas de IA}
+Este anexo tiene como objetivo garantizar la transparencia en el uso de herramientas de inteligencia artificial generativa durante la realización del Trabajo de Fin de Grado. En él se incluye un registro ordenado de las consultas formuladas en las interacciones con sistemas de \textit{IA} que han sido más significativas en relación con el desarrollo del proyecto.
 
-Este anexo tiene como objetivo garantizar la transparencia en el uso de
-herramientas de inteligencia artificial generativa durante la realización
-del Trabajo de Fin de Grado. En él se deberá incluir un registro
-ordenado de los \textit{prompts}, solicitudes, o peticiones formuladas por el estudiante en las interacciones con sistemas de IA que hayan sido más significativas en relación al desarrollo del TFG. Asimismo se incluirán bien las respuestas generadas directamente por los sistemas de IA, o bien se reflejará la importancia que ha tenido esa interacción en el desarrollo del trabajo ( código, texto, enfoque...) de esas interacciones significativas.
+El propósito de este registro es documentar de forma clara el alcance, la finalidad y el impacto real de dichas herramientas en el proceso de aprendizaje, entendiendo su uso como una herramienta de apoyo al desarrollo técnico, la orientación conceptual y la depuración, y en ningún caso como un sustituto del razonamiento ingenieril o la toma de decisiones arquitectónicas.
 
-El propósito de este anexo no es penalizar el uso de inteligencia artificial,
-sino documentarlo de forma clara, permitiendo al tribunal evaluar el alcance,
-la finalidad y el impacto real de dichas herramientas en el proceso de
-aprendizaje y en los resultados obtenidos. El uso de IA debe entenderse como
-una herramienta de apoyo, nunca como un sustituto del razonamiento,
-la toma de decisiones técnicas o la autoría del trabajo.
+A continuación, se detallan las interacciones más relevantes:
 
-Para cada interacción relevante con sistemas de IA, se deberá indicar, al
-menos, la siguiente información:
+\subsection{Interacción 1: Gestión de memoria efímera y borrado de archivos}
 \begin{itemize}
-    \item Herramienta o modelo de IA utilizado.
-    \item Fecha aproximada de uso.
-    \item Prompt/petición/solicitud/forma de uso realizada por el estudiante.
-    \item Respuesta completa generada por la IA (opcional)
-    \item Uso posterior de dicha respuesta en el TFG (orientación conceptual,
-    mejora de redacción, generación de ideas, apoyo técnico, generación de código, etc.).
+    \item \textbf{Herramienta o modelo de \textit{IA} utilizado:} \textit{Gemini 3.1 Pro}.
+    \item \textbf{Fecha aproximada de uso:} 23 de febrero de 2026.
+    \item \textbf{Petición realizada:} ``¿Cómo puedo implementar un sistema en \textit{Python} que actúe como un \textit{Watchdog} para monitorizar la desconexión de usuarios en una \textit{app web} y borre automáticamente los archivos \textit{.csv} guardados en la carpeta \textit{Temp} de \textit{Windows}?''
+    \item \textbf{Resumen de la respuesta generada:} El modelo generó un bloque de código explicando el uso de la librería \texttt{tempfile} y los métodos del módulo \texttt{os} para identificar archivos huérfanos por marca de tiempo y purgar directorios temporales basándose en la caída de la conexión del \textit{WebSocket}.
+    \item \textbf{Uso posterior en el \textit{TFG}:} Apoyo técnico y generación de código de prueba. Esta interacción sirvió para construir el primer prototipo de ingesta de datos. Sin embargo, como se documenta en la sección de \textbf{Pruebas del Sistema \ref{sec:Practica}}, este enfoque fue posteriormente \textbf{descartado} por motivos de rendimiento y cumplimiento de la \textit{LOPD}, evolucionando hacia una arquitectura de procesamiento enteramente en \textit{RAM} y variables locales que eliminó la necesidad de escribir en el disco físico.
 \end{itemize}
 
-Este anexo podrá estructurarse en forma de tablas o listados numerados, y
-solo deberá incluir aquellas interacciones que hayan tenido una influencia
-significativa en el desarrollo del trabajo. 
+\subsection{Interacción 2: Integración de Base de Datos y \textit{SQLModel}}
+\begin{itemize}
+    \item \textbf{Herramienta o modelo de \textit{IA} utilizado:} \textit{Gemini 3.1 Pro}.
+    \item \textbf{Fecha aproximada de uso:} 15 de abril de 2026.
+    \item \textbf{Petición realizada:} ``Quiero migrar mi aplicación de \textit{Reflex} para que use una base de datos relacional persistente en lugar de leer archivos \textit{CSV}. A modo de guía inicial, ¿qué paquetes necesito instalar y cuál es la mejor forma de conectar \textit{PostgreSQL} a \textit{Reflex} usando \textit{SQLModel}?''
+    \item \textbf{Resumen de la respuesta generada:} El sistema proporcionó una guía de configuración detallada. Indicó la necesidad de añadir paquetes como \texttt{psycopg2} y \texttt{sqlmodel}, ofreció un ejemplo sobre cómo configurar la variable de entorno \texttt{DATABASE\_URL} y mostró un patrón de diseño básico para crear clases de tablas heredando de \texttt{rx.Model}.
+    \item \textbf{Uso posterior en el \textit{TFG}:} Orientación conceptual. La respuesta sirvió como mapa de ruta para estructurar la conexión al motor relacional y plantear el diseño del \textit{ORM} (\textit{Object-Relational Mapping}), sentando las bases teóricas sobre las que posteriormente se programó toda la lógica transaccional y la clase central \texttt{BBDD} del proyecto.
+\end{itemize}
+
+\subsection{Interacción 3: Evolución de las Estrategias de Despliegue (Secuencia de consultas)}
+Esta interacción engloba una serie de tres consultas sucesivas que reflejan fielmente la evolución arquitectónica del proyecto, desde los intentos iniciales de despliegue local hasta llegar a la infraestructura final contenerizada.
+
+\begin{itemize}
+    \item \textbf{Herramienta o modelo de \textit{IA} utilizado:} \textit{Gemini 3.1 Pro}.
+    \item \textbf{Fechas aproximadas de uso:} Entre el 10 de marzo y el 1 de mayo de 2026.
+    \item \textbf{Secuencia de Peticiones y Resultados:}
+    
+    \begin{enumerate}
+        \item \textbf{Consulta 3.1 - Despliegue local (\textit{Windows}):}
+        \begin{itemize}
+            \item \textbf{Petición:} ``¿Cómo puedo crear un \textit{script .bat} en \textit{Windows} para activar automáticamente el entorno virtual de \textit{Python} y arrancar mi servidor de \textit{Reflex} con un doble clic?''
+            \item \textbf{Respuesta generada:} El modelo proporcionó la sintaxis básica de \textit{Batch} para navegar entre directorios, activar el entorno (\texttt{venv\textbackslash{}Scripts\textbackslash{}activate}) y ejecutar el comando de arranque.
+            \item \textbf{Uso posterior:} Generación de código. El \textit{script} fue implementado en las primeras pruebas de usuario, pero fue rápidamente \textbf{descartado} debido a una mejora en el despliegue hacia la \textit{intranet} del hospital.
+        \end{itemize}
+        \vspace{0.3cm}
+        
+        \item \textbf{Consulta 3.2 - Dispositivo portátil (\textit{Linux/Raspberry Pi}):}
+        \begin{itemize}
+            \item \textbf{Petición:} ``Necesito adaptar la lógica anterior a un entorno \textit{Linux} para implementarlo en un terminal portátil (\textit{Raspberry Pi}). ¿Cómo estructuro un \textit{script .sh} para levantar la \textit{web}?''
+            \item \textbf{Respuesta generada:} Se detallaron los comandos \textit{Bash} necesarios, el uso de la cabecera \textit{shebang} (\texttt{\#!/bin/bash}).
+            \item \textbf{Uso posterior:} Soporte técnico. Esta guía se aplicó con éxito para garantizar el arranque autónomo y \textit{Plug \& Play} de la aplicación dentro de la \textit{Raspberry Pi}, posibilitando su uso seguro fuera de la red del hospital.
+        \end{itemize}
+        \vspace{0.3cm}
+        
+        \item \textbf{Consulta 3.3 - Infraestructura definitiva (\textit{Docker}):}
+        \begin{itemize}
+            \item \textbf{Petición:} ``Dame una guía inicial y comandos para contenerizar la aplicación \textit{web} y una base de datos \textit{PostgreSQL} usando \textit{Docker} y \texttt{docker-compose.yml}.''
+            \item \textbf{Respuesta generada:} El modelo redactó un esqueleto básico para un \texttt{Dockerfile} (empleando la imagen \texttt{python:3.12-slim}) y un archivo \texttt{docker-compose.yml} configurado para orquestar los dos servicios, mapeando los puertos 3000 y 5432.
+            \item \textbf{Uso posterior:} Toma de decisiones arquitectónicas y diseño de infraestructura. Esta consulta marcó el punto de inflexión del \textit{TFG}, sirviendo como base estructural para desarrollar la arquitectura final y profesional de despliegue continuo en la \textit{intranet} del hospital.
+        \end{itemize}
+    \end{enumerate}
+\end{itemize}
 
 
