@@ -64,3 +64,32 @@ El cálculo, monitorización y análisis de estos indicadores resultan de vital 
 		
 En conclusión, el acceso y tratamiento de estos datos (protegidos en todo momento mediante el despliegue de una arquitectura estrictamente local) no responde a un mero ejercicio estadístico, sino a una necesidad imperativa para garantizar una atención médica más segura, eficiente, ética y de la más alta calidad para los futuros pacientes.
 
+\section{Desafíos Técnicos y Evolución Arquitectónica}
+
+Durante el ciclo de vida del desarrollo de la plataforma para la unidad (\textit{URCCPQ}), se presentaron diversos obstáculos técnicos e imprevistos metodológicos que requirieron la reevaluación continua y la adaptación de las estrategias iniciales. La necesidad de integrar una herramienta analítica en un entorno clínico restrictivo obligó a iterar sobre el diseño del sistema. A continuación, se detallan las principales problemáticas enfrentadas y las soluciones de ingeniería implementadas.
+
+\subsection{Ingeniería de Requisitos y Selección de la Pila Tecnológica}
+El inicio de este proyecto supuso un reto de ingeniería de requisitos considerable. Al estar dirigido a facultativos médicos, cuyo perfil carece de formación técnica específica en informática, la problemática se planteó inicialmente de forma sumamente abierta, sin una arquitectura predefinida ni limitaciones tecnológicas claras. Esta abstracción obligó a asumir el liderazgo del diseño desde su concepción, requiriendo traducir necesidades médicas complejas y protocolos críticos (como la escala \textit{APACHE} o los días de \textit{VMI}) en lógica computacional.
+
+El primer gran desafío derivado de esta fase fue la selección del entorno de desarrollo. La necesidad de aunar un potente motor estadístico con una interfaz \textit{web} moderna e interactiva generó dificultades a la hora de determinar qué lenguaje y \textit{framework} emplear. Tras evaluar distintas alternativas, se optó por unificar el desarrollo bajo \textit{Python} empleando \textit{Reflex}. Esta decisión implicó enfrentarse a la curva de aprendizaje de tecnologías de despliegue novedosas, pero resultó una solución vital para superar las severas limitaciones estructurales y visuales que presentaban otras opciones más tradicionales de la ciencia de datos.
+
+\subsection{Limitaciones de Despliegue Local: Ejecutables frente a Contenedores}
+El segundo aspecto crítico, y uno de los mayores escollos del proyecto, tuvo lugar durante la fase de despliegue local. Con el objetivo de facilitar el uso a los doctores, el planteamiento original buscaba compilar y empaquetar toda la aplicación en un único archivo ejecutable tradicional (\textit{.exe}). Sin embargo, la complejidad arquitectónica de un \textit{framework full-stack} hizo descartar esta alternativa por incompatibilidades críticas fundamentadas en los siguientes factores:
+
+\begin{itemize}
+    \item \textbf{Arquitectura distribuida y WebSockets:} \textit{Reflex} opera bajo un modelo \textit{full-stack} que despliega dos servidores simultáneos (\textit{Frontend} y \textit{Backend}). La sincronización del estado de la aplicación y la transferencia de datos entre ambos dependen de una conexión bidireccional continua a través de \textit{WebSockets}.
+    
+    \item \textbf{Ejecución en directorios temporales:} El empaquetado en un único archivo obliga a que el código se descomprima dinámicamente en una carpeta temporal del sistema anfitrión cada vez que se ejecuta.
+    
+    \item \textbf{Restricciones de seguridad del sistema operativo:} Los \textit{firewalls} y sistemas de protección nativos (como \textit{Windows Defender}) aplican políticas estrictas sobre los procesos iniciados desde rutas temporales. Al intentar levantar servidores locales y abrir puertos de red desde estas ubicaciones, el sistema operativo interpreta la acción como una posible amenaza, bloqueando silenciosamente el tráfico de los \textit{WebSockets}.
+\end{itemize}
+
+Como resultado de este bloqueo, la interfaz gráfica lograba renderizarse en el navegador, pero la comunicación con la lógica del servidor (despliegue de eventos, subida de archivos) quedaba completamente anulada. Como solución de ingeniería, se rediseñó por completo la estrategia de despliegue mediante la orquestación de contenedores \textit{Docker} directamente en la \textit{intranet} del hospital. Esta alternativa garantizó el correcto flujo de red y el estricto respeto a las políticas de seguridad institucionales, proporcionando a los facultativos la misma experiencia de acceso \textit{Zero-Install} y \textit{plug and play} que se buscaba inicialmente sin comprometer la funcionalidad bidireccional.
+
+\subsection{Evolución de la Persistencia: Transición hacia Modelos Relacionales}
+Finalmente, un tercer desafío técnico relevante fue la evolución del sistema de gestión de la información. El planteamiento analítico original contemplaba una persistencia volátil basada exclusivamente en la carga manual de archivos planos de tipo \textit{CSV}. 
+
+No obstante, durante el desarrollo se identificó que este enfoque carecía de la trazabilidad necesaria para un entorno médico. Con el fin de profesionalizar la herramienta, garantizar la integridad de los registros a largo plazo y permitir un manejo de la información auditable, se planteó el reto de migrar hacia la implementación de una base de datos relacional sin afectar al motor de cálculo ya construido. 
+
+Para solventar esta carencia, se seleccionó e integró \textit{PostgreSQL}. Esta decisión estuvo motivada estratégicamente por la necesidad de asegurar la compatibilidad nativa con la infraestructura tecnológica ya operativa en el servidor central del \textit{HUBU}. Este cambio arquitectónico permitió abandonar el manejo de archivos locales aislados en favor de una solución integrada (\textit{SQLModel} acoplado a \textit{Pandas}), capaz de soportar el histórico clínico de la unidad bajo los estándares de seguridad, concurrencia y rendimiento exigidos por el hospital.
+

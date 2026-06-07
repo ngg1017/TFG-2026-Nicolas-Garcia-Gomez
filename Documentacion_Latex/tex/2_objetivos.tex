@@ -1,43 +1,38 @@
 \capitulo{2}{Objetivos} \label{ch:objetivos}
-Este proyecto busca proporcionar una herramienta para la mejora del calculo de indicadores clínicos, mediante la aplicación de tecnologías avanzadas de análisis de datos. La idea surge de la necesidad de ampliación
-de un trabajo previo realizado en las practicas curriculares, centrado en la obtención de los indicadores y su cálculo.
+Este proyecto busca proporcionar una herramienta para la mejora del cálculo de indicadores clínicos mediante la aplicación de tecnologías avanzadas de análisis de datos. La idea surge de la necesidad de ampliar un trabajo previo realizado en las prácticas curriculares, superando las limitaciones metodológicas del cálculo manual.
 
-A continuación, se enumeran y explican de forma detallada los objetivos que se persiguen con la realización de este proyecto.
+A continuación, se enumeran y explican los objetivos generales y específicos que guían la realización de este proyecto.
 
-\section{Objetivo Generales}
-Este proyecto consta de un objetivo principal claro y de gran importancia debido a su relevancia en la unidad de Reanimación y Cuidados Críticos postquirúrgicos del Servicio de Anestesiología y Reanimación de Burgos; ademas cuenta con diversas problemáticas secundarias que a continuación se comentaran.
+\section{Objetivos Generales}
+El proyecto se fundamenta en un único objetivo principal, del cual derivan las diferentes ramas de desarrollo técnico necesarias para su implantación en la unidad de Reanimación y Cuidados Críticos postquirúrgicos del Servicio de Anestesiología y Reanimación de Burgos (\textit{HUBU}).
 
-Nuestro proyecto propone el desarrollo y validación de una herramienta que permita generar un análisis del desempeño de la unidad con su consiguiente informe de los datos clínicos por parte de los médicos implicados \cite{semicyuc}. Esta herramienta, facilitará el cálculo de estos indicadores clínicos específicos y mejorará la eficiencia de los flujos de trabajo, contribuyendo así en la mejora de la calidad de los informes clínicos. 
+\begin{itemize}
+    \item \textbf{Desarrollar y validar} una plataforma \textit{web} clínica que automatice el análisis del desempeño de la unidad y la generación de informes estadísticos, con el fin de reducir drásticamente el tiempo de gestión administrativa y mejorar la eficiencia de los flujos de trabajo del personal médico \cite{semicyuc}.
+\end{itemize}
 
-Al automatizar el cálculo y el posterior análisis, se espera reducir significativamente el tiempo dedicado a 
-estas tareas, logrando así una mayor eficiencia en el entorno clínico.
-
-\section{Objetivos de la integración y funcionalidad del sistema}
-Una de las mayores problemáticas fue la integración de este sistema dentro de los ordenadores del \textit{HUBU}. Era de vital importancia que los datos recopilados sean unicamente accesibles para el personal del hospital, imposibilitando la creación de una \textit{web online} con \textit{IP} pública. Este proceso paso a ser primordial ya que debíamos encontrar una solución que permitiese utilizar la herramienta \textit{web} sin comprometer los datos privados de los pacientes, para ello:
+\section{Objetivos Específicos: Integración y Seguridad del Sistema}
+Para alcanzar el objetivo general cumpliendo con los estrictos estándares de privacidad hospitalaria, se establecen los siguientes objetivos secundarios:
 
 \begin{enumerate}
-    \item \textbf{Exportación del proyecto:} Como ya hemos comentado, es de vital importancia que estos datos (aun siendo anonimizados o seudonimización) no salgan del hospital o de los dispositivos destinados para su uso. Por lo que uno de los objetivos mas complejos, era no utilizar el servicio de \textit{Reflex Cloud} para publicar la aplicación, dado que estos datos transitarían por servidores externos. Fue necesario realizar un despliegue local de la aplicación, a través de la \textit{intranet} del hospital.
-
-    \item \textbf{Recolección Semiautomática y Seudonimización:} Ante la imposibilidad de extraer datos automáticamente desde \textit{ICCA}, se diseñó un método de recolección semiautomática. Los facultativos recopilan de forma seudonimizada las variables definidas en un documento de especificación técnica, estos datos se almacenan de forma persistente en la base de datos \textit{PostgreSQL} del hospital para su posterior análisis clínico y auditoría.
+    \item \textbf{Desplegar} el sistema de forma local y centralizada a través de la \textit{intranet} del hospital. Se debe prescindir de servicios externos como \textit{Reflex Cloud} para imposibilitar la salida de datos de los pacientes hacia servidores con \textit{IP} pública.
+    \item \textbf{Establecer} un flujo de recolección semiautomática y seudonimizada de variables clínicas, almacenando los registros de forma persistente en la base de datos \textit{PostgreSQL} interna del hospital para su posterior análisis y auditoría.
 \end{enumerate}
 
-\section{Objetivos del desarrollo web}
-Están relacionados con el diseño y la implementación de una interfaz web con funcionalidades específicas.
+\section{Objetivos Específicos: Desarrollo Software}
+Para materializar el motor analítico de la herramienta, se plantean las siguientes metas a nivel de código y diseño:
 
 \begin{enumerate}
-    \item \textbf{Permitir la carga y procesamiento de archivos \textit{CSV}:} Incluyendo una zona que permita la subida con sus posteriores método de eliminación. Garantizando en todo momento el control total sobre los archivos cargados y el tiempo que permanecen en la memoria del equipo.
-    
-    \item \textbf{Carga y procesamiento de archivos desde la \textit{BBDD}:} Para el análisis, el sistema extrae los registros directamente desde el servidor \textit{PostgreSQL} del hospital. Mediante \textit{SQLModel}, los datos se inyectan en \textit{DataFrames} de \textit{Pandas} a través de \textit{buffers}\footnote{Espacio de almacenamiento efímero en la memoria \textit{RAM} que retiene datos durante su transferencia entre procesos, evitando el uso del disco duro.} en la memoria \textit{RAM} (arquitectura \textit{Zero-Disk}\footnote{Arquitectura o metodología de desarrollo donde las aplicaciones y sistemas operativos están diseñados para funcionar sin depender de un disco duro local (\textit{HDD} o \textit{SSD}) para el almacenamiento de datos persistentes o la ejecución de archivos del sistema durante su operación.}), evitando la escritura de archivos físicos en el disco duro. Este flujo garantiza que la información clínica se procese a velocidad nativa y sea eliminada por el \textit{Garbage Collector}\footnote{Mecanismo automático de gestión de memoria que elimina objetos que ya no se utilizan en el programa, liberando espacio en la memoria RAM.} al finalizar la sesión, cumpliendo estrictamente con la \textit{LOPD}. 
-
-    \item \textbf{Diseñar una interfaz que garantice la accesibilidad:} El personal clínico al que está destinado el producto final de este proyecto tendrán distintos niveles de competencia tecnológica, por lo que un diseño sencillo, intuitivo y la gestión eficaz de la información son de vital importancia para una experiencia de usuario satisfactoria.
+    \item \textbf{Procesar} archivos \textit{CSV} locales, implementando un módulo seguro de carga, lectura y posterior eliminación que garantice el control total sobre la persistencia en el equipo.
+    \item \textbf{Extraer y analizar} registros de la \textit{BBDD} mediante arquitectura \textit{Zero-Disk}\footnote{Arquitectura o metodología de desarrollo donde las aplicaciones y sistemas operativos están diseñados para funcionar sin depender de un disco duro local (\textit{HDD} o \textit{SSD}) para el almacenamiento de datos persistentes o la ejecución de archivos del sistema durante su operación.}. Mediante \textit{SQLModel}, los datos se inyectarán en \textit{DataFrames} de \textit{Pandas} a través de \textit{buffers}\footnote{Espacio de almacenamiento efímero en la memoria \textit{RAM} que retiene datos durante su transferencia entre procesos, evitando el uso del disco duro.} temporales. Esto asegura el procesamiento a velocidad nativa y la destrucción de la información mediante el \textit{Garbage Collector}\footnote{Mecanismo automático de gestión de memoria que elimina objetos que ya no se utilizan en el programa, liberando espacio en la memoria \textit{RAM}.} al cerrar la sesión, en estricto cumplimiento de la \textit{LOPD}.
+    \item \textbf{Diseñar} una interfaz intuitiva, accesible y \textit{Zero-Install} que ofrezca una experiencia de usuario satisfactoria a todo el personal clínico, independientemente de su nivel de competencia tecnológica.
 \end{enumerate}
 
-\section{Objetivos de desarrollo hardware}
-En un inicio nació con el objetivo de la creación de un servidor local gracias a la aquitectura \textit{Raspberry Pi}, a través del cual, los ordenadores de la unidad pudieran establecer una conexión. Esta idea fue descartada virando hacia el desarrollo de un terminal físico portátil (denominado internamente ``\textit{tablet médica}''), que dota al personal clínico de movilidad para utilizar la aplicación fuera del hospital, permitiendo la descarga de registros desde la propia aplicación en formato \textit{CSV} de forma totalmente anonimizada.
+\section{Objetivos Específicos: Desarrollo Hardware}
+Finalmente, para dotar al proyecto de versatilidad en escenarios fuera de la \textit{intranet} hospitalaria, se plantea el siguiente objetivo físico:
+
 \begin{enumerate}
-    \item \textbf{Mejora y optimización del prototipo \textit{hardware}:} Para ello se realizan mejoras en el prototipo inicial. Buscando perfeccionar el diseño para facilitar su uso portátil, desembocando en un diseño más cómodo y minimizando las restricciones que puedan afectar al usuario durante su uso.
+    \item \textbf{Construir y optimizar} un terminal físico autónomo y portátil (arquitectura \textit{Raspberry Pi}, denominada internamente ``\textit{tablet médica}''). Este dispositivo dotará al facultativo de total movilidad para utilizar la aplicación y descargar registros estadísticos anonimizados en formato \textit{CSV} sin comprometer la seguridad del servidor central.
 \end{enumerate}
-
 
 
 

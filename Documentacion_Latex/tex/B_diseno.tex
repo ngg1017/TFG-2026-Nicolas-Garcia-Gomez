@@ -168,3 +168,81 @@ Como variante orientada a la movilidad y la autonomía asistencial, se ha diseñ
 		\item El resultado final del análisis puede ser exportado por el médico mediante la generación del informe \textit{PDF}, sirviendo este como el único entregable permanente de la sesión.
 	\end{itemize}
 \end{enumerate}
+
+En este apartado se incluye una breve descripción de todos los componentes \textit{hardware} utilizados.
+
+\begin{itemize}
+    \item \textbf{\textit{Raspberry Pi 3 model B}:} (Figura \ref{fig:raspberrypi}) Es un ordenador de placa única (\textit{SBC}) de bajo coste y tamaño reducido (como una tarjeta de crédito), creado por la \textit{Raspberry Pi Foundation} en 2012 para promover la enseñanza de la informática. Ejecuta \textit{Linux}, cuenta con puertos \textit{USB}, \textit{HDMI}, \textit{Wi-Fi} y pines \textit{GPIO} perfectos para este tipo de proyectos.
+    
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.7\textwidth]{img/raspberrypi.jpg}
+        \caption{Raspberry Pi 3 model B. \cite{raspberryC}}
+        \label{fig:raspberrypi}
+    \end{figure}
+    
+    \item \textbf{\textit{Pantalla Raspberry Pi LCD 7'' Táctil}:} (Figura \ref{fig:pantalla}) Es un dispositivo de \textbf{800 x 480} con el que convertir una \textit{Raspberry Pi} en una \textit{tablet} generando en un sistema totalmente interactivo. Esta pantalla táctil utiliza \textit{drivers} que funcionan con toques de diez dedos, y también puede mostrar un teclado en pantalla.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.7\textwidth]{img/pantalla.jpg}
+        \caption{Pantalla Raspberry Pi LCD 7'' Táctil. \cite{pantalla}}
+        \label{fig:pantalla}
+    \end{figure}
+    
+    \item \textbf{\textit{Sandisk MicroSD Ultra 32GB}:} (Figura \ref{fig:sd}) Es un dispositivo de almacenamiento de datos portátil y extremadamente pequeño basado en tecnología \textit{flash}, utilizado para almacenar el \textit{SO} de la \textit{RaspBerry Pi}.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.3\textwidth]{img/sd.jpg}
+        \caption{MicroSD 32GB. \cite{sd}}
+        \label{fig:sd}
+    \end{figure}
+
+    \item \textbf{Cables:} El cableado necesario para realizar las conexiones pertinentes.
+
+    \item \textbf{Caja para prototipos:} (Figura \ref{fig:caja}) Almacena todo el \textit{hardware} necesario para el funcionamiento del prototipo. Fabricada mediante la impresión \textit{3D}\footnote{Es un proceso que crea objetos tridimensionales sólidos capa por capa a partir de un modelo digital.} resistente que protegerá el microprocesador y las conexiones entre todos los componentes.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.5\textwidth]{img/carcasa.png}
+        \caption{Caja de componentes. \cite{carcasa}}
+        \label{fig:caja}
+    \end{figure}
+    
+    \item \textbf{\textit{Adafruit PowerBoost 1000C}\footnote{Durante la fase de validación física del prototipo, se ha determinado empíricamente que módulos de batería como el \textit{Adafruit PowerBoost 1000C} resultan insuficientes para soportar el consumo combinado de la \textit{Raspberry Pi} y el panel táctil de 7 pulgadas. Superar su carga nominal provoca un estrés térmico en el módulo que puede derivar en picos de tensión y causar daños eléctricos irreversibles en la placa controladora de la pantalla. Por consiguiente, para garantizar la integridad y estabilidad del \textit{hardware} en entornos de producción, es un requisito estricto sustituir este componente por un sistema de alimentación ininterrumpida (tipo \textit{UPS}) diseñado para proporcionar una salida continua y estable de, al menos, 5\textit{V} y 3 Amperios.}:} (Figura \ref{fig:adafruit}) Es un módulo versátil de gestión de energía (convertidor \textit{DC/DC boost}) con cargador integrado, diseñado para alimentar proyectos portátiles. Convierte el voltaje de baterías \textit{LiIon/LiPoly} de 3,7\textit{V} a una salida estable de 5,2\textit{V} \textit{DC}, ideal para dispositivos como \textit{Arduino} o \textit{Raspberry Pi}, permitiendo la carga de la batería y la alimentación del proyecto simultáneamente.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.3\textwidth]{img/adafruit.png}
+        \caption{\textit{Adafruit PowerBoost 1000C}. \cite{adafruit}}
+        \label{fig:adafruit}
+    \end{figure}
+    
+    \item \textbf{Batería de 6000\textit{mAH} a 3,7\textit{V}:} (Figura \ref{fig:bateria}) Almacena la energía en forma química para posteriormente convertirla en energía eléctrica para el suministro de corriente a diversos equipos y sistemas.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.3\textwidth]{img/bateria.jpg}
+        \caption{Batería de 6000 \textit{mAH} a 3,7\textit{V}. \cite{bateria}}
+        \label{fig:bateria}
+    \end{figure}
+    
+    \item \textbf{Interruptor \textit{SPDT}:} (Figura \ref{fig:interruptor}) Es un componente eléctrico con tres terminales: uno común (entrada) y dos de salida. Permite dirigir la corriente entre dos trayectorias distintas, en este proyecto solo se necesita una de las trayectorias; sin embargo, en el proveedor de compra los interruptores  \textit{SPST}\footnote{Es el tipo más básico de interruptor eléctrico, diseñado para abrir o cerrar un único circuito} no se encontraban disponibles.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.2\textwidth]{img/interruptor.jpg}
+        \caption{Interruptor \textit{SPDT}. \cite{interruptor}}
+        \label{fig:interruptor}
+    \end{figure}
+\end{itemize}
+
+La elección de la \textit{Raspberry Pi} frente a otros sistemas informáticos convencionales o terminales industriales para el diseño del dispositivo físico se justifica en los siguientes factores:
+
+\begin{enumerate}
+    \item \textbf{Disipación térmica pasiva (Asepsia clínica):} Al utilizar un \textit{SoC} altamente eficiente, la placa carece de ventiladores mecánicos para su refrigeración. Este atributo de \textit{hardware} es crítico en un entorno de aislamiento como la \textit{URCCPQ}, ya que elimina la generación de corrientes de aire que podrían dispersar polvo o patógenos aerógenos, contribuyendo a la esterilidad del área.
+    \item \textbf{Eficiencia energética y autonomía:} Su arquitectura \textit{ARM} presenta un consumo eléctrico drásticamente inferior al de los procesadores \textit{x86/x64} convencionales. Esto permite que el terminal sea alimentado de forma estable y prolongada mediante baterías externas estándar, un requisito físico indispensable para garantizar la portabilidad de la ``\textit{tablet} médica''.
+    \item \textbf{Factor de forma y empaquetado (\textit{SBC}):} Al tratarse de un ordenador de placa única (\textit{Single Board Computer}), concentra la \textit{CPU}, memoria e interfaces de red en dimensiones muy reducidas (formato tarjeta de crédito). Esto ha permitido integrarla de forma compacta en la carcasa del dispositivo portátil sin comprometer la ergonomía.
+    \item \textbf{Interfaces físicas nativas:} La placa incorpora de fábrica conectividad directa para pantallas táctiles (mediante puertos \textit{DSI} o \textit{micro-HDMI}) y pines de entrada/salida (\textit{GPIO}), lo que facilita el ensamblaje directo de la pantalla interactiva sin requerir tarjetas controladoras adicionales ni cableado voluminoso.
+\end{enumerate}

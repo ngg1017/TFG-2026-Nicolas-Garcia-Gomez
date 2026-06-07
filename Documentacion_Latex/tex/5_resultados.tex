@@ -4,15 +4,56 @@ Una vez finalizado el desarrollo y explicación del proyecto, es necesario reali
 \section{Resumen de resultados}
 El trabajo realizado en este proyecto a desembocado en una aplicación \textit{web} profesional y resolutiva. Dicha \textit{web} está construida en su totalidad en \textit{Reflex} y cuanta con las funciones necesarias para el calculo de indicadores deseados por la jefatura de la unidad. 
 
-Esta plataforma cuenta con un módulo de carga de datos que admite la subida de un máximo de diez archivos \textit{CSV} o, alternativamente, la extracción directa de un histórico clínico de hasta diez años desde la base de datos, permitiendo así el seguimiento de un amplio espectro temporal. El gestor de archivos interno se basa en una \textit{FIFO}\footnote{Estrategia de gestión de almacenamiento donde los elementos más antiguos o introducidos primero son los primeros en eliminarse} generando un mensaje por pantalla de todos los archivos/datos eliminados en el proceso de carga. Una vez se han cargado los registros es posible seleccionar un botón de borrado, que como su nombre indica se encarga de eliminar los datos alojados en la memoria \textit{RAM}. Cuenta con un menú de selección de indicadores que facilita el cálculo de los veintiún indicadores, mostrando un gráfico lineal o de barras a decisión del personal, que representan la evolución temporal y la tendencia histórica de los indicadores clínicos de la URCCPQ, evaluando visualmente su estabilidad mediante márgenes de variabilidad interanual. Por último cuenta con cuatro utilidades adicionales, dos relacionadas con la base de datos y otras dos con el análisis de los registros:
+Esta plataforma cuenta con un módulo de carga de datos que admite la subida de un máximo de diez archivos \textit{CSV} o, alternativamente, la extracción directa de un histórico clínico de hasta diez años desde la base de datos, permitiendo así el seguimiento de un amplio espectro temporal, en la siguiente imagen \ref{fig:modulos} se pueden observar los módulos.
+
+\begin{figure}[h]
+	\centering
+    \includegraphics[width=1.2\textwidth]{img/modulos.png}
+    \caption{Módulos principales de carga/extracción de datos.}
+    \label{fig:modulos}
+\end{figure}
+
+El gestor de archivos interno se basa en una \textit{FIFO}\footnote{Estrategia de gestión de almacenamiento donde los elementos más antiguos o introducidos primero son los primeros en eliminarse} generando un mensaje por pantalla de todos los archivos/datos eliminados en el proceso de carga. 
+
+Una vez se han cargado los registros es posible seleccionar un botón de borrado, que como su nombre indica se encarga de eliminar los datos alojados en la memoria \textit{RAM}. Cuenta con un menú de selección de indicadores que facilita el cálculo de los veintiún indicadores, mostrando un gráfico lineal o de barras a decisión del personal visible en la siguiente imagen \ref{fig:grafico}, que representan la evolución temporal y la tendencia histórica de los indicadores clínicos de la URCCPQ, evaluando visualmente su estabilidad mediante márgenes de variabilidad interanual. Por último cuenta con cuatro utilidades adicionales, dos relacionadas con la base de datos y otras dos con el análisis de los registros:
+
+\begin{figure}[h]
+	\centering
+    \includegraphics[width=1.2\textwidth]{img/grafico.png}
+    \caption{Gráfico de barras calculado por la aplicación.}
+    \label{fig:grafico}
+\end{figure}
+
 \begin{enumerate}
-	\item \textbf{Gestión de registros clínicos:} Permite la administración integral de la información en la base de datos. Para garantizar la consistencia de los datos y prevenir duplicidades, el sistema requiere realizar obligatoriamente una búsqueda previa del paciente antes de habilitar las funciones para añadir, editar o borrar sus registros.
+	\item \textbf{Gestión de registros clínicos:} Permite la administración integral de la información en la base de datos. Para garantizar la consistencia de los datos y prevenir duplicidades, el sistema requiere realizar obligatoriamente una búsqueda previa del paciente antes de habilitar las funciones para añadir, editar o borrar sus registros. En la siguiente imagen \ref{fig:bbdd} se puede observar el panel de gestión de la \textit{BBDD}.
+	
+	\begin{figure}[h]
+		\centering
+    		\includegraphics[width=1.2\textwidth]{img/bbdd_2.png}
+    		\caption{Panel de la \textit{BBDD}.}
+    		\label{fig:bbdd}
+	\end{figure}
 		
 	\item \textbf{Exportación de histórico clínico:} Habilita la extracción de los registros correspondientes a múltiples años en formato \textit{CSV}. La descarga se genera de forma totalmente anonimizada, garantizando el cumplimiento de la \textit{LOPD} y permitiendo al personal médico realizar el análisis estadístico en el terminal portátil (\textit{Raspberry Pi}) de forma segura fuera del entorno hospitalario.
 
-	\item \textbf{Mezcla de indicadores:} Permite combinar un máximo de tres indicadores 			con el fin de permitir su visualización en un mismo gráfico. Esta función facilitara 			la comparación de aquellos que se encuentren relacionados.
+	\item \textbf{Mezcla de indicadores:} Permite combinar un máximo de tres indicadores 			con el fin de permitir su visualización en un mismo gráfico. Esta función facilitara 			la comparación de aquellos que se encuentren relacionados, en la imagen \ref{fig:mezcla} se muestra un ejemplo.
 	
-	\item \textbf{Resumen Indicadores:} Muestra dos tablas, la primera representa el 			resumen de los indicadores, mientras que la segunda hace referencia a los 				porcentajes de ingresos por especialidades, ambas descargables. Cuenta con una 			tercera funcionalidad, la cual permite descargar un informe final con todos los 			indicadores y sus respectivos gráficos.
+	\begin{figure}[h]
+		\centering
+    		\includegraphics[width=1.2\textwidth]{img/mezcla_2.png}
+    		\caption{Combinación de 3 indicadores.}
+    		\label{fig:mezcla}
+	\end{figure}
+	
+	\item \textbf{Resumen Indicadores:} Muestra dos tablas, la primera representa el 			resumen de los indicadores, mientras que la segunda hace referencia a los 				porcentajes de ingresos por especialidades, ambas descargables. Cuenta con una 			tercera funcionalidad, la cual permite descargar un informe final con todos los 			indicadores y sus respectivos gráficos, en la siguiente imagen \ref{fig:resumen} se 	muestran los aspectos descritos en este apartado.
+	
+	\begin{figure}[h]
+		\centering
+    		\includegraphics[width=1.2\textwidth]{img/resumen_2.png}
+    		\caption{Resumen de los indicadores.}
+    		\label{fig:resumen}
+	\end{figure}
+	
 \end{enumerate}
 
 Todos los procesos descritos anteriormente son realizables por cualquier usuario gracias al cumplimiento de todos los objetivos que se plantearon. \pageref{ch:objetivos} 
