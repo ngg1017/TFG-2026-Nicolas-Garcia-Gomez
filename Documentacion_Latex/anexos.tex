@@ -8,6 +8,7 @@
 \usepackage{lmodern} % scalable font
 \usepackage{microtype}
 \usepackage{placeins}
+\usepackage{pdfpages}
 \usepackage{longtable}
 
 \RequirePackage{booktabs}
@@ -205,6 +206,14 @@
 \addcontentsline{toc}{chapter}{Diccionario de Variables Clínicas}
 %Absorbe la tabla gigante de los datos
 \input{./tex/anexos_datos}
+
+\chapter*{Solicitud Comité de Bioética}
+\addcontentsline{toc}{chapter}{Solicitud Comité de Bioética}
+%Etiqueta para referenciarlo
+\label{anexos:mi_pdf}
+%Absorbe el documento PDF completo en lugar de la tabla de datos
+\includepdf[pages=-, pagecommand={\thispagestyle{plain}}]{./Solicitud.pdf}
+\includepdf[pages=-, pagecommand={\thispagestyle{plain}}]{./Tramite_Nicolas.pdf}
 
 \bibliographystyle{apalike}
 \bibliography{bibliografiaAnexos}
